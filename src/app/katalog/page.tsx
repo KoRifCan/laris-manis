@@ -67,6 +67,29 @@ export default function KatalogPage() {
   const [filters, setFilters] = useState(initialFilters);
   const [pagination, setPagination] = useState({ page: 1, limit: 20, total: 0, hasMore: false });
   const [showFilters, setShowFilters] = useState(false);
+  const [paramsReady, setParamsReady] = useState(false);
+  const [urlCategorySlug, setUrlCategorySlug] = useState<string | null>(null);
+
+  // Baca ?q= dan ?category= dari URL (mis. dari hero & tile kategori)
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const q = params.get('q');
+    const slug = params.get('category');
+    if (q || slug) {
+      setFilters((prev) => ({ ...prev, ...(q ? { q } : {}) }));
+    }
+    if (slug) setUrlCategorySlug(slug);
+    setParamsReady(true);
+  }, []);
+
+  // Terjemahkan slug kategori -> categoryId setelah daftar kategori termuat
+  useEffect(() => {
+    if (!urlCategorySlug || categories.length === 0) return;
+    const found = categories.find((c) => c.slug === urlCategorySlug);
+    if (found) {
+      setFilters((prev) => (prev.categoryId === found.id ? prev : { ...prev, categoryId: found.id }));
+    }
+  }, [urlCategorySlug, categories]);
 
   const fetchProducts = useCallback(async () => {
     setLoading(true);
@@ -103,9 +126,12 @@ export default function KatalogPage() {
   }, []);
 
   useEffect(() => {
-    fetchProducts();
     fetchCategories();
-  }, [fetchProducts, fetchCategories]);
+  }, [fetchCategories]);
+
+  useEffect(() => {
+    if (paramsReady) fetchProducts();
+  }, [fetchProducts, paramsReady]);
 
   const handleFilterChange = (key: string, value: string) => {
     setFilters(prev => ({ ...prev, [key]: value }));
