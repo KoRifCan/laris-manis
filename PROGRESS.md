@@ -64,6 +64,7 @@ Platform etalase produk UMKM (marketplace multi-toko) berbasis web + PWA
 - **Verifikasi production** (`laris-manis-id.vercel.app`, deploy `laris-manis-rbgev3gse`): `/auth/login` 200; `GET /api/products` 200; login salah → 401 "Email atau password salah"; login benar → `idToken`; `/api/favorites` tanpa token → 401, dengan token → 200, toggle on/off → 200
 - Akun uji (bisa dipakai manual di browser): `uji-favorit@larismanis.test` / `UjiFavorit123!` (role pembeli)
 - Catatan: pesan "Terjadi kesalahan jaringan" generik di halaman lain (daftar, lupa-password, verifikasi-email) belum ditangani — hanya login & favorit sesuai lingkup tugas
+- **Sesi tampilan** (laporan lanjutan: "login berhasil tapi tidak ada perubahan, disuruh login lagi"): `client-auth` kini menyimpan sesi (token + nama/email/role) dan memancarkan event `lm-auth-changed`; Header (desktop & mobile) menampilkan nama pengguna + tombol **Keluar** saat sesi valid (via `useSyncExternalStore`, tanpa hydration mismatch); halaman login **auto-redirect** bila sudah punya sesi valid — deploy production `laris-manis-gucj6ssd8`
 
 ### Phase 6: Testing & Deploy Produksi (Vercel)
 - [ ] Unit & integration tests
