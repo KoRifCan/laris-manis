@@ -88,7 +88,7 @@ Platform etalase produk UMKM (marketplace multi-toko) berbasis web + PWA
 - URL: https://github.com/KoRifCan/laris-manis
 - Main branch: `main`
 - Current working branch: `redesign/homepage-v2`
-- Preview deploy (branch `redesign/homepage-v2`): https://laris-manis-plsh0br5s-korifcan.vercel.app
+- Preview deploy (branch `redesign/homepage-v2`): https://laris-manis-gxtmj719g-korifcan.vercel.app
   - Dilindungi Vercel Deployment Protection (SSO); buka via login Vercel, atau verifikasi via `vercel curl <url>`
   - Environment variable preview sudah terisi dari `.env.local` (14 var)
   - Fix API 500 di Vercel: `jwks-rsa` butuh jose ESM tapi runtime-nya CJS → npm override `jose@5.10.0` + pin `engines.node` 22.x (bug lama, juga menimpa production)
