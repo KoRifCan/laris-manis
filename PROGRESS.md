@@ -53,6 +53,18 @@ Platform etalase produk UMKM (marketplace multi-toko) berbasis web + PWA
 - [x] Composite index Firestore dideploy (`firestore.indexes.json`, 23 index) — katalog & API produk sebelumnya gagal total ("requires an index")
 - [x] Seed produk dideduplikasi (13 produk) dan script seed dibuat idempoten
 
+### Phase 5c: Perbaikan Login & Favorit ✅ COMPLETED (branch `fix/auth-favorit-error`)
+- **Akar masalah "Terjadi kesalahan jaringan"**: semua API route di Vercel 500 `ERR_REQUIRE_ESM` (`jwks-rsa` → `jose` ESM vs runtime CJS) sehingga `res.json()` melempar; fix: npm override `jose@5.10.0` + `engines.node` 22.x (branch ini juga membawa desain Phase 5b ke production)
+- **Env vars Production**: lengkap (15 variabel) — bukan penyebab
+- **Authorized domains**: tidak bisa dibaca via API; tes REST `signInWithPassword` tidak memvalidasi Origin → login server-side tidak terpengaruh; cek manual tetap disarankan bila kelak pakai client SDK
+- **`/api/auth/login` diperbaiki**: sebelumnya tidak memverifikasi password & tidak menghasilkan sesi; kini verifikasi via Identity Toolkit REST, kembalikan `idToken` + role, update `lastLoginAt` pakai `set(merge)` (aman bila dokumen user belum ada)
+- **`src/lib/client-auth.ts` baru**: simpan/hapus token, `authFetch` (Bearer otomatis), `readJson` aman terhadap body non-JSON, klasifikasi error offline / sesi habis / server
+- **Halaman login**: pesan error terdiferensiasi (offline vs server 5xx vs kredensial salah vs respons tidak valid), token disimpan sebelum redirect
+- **Halaman favorit**: kirim `Authorization: Bearer`, 401 → redirect ke login dengan pesan "Sesi berakhir...", 5xx → pesan server, offline → pesan offline; hapus favorit kini menampilkan error (sebelumnya ditelan `console.error`)
+- **Verifikasi production** (`laris-manis-id.vercel.app`, deploy `laris-manis-rbgev3gse`): `/auth/login` 200; `GET /api/products` 200; login salah → 401 "Email atau password salah"; login benar → `idToken`; `/api/favorites` tanpa token → 401, dengan token → 200, toggle on/off → 200
+- Akun uji (bisa dipakai manual di browser): `uji-favorit@larismanis.test` / `UjiFavorit123!` (role pembeli)
+- Catatan: pesan "Terjadi kesalahan jaringan" generik di halaman lain (daftar, lupa-password, verifikasi-email) belum ditangani — hanya login & favorit sesuai lingkup tugas
+
 ### Phase 6: Testing & Deploy Produksi (Vercel)
 - [ ] Unit & integration tests
 - [ ] Deploy ke Vercel
@@ -67,9 +79,10 @@ Platform etalase produk UMKM (marketplace multi-toko) berbasis web + PWA
 ---
 
 ## Current Status
-**Phase**: 5b - Redesign Visual Homepage v2 (Complete, menunggu deploy)
-**Branch**: redesign/homepage-v2
-**Last Commit**: Palet Merah Pasar/Kunyit/Pandan, font Fraunces + Plus Jakarta Sans, homepage v2
+**Phase**: 5c - Perbaikan Login & Favorit (Complete, sudah tayang di production)
+**Branch**: fix/auth-favorit-error
+**Last Commit**: Login & favorit kirim token, pesan error terdiferensiasi
+**Production**: https://laris-manis-id.vercel.app (deploy `laris-manis-rbgev3gse`, desain Phase 5b ikut tayang)
 
 ## Environment Variables Needed (for Vercel/GitHub Secrets)
 - `NEXT_PUBLIC_FIREBASE_API_KEY`
@@ -87,7 +100,7 @@ Platform etalase produk UMKM (marketplace multi-toko) berbasis web + PWA
 ## GitHub Repository
 - URL: https://github.com/KoRifCan/laris-manis
 - Main branch: `main`
-- Current working branch: `redesign/homepage-v2`
+- Current working branch: `fix/auth-favorit-error` (turunan `redesign/homepage-v2`)
 - Preview deploy (branch `redesign/homepage-v2`): https://laris-manis-gxtmj719g-korifcan.vercel.app
   - Dilindungi Vercel Deployment Protection (SSO); buka via login Vercel, atau verifikasi via `vercel curl <url>`
   - Environment variable preview sudah terisi dari `.env.local` (14 var)
