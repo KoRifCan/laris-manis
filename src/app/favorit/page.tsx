@@ -96,7 +96,7 @@ export default function FavoritesPage() {
       <div className="flex flex-col min-h-screen">
         <Header />
         <main className="flex-1 flex items-center justify-center py-12">
-          <div className="animate-spin rounded-full h-12 w-12 border-4 border-indigo-600 border-t-transparent"></div>
+          <div className="animate-spin rounded-full h-12 w-12 border-4 border-brand-600 border-t-transparent"></div>
         </main>
         <Footer />
       </div>
@@ -174,7 +174,7 @@ export default function FavoritesPage() {
                         </div>
                         
                         <div className="space-y-2">
-                          <h3 className="font-semibold text-gray-900 dark:text-white line-clamp-2 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
+                          <h3 className="font-semibold text-gray-900 dark:text-white line-clamp-2 group-hover:text-brand-600 dark:group-hover:text-brand-400 transition-colors">
                             {fav.productName}
                           </h3>
                           <p className="text-xl font-bold text-gray-900 dark:text-white">

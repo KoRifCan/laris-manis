@@ -44,7 +44,7 @@ export function Footer() {
         <div className="xl:grid xl:grid-cols-3 xl:gap-8">
           <div className="space-y-8">
             <Link href="/" className="flex items-center gap-2" aria-label="Laris Manis - Beranda">
-              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-indigo-600">
+              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-brand-600">
                 <ShoppingBagIcon className="h-6 w-6 text-white" aria-hidden="true" />
               </div>
               <span className="text-2xl font-bold text-gray-900 dark:text-white">Laris Manis</span>
@@ -75,7 +75,7 @@ export function Footer() {
                 <ul className="mt-4 space-y-3" role="list">
                   {footerLinks.produk.map((link) => (
                     <li key={link.href}>
-                      <Link href={link.href} className="text-sm text-gray-600 hover:text-indigo-600 dark:text-gray-400 dark:hover:text-indigo-400">
+                      <Link href={link.href} className="text-sm text-gray-600 hover:text-brand-600 dark:text-gray-400 dark:hover:text-brand-400">
                         {link.label}
                       </Link>
                     </li>
@@ -87,7 +87,7 @@ export function Footer() {
                 <ul className="mt-4 space-y-3" role="list">
                   {footerLinks.bantuan.map((link) => (
                     <li key={link.href}>
-                      <Link href={link.href} className="text-sm text-gray-600 hover:text-indigo-600 dark:text-gray-400 dark:hover:text-indigo-400">
+                      <Link href={link.href} className="text-sm text-gray-600 hover:text-brand-600 dark:text-gray-400 dark:hover:text-brand-400">
                         {link.label}
                       </Link>
                     </li>
@@ -101,7 +101,7 @@ export function Footer() {
                 <ul className="mt-4 space-y-3" role="list">
                   {footerLinks.penjual.map((link) => (
                     <li key={link.href}>
-                      <Link href={link.href} className="text-sm text-gray-600 hover:text-indigo-600 dark:text-gray-400 dark:hover:text-indigo-400">
+                      <Link href={link.href} className="text-sm text-gray-600 hover:text-brand-600 dark:text-gray-400 dark:hover:text-brand-400">
                         {link.label}
                       </Link>
                     </li>
@@ -113,7 +113,7 @@ export function Footer() {
                 <ul className="mt-4 space-y-3" role="list">
                   {footerLinks.tentang.map((link) => (
                     <li key={link.href}>
-                      <Link href={link.href} className="text-sm text-gray-600 hover:text-indigo-600 dark:text-gray-400 dark:hover:text-indigo-400">
+                      <Link href={link.href} className="text-sm text-gray-600 hover:text-brand-600 dark:text-gray-400 dark:hover:text-brand-400">
                         {link.label}
                       </Link>
                     </li>
@@ -128,8 +128,8 @@ export function Footer() {
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
             {features.map((feature) => (
               <div key={feature.title} className="flex items-start gap-4">
-                <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-indigo-100 dark:bg-indigo-900/30">
-                  <feature.icon className="h-6 w-6 text-indigo-600 dark:text-indigo-400" aria-hidden="true" />
+                <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-brand-100 dark:bg-brand-900/30">
+                  <feature.icon className="h-6 w-6 text-brand-600 dark:text-brand-400" aria-hidden="true" />
                 </div>
                 <div>
                   <h4 className="text-sm font-semibold text-gray-900 dark:text-white">{feature.title}</h4>

@@ -91,7 +91,7 @@ export default function ForgotPasswordPage() {
             <div className="mt-6 text-center">
               <p className="text-gray-600 dark:text-gray-400">
                 Ingat password?{' '}
-                <Link href="/auth/login" className="text-indigo-600 hover:text-indigo-700 font-medium dark:text-indigo-400 dark:hover:text-indigo-300">
+                <Link href="/auth/login" className="text-brand-600 hover:text-brand-700 font-medium dark:text-brand-400 dark:hover:text-brand-300">
                   Kembali ke Login
                 </Link>
               </p>

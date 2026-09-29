@@ -185,7 +185,7 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
                   {product.images.map((image, index) => (
                     <button
                       key={index}
-                      className="flex-shrink-0 w-20 h-20 rounded-lg overflow-hidden border-2 border-transparent hover:border-indigo-500 transition-colors"
+                      className="flex-shrink-0 w-20 h-20 rounded-lg overflow-hidden border-2 border-transparent hover:border-brand-500 transition-colors"
                     >
                       <Image src={image} alt={`${product.name} - ${index + 1}`} fill className="object-cover" sizes="80px" />
                     </button>
@@ -199,11 +199,11 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
               <div className="sticky top-24 space-y-6">
                 <Card className="p-6">
                   <div className="flex items-start gap-2 mb-4">
-                    <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-indigo-100 dark:bg-indigo-900/30">
-                      <ShoppingBagIcon className="h-5 w-5 text-indigo-600 dark:text-indigo-400" />
+                    <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-brand-100 dark:bg-brand-900/30">
+                      <ShoppingBagIcon className="h-5 w-5 text-brand-600 dark:text-brand-400" />
                     </div>
                     <div>
-                      <p className="text-sm text-indigo-600 dark:text-indigo-400 font-medium">{product.categoryName}</p>
+                      <p className="text-sm text-brand-600 dark:text-brand-400 font-medium">{product.categoryName}</p>
                       <p className="text-xs text-gray-500 dark:text-gray-400">Dijual oleh {product.storeName}</p>
                     </div>
                   </div>
@@ -211,7 +211,7 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
                   <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">{product.name}</h1>
                   
                   <div className="flex items-center gap-4 mb-4">
-                    <span className="text-3xl font-bold text-indigo-600 dark:text-indigo-400">{formatRupiah(product.price)}</span>
+                    <span className="text-3xl font-bold text-brand-600 dark:text-brand-400">{formatRupiah(product.price)}</span>
                     {product.favoriteCount > 0 && (
                       <Badge variant="secondary" className="flex items-center gap-1">
                         <HeartIcon className="h-3 w-3" />
@@ -249,7 +249,7 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
                   <div className="flex items-center gap-3 mb-4">
                     <Avatar src={product.storeLogoUrl} name={product.storeName} size="lg" />
                     <div>
-                      <Link href={`/toko/${product.storeSlug}`} className="font-semibold text-gray-900 dark:text-white hover:text-indigo-600 dark:hover:text-indigo-400">
+                      <Link href={`/toko/${product.storeSlug}`} className="font-semibold text-gray-900 dark:text-white hover:text-brand-600 dark:hover:text-brand-400">
                         {product.storeName}
                       </Link>
                       <div className="flex items-center gap-2 mt-1">
@@ -273,7 +273,7 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
                       <ChatBubbleLeftRightIcon className="h-4 w-4" />
                       <span>{product.storePhone}</span>
                     </div>
-                    <Link href={`/toko/${product.storeSlug}`} className="text-indigo-600 hover:text-indigo-700 font-medium flex items-center gap-1">
+                    <Link href={`/toko/${product.storeSlug}`} className="text-brand-600 hover:text-brand-700 font-medium flex items-center gap-1">
                       Lihat Profil Toko
                       <ArrowRightIcon className="h-4 w-4" />
                     </Link>
@@ -299,7 +299,7 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
                 <Card className="p-6">
                   <div className="flex items-center justify-between mb-6">
                     <h2 className="text-xl font-bold text-gray-900 dark:text-white">Ulasan ({reviews.length})</h2>
-                    <Link href={`/produk/${product.id}#reviews`} className="text-indigo-600 hover:text-indigo-700 font-medium text-sm">
+                    <Link href={`/produk/${product.id}#reviews`} className="text-brand-600 hover:text-brand-700 font-medium text-sm">
                       Lihat Semua
                       <ArrowRightIcon className="h-4 w-4 ml-1" />
                     </Link>
@@ -356,9 +356,9 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
                 </dl>
               </Card>
 
-              <Card className="p-6 bg-indigo-50 dark:bg-indigo-900/20 border-indigo-200 dark:border-indigo-800">
+              <Card className="p-6 bg-brand-50 dark:bg-brand-900/20 border-brand-200 dark:border-brand-800">
                 <div className="flex items-center gap-3 mb-3">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-indigo-600">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-brand-600">
                     <TruckIcon className="h-5 w-5 text-white" />
                   </div>
                   <h3 className="font-semibold text-gray-900 dark:text-white">Pengiriman</h3>

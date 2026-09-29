@@ -194,7 +194,7 @@ export default async function StoreDetailPage({ params }: { params: Promise<{ sl
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <div className="border-b border-gray-200 dark:border-gray-700">
               <nav className="flex gap-8" aria-label="Store tabs">
-                <button className="py-4 text-sm font-medium text-indigo-600 dark:text-indigo-400 border-b-2 border-indigo-600">
+                <button className="py-4 text-sm font-medium text-brand-600 dark:text-brand-400 border-b-2 border-brand-600">
                   Produk ({activeProducts.length})
                 </button>
                 <button className="py-4 text-sm font-medium text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200">
@@ -250,10 +250,10 @@ export default async function StoreDetailPage({ params }: { params: Promise<{ sl
                         </div>
                         
                         <div className="space-y-2">
-                          <p className="text-xs text-indigo-600 dark:text-indigo-400 font-medium">
+                          <p className="text-xs text-brand-600 dark:text-brand-400 font-medium">
                             {product.categoryName}
                           </p>
-                          <h3 className="font-semibold text-gray-900 dark:text-white line-clamp-2 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
+                          <h3 className="font-semibold text-gray-900 dark:text-white line-clamp-2 group-hover:text-brand-600 dark:group-hover:text-brand-400 transition-colors">
                             {product.name}
                           </h3>
                           <p className="text-xl font-bold text-gray-900 dark:text-white">

@@ -126,7 +126,7 @@ export default function SuperAdminDashboardPage() {
       <div className="flex flex-col min-h-screen">
         <Header />
         <main className="flex-1 flex items-center justify-center py-12">
-          <div className="animate-spin rounded-full h-12 w-12 border-4 border-indigo-600 border-t-transparent"></div>
+          <div className="animate-spin rounded-full h-12 w-12 border-4 border-brand-600 border-t-transparent"></div>
         </main>
         <Footer />
       </div>
@@ -154,7 +154,7 @@ export default function SuperAdminDashboardPage() {
                 onClick={() => setActiveTab('users')}
                 className={`py-4 px-1 text-sm font-medium border-b-2 transition-colors ${
                   activeTab === 'users' 
-                    ? 'text-indigo-600 dark:text-indigo-400 border-indigo-600' 
+                    ? 'text-brand-600 dark:text-brand-400 border-brand-600' 
                     : 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200'
                 }`}
               >
@@ -164,7 +164,7 @@ export default function SuperAdminDashboardPage() {
                 onClick={() => setActiveTab('categories')}
                 className={`py-4 px-1 text-sm font-medium border-b-2 transition-colors ${
                   activeTab === 'categories' 
-                    ? 'text-indigo-600 dark:text-indigo-400 border-indigo-600' 
+                    ? 'text-brand-600 dark:text-brand-400 border-brand-600' 
                     : 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200'
                 }`}
               >
@@ -174,7 +174,7 @@ export default function SuperAdminDashboardPage() {
                 onClick={() => setActiveTab('settings')}
                 className={`py-4 px-1 text-sm font-medium border-b-2 transition-colors ${
                   activeTab === 'settings' 
-                    ? 'text-indigo-600 dark:text-indigo-400 border-indigo-600' 
+                    ? 'text-brand-600 dark:text-brand-400 border-brand-600' 
                     : 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200'
                 }`}
               >
@@ -197,13 +197,13 @@ export default function SuperAdminDashboardPage() {
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
                         placeholder="Cari email atau nama..."
-                        className="w-full sm:w-64 pl-10 pr-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                        className="w-full sm:w-64 pl-10 pr-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-brand-500"
                       />
                     </div>
                     <select
                       value={roleFilter}
                       onChange={(e) => setRoleFilter(e.target.value)}
-                      className="px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                      className="px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-brand-500"
                     >
                       <option value="">Semua Role</option>
                       <option value="super_admin">Super Admin</option>
@@ -243,8 +243,8 @@ export default function SuperAdminDashboardPage() {
                         <tr key={user.uid} className="hover:bg-gray-50 dark:hover:bg-gray-800">
                           <td className="px-6 py-4">
                             <div className="flex items-center gap-3">
-                              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-indigo-100 dark:bg-indigo-900/30">
-                                <span className="text-indigo-600 dark:text-indigo-400 font-medium">
+                              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-brand-100 dark:bg-brand-900/30">
+                                <span className="text-brand-600 dark:text-brand-400 font-medium">
                                   {user.displayName.charAt(0).toUpperCase()}
                                 </span>
                               </div>

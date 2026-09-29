@@ -62,7 +62,7 @@ export default function HomePage() {
       
       <main className="flex-1">
         {/* Hero Section */}
-        <section className="relative bg-gradient-to-br from-indigo-600 via-indigo-700 to-purple-800 text-white">
+        <section className="relative bg-gradient-to-br from-brand-600 via-brand-700 to-purple-800 text-white">
           <div className="mx-auto max-w-7xl px-4 py-20 sm:px-6 lg:px-8 lg:py-32">
             <div className="max-w-3xl">
               <Badge variant="success" className="mb-6" size="md">
@@ -73,19 +73,19 @@ export default function HomePage() {
                 <br />
                 <span className="text-yellow-300">Berkualitas & Terjangkau</span>
               </h1>
-              <p className="text-lg sm:text-xl text-indigo-100 mb-8 max-w-2xl">
+              <p className="text-lg sm:text-xl text-brand-100 mb-8 max-w-2xl">
                 Platform etalase produk UMKM terpercaya. Belanja langsung dari pengrajin dan 
                 pengusaha kecil seluruh Indonesia. Semua produk diverifikasi, chat langsung ke penjual via WhatsApp.
               </p>
               <div className="flex flex-wrap gap-4">
                 <Link href="/katalog">
-                  <Button size="lg" className="bg-white text-indigo-600 hover:bg-indigo-50 px-8 py-3">
+                  <Button size="lg" className="bg-white text-brand-600 hover:bg-brand-50 px-8 py-3">
                     Jelajahi Katalog
                     <ArrowRightIcon className="h-5 w-5 ml-2" />
                   </Button>
                 </Link>
                 <Link href="/auth/daftar-penjual">
-                  <Button variant="outline" size="lg" className="border-white text-white hover:bg-indigo-800 px-8 py-3">
+                  <Button variant="outline" size="lg" className="border-white text-white hover:bg-brand-800 px-8 py-3">
                     Jadi Penjual
                   </Button>
                 </Link>
@@ -102,7 +102,7 @@ export default function HomePage() {
                     <stat.icon className="h-8 w-8 text-yellow-300" />
                   </div>
                   <p className="text-3xl sm:text-4xl font-bold">{stat.value}</p>
-                  <p className="text-indigo-200 text-sm">{stat.label}</p>
+                  <p className="text-brand-200 text-sm">{stat.label}</p>
                 </div>
               ))}
             </div>
@@ -119,7 +119,7 @@ export default function HomePage() {
               </div>
               <Link 
                 href="/kategori" 
-                className="text-indigo-600 hover:text-indigo-700 font-medium flex items-center gap-1"
+                className="text-brand-600 hover:text-brand-700 font-medium flex items-center gap-1"
               >
                 Lihat Semua
                 <ArrowRightIcon className="h-5 w-5" />
@@ -137,7 +137,7 @@ export default function HomePage() {
                   <div className="relative p-4 flex flex-col justify-end h-full">
                     <span className="text-4xl">{category.icon}</span>
                     <h3 className="mt-2 font-semibold text-white">{category.name}</h3>
-                    <p className="text-xs text-indigo-100">{category.count.toLocaleString('id-ID')} produk</p>
+                    <p className="text-xs text-brand-100">{category.count.toLocaleString('id-ID')} produk</p>
                   </div>
                 </Link>
               ))}
@@ -158,8 +158,8 @@ export default function HomePage() {
             <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
               {features.map((feature) => (
                 <Card key={feature.title} className="text-center hover:shadow-lg transition-shadow">
-                  <div className="flex h-14 w-14 items-center justify-center rounded-xl bg-indigo-100 dark:bg-indigo-900/30 mx-auto mb-4">
-                    <feature.icon className="h-7 w-7 text-indigo-600 dark:text-indigo-400" />
+                  <div className="flex h-14 w-14 items-center justify-center rounded-xl bg-brand-100 dark:bg-brand-900/30 mx-auto mb-4">
+                    <feature.icon className="h-7 w-7 text-brand-600 dark:text-brand-400" />
                   </div>
                   <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">{feature.title}</h3>
                   <p className="text-gray-600 dark:text-gray-400">{feature.description}</p>
@@ -170,15 +170,15 @@ export default function HomePage() {
         </section>
 
         {/* CTA Section */}
-        <section className="py-16 bg-indigo-600 text-white">
+        <section className="py-16 bg-brand-600 text-white">
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 text-center">
             <h2 className="text-3xl font-bold mb-4">Mulai Jualan Online Anda Hari Ini</h2>
-            <p className="text-lg text-indigo-100 mb-8 max-w-2xl mx-auto">
+            <p className="text-lg text-brand-100 mb-8 max-w-2xl mx-auto">
               Bergabunglah dengan ribuan UMKM yang sudah memperluas jangkauan pasar mereka melalui Laris Manis. 
               Daftar gratis, kelola toko mudah, dan mulai menjual ke seluruh Indonesia.
             </p>
             <Link href="/auth/daftar-penjual">
-              <Button size="lg" className="bg-white text-indigo-600 hover:bg-indigo-50 px-10 py-4 text-lg">
+              <Button size="lg" className="bg-white text-brand-600 hover:bg-brand-50 px-10 py-4 text-lg">
                 Daftar Sebagai Penjual
                 <ArrowRightIcon className="h-5 w-5 ml-2" />
               </Button>
@@ -196,22 +196,22 @@ export default function HomePage() {
             
             <div className="grid md:grid-cols-3 gap-8">
               <div className="text-center">
-                <div className="flex h-16 w-16 items-center justify-center rounded-full bg-indigo-100 dark:bg-indigo-900/30 mx-auto mb-4">
-                  <MagnifyingGlassIcon className="h-8 w-8 text-indigo-600 dark:text-indigo-400" />
+                <div className="flex h-16 w-16 items-center justify-center rounded-full bg-brand-100 dark:bg-brand-900/30 mx-auto mb-4">
+                  <MagnifyingGlassIcon className="h-8 w-8 text-brand-600 dark:text-brand-400" />
                 </div>
                 <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">1. Cari Produk</h3>
                 <p className="text-gray-600 dark:text-gray-400">Telusuri katalog atau gunakan pencarian dan filter untuk menemukan produk yang diinginkan</p>
               </div>
               <div className="text-center">
-                <div className="flex h-16 w-16 items-center justify-center rounded-full bg-indigo-100 dark:bg-indigo-900/30 mx-auto mb-4">
-                  <ChatBubbleLeftRightIcon className="h-8 w-8 text-indigo-600 dark:text-indigo-400" />
+                <div className="flex h-16 w-16 items-center justify-center rounded-full bg-brand-100 dark:bg-brand-900/30 mx-auto mb-4">
+                  <ChatBubbleLeftRightIcon className="h-8 w-8 text-brand-600 dark:text-brand-400" />
                 </div>
                 <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">2. Hubungi Penjual</h3>
                 <p className="text-gray-600 dark:text-gray-400">Klik tombol WhatsApp untuk chat langsung ke penjual, tanya stok, harga, dan detail produk</p>
               </div>
               <div className="text-center">
-                <div className="flex h-16 w-16 items-center justify-center rounded-full bg-indigo-100 dark:bg-indigo-900/30 mx-auto mb-4">
-                  <TruckIcon className="h-8 w-8 text-indigo-600 dark:text-indigo-400" />
+                <div className="flex h-16 w-16 items-center justify-center rounded-full bg-brand-100 dark:bg-brand-900/30 mx-auto mb-4">
+                  <TruckIcon className="h-8 w-8 text-brand-600 dark:text-brand-400" />
                 </div>
                 <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">3. Pesan & Terima</h3>
                 <p className="text-gray-600 dark:text-gray-400">Sepakati detail dengan penjual, lakukan pembayaran, dan terima barang di rumah</p>

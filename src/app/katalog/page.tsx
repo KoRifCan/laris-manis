@@ -125,7 +125,7 @@ export default function KatalogPage() {
   const hasActiveFilters = Object.values(filters).some(v => v !== '');
   const activeFilterCount = Object.values(filters).filter(v => v !== '').length;
   const filterBadge = hasActiveFilters ? (
-    <span className="bg-indigo-100 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-300 px-2 py-0.5 rounded-full text-xs">
+    <span className="bg-brand-100 text-brand-700 dark:bg-brand-900/30 dark:text-brand-300 px-2 py-0.5 rounded-full text-xs">
       {activeFilterCount}
     </span>
   ) : null;
@@ -176,7 +176,7 @@ export default function KatalogPage() {
                     value={filters.q}
                     onChange={(e) => handleFilterChange('q', e.target.value)}
                     placeholder="Cari nama produk, kategori, atau toko..."
-                    className="w-full pl-10 pr-4 py-3 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                    className="w-full pl-10 pr-4 py-3 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-brand-500"
                   />
                 </div>
                 {clearFiltersButton}
@@ -259,10 +259,10 @@ export default function KatalogPage() {
                             </div>
                             
                             <div className="space-y-2">
-                              <p className="text-xs text-indigo-600 dark:text-indigo-400 font-medium">
+                              <p className="text-xs text-brand-600 dark:text-brand-400 font-medium">
                                 {product.categoryName}
                               </p>
-                              <h3 className="font-semibold text-gray-900 dark:text-white line-clamp-2 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
+                              <h3 className="font-semibold text-gray-900 dark:text-white line-clamp-2 group-hover:text-brand-600 dark:group-hover:text-brand-400 transition-colors">
                                 {product.name}
                               </h3>
                               <p className="text-xl font-bold text-gray-900 dark:text-white">

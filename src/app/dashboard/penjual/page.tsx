@@ -146,7 +146,7 @@ export default function SellerDashboardPage() {
       <div className="flex flex-col min-h-screen">
         <Header />
         <main className="flex-1 flex items-center justify-center py-12">
-          <div className="animate-spin rounded-full h-12 w-12 border-4 border-indigo-600 border-t-transparent"></div>
+          <div className="animate-spin rounded-full h-12 w-12 border-4 border-brand-600 border-t-transparent"></div>
         </main>
         <Footer />
       </div>
@@ -178,11 +178,11 @@ export default function SellerDashboardPage() {
 
             {/* Store Status */}
             {store && (
-              <Card className="mt-6 p-4 bg-indigo-50 dark:bg-indigo-900/20 border-indigo-200 dark:border-indigo-800">
+              <Card className="mt-6 p-4 bg-brand-50 dark:bg-brand-900/20 border-brand-200 dark:border-brand-800">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-4">
-                    <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-indigo-100 dark:bg-indigo-900/30">
-                      <ShoppingBagIcon className="h-6 w-6 text-indigo-600 dark:text-indigo-400" />
+                    <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-brand-100 dark:bg-brand-900/30">
+                      <ShoppingBagIcon className="h-6 w-6 text-brand-600 dark:text-brand-400" />
                     </div>
                     <div>
                       <h3 className="font-semibold text-gray-900 dark:text-white">{store.name}</h3>
@@ -220,7 +220,7 @@ export default function SellerDashboardPage() {
                 onClick={() => setActiveTab('produk')}
                 className={`py-4 px-1 text-sm font-medium border-b-2 transition-colors ${
                   activeTab === 'produk' 
-                    ? 'text-indigo-600 dark:text-indigo-400 border-indigo-600' 
+                    ? 'text-brand-600 dark:text-brand-400 border-brand-600' 
                     : 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200'
                 }`}
               >
@@ -230,7 +230,7 @@ export default function SellerDashboardPage() {
                 onClick={() => setActiveTab('statistik')}
                 className={`py-4 px-1 text-sm font-medium border-b-2 transition-colors ${
                   activeTab === 'statistik' 
-                    ? 'text-indigo-600 dark:text-indigo-400 border-indigo-600' 
+                    ? 'text-brand-600 dark:text-brand-400 border-brand-600' 
                     : 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200'
                 }`}
               >
@@ -240,7 +240,7 @@ export default function SellerDashboardPage() {
                 onClick={() => setActiveTab('profil')}
                 className={`py-4 px-1 text-sm font-medium border-b-2 transition-colors ${
                   activeTab === 'profil' 
-                    ? 'text-indigo-600 dark:text-indigo-400 border-indigo-600' 
+                    ? 'text-brand-600 dark:text-brand-400 border-brand-600' 
                     : 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200'
                 }`}
               >
@@ -267,7 +267,7 @@ export default function SellerDashboardPage() {
                     onClick={() => setStatusFilter(key as any)}
                     className={`px-3 py-1.5 rounded-full text-sm font-medium transition-colors ${
                       statusFilter === key
-                        ? 'bg-indigo-600 text-white'
+                        ? 'bg-brand-600 text-white'
                         : 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700'
                     }`}
                   >
@@ -314,7 +314,7 @@ export default function SellerDashboardPage() {
                         </div>
                         
                         <div className="space-y-2 mb-4">
-                          <p className="text-xs text-indigo-600 dark:text-indigo-400 font-medium">
+                          <p className="text-xs text-brand-600 dark:text-brand-400 font-medium">
                             {product.categoryName}
                           </p>
                           <h3 className="font-semibold text-gray-900 dark:text-white line-clamp-2">
@@ -378,8 +378,8 @@ export default function SellerDashboardPage() {
           {activeTab === 'statistik' && (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
               <Card className="p-6 text-center">
-                <div className="flex h-14 w-14 items-center justify-center rounded-xl bg-indigo-100 dark:bg-indigo-900/30 mx-auto mb-4">
-                  <ShoppingBagIcon className="h-7 w-7 text-indigo-600 dark:text-indigo-400" />
+                <div className="flex h-14 w-14 items-center justify-center rounded-xl bg-brand-100 dark:bg-brand-900/30 mx-auto mb-4">
+                  <ShoppingBagIcon className="h-7 w-7 text-brand-600 dark:text-brand-400" />
                 </div>
                 <p className="text-3xl font-bold text-gray-900 dark:text-white">{statusCounts.aktif}</p>
                 <p className="text-gray-600 dark:text-gray-400 mt-1">Produk Aktif</p>

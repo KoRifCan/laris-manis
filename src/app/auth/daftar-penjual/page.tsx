@@ -103,19 +103,19 @@ export default function DaftarPenjualPage() {
       <main className="flex-1 py-12 px-4">
         <div className="mx-auto max-w-2xl">
           {/* Info Card */}
-          <Card className="mb-8 p-6 bg-indigo-50 dark:bg-indigo-900/20 border-indigo-200 dark:border-indigo-800">
+          <Card className="mb-8 p-6 bg-brand-50 dark:bg-brand-900/20 border-brand-200 dark:border-brand-800">
             <div className="flex items-start gap-4">
-              <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-indigo-100 dark:bg-indigo-900/30 flex-shrink-0">
-                <ShieldCheckIcon className="h-6 w-6 text-indigo-600 dark:text-indigo-400" />
+              <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-brand-100 dark:bg-brand-900/30 flex-shrink-0">
+                <ShieldCheckIcon className="h-6 w-6 text-brand-600 dark:text-brand-400" />
               </div>
               <div>
                 <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Jadi Penjual di Laris Manis</h2>
                 <ul className="mt-3 space-y-2 text-sm text-gray-600 dark:text-gray-400">
-                  <li className="flex items-center gap-2"><ShoppingBagIcon className="h-5 w-5 text-indigo-600" /> Kelola toko online sendiri gratis</li>
-                  <li className="flex items-center gap-2"><ShoppingBagIcon className="h-5 w-5 text-indigo-600" /> Upload produk tanpa batas (max 5 foto/produk)</li>
-                  <li className="flex items-center gap-2"><ShoppingBagIcon className="h-5 w-5 text-indigo-600" /> Chat langsung dengan pembeli via WhatsApp</li>
-                  <li className="flex items-center gap-2"><ShoppingBagIcon className="h-5 w-5 text-indigo-600" /> Statistik penjualan & pelacakan stok</li>
-                  <li className="flex items-center gap-2"><ShoppingBagIcon className="h-5 w-5 text-indigo-600" /> Verifikasi admin untuk kepercayaan pembeli</li>
+                  <li className="flex items-center gap-2"><ShoppingBagIcon className="h-5 w-5 text-brand-600" /> Kelola toko online sendiri gratis</li>
+                  <li className="flex items-center gap-2"><ShoppingBagIcon className="h-5 w-5 text-brand-600" /> Upload produk tanpa batas (max 5 foto/produk)</li>
+                  <li className="flex items-center gap-2"><ShoppingBagIcon className="h-5 w-5 text-brand-600" /> Chat langsung dengan pembeli via WhatsApp</li>
+                  <li className="flex items-center gap-2"><ShoppingBagIcon className="h-5 w-5 text-brand-600" /> Statistik penjualan & pelacakan stok</li>
+                  <li className="flex items-center gap-2"><ShoppingBagIcon className="h-5 w-5 text-brand-600" /> Verifikasi admin untuk kepercayaan pembeli</li>
                 </ul>
               </div>
             </div>
@@ -212,7 +212,7 @@ export default function DaftarPenjualPage() {
                   placeholder="Ceritakan tentang toko Anda, produk unggulan, visi misi, dll (min 10 karakter, max 1000)"
                   required
                   maxLength={1000}
-                  className="w-full px-4 py-3 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent resize-none"
+                  className="w-full px-4 py-3 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent resize-none"
                 />
               </div>
 
@@ -224,9 +224,9 @@ export default function DaftarPenjualPage() {
 
             <p className="mt-6 text-center text-sm text-gray-500 dark:text-gray-400">
               Dengan mengirim pengajuan, Anda menyetujui{' '}
-              <Link href="/kebijakan/penjual" className="text-indigo-600 hover:text-indigo-700">Kebijakan Penjual</Link>{' '}
+              <Link href="/kebijakan/penjual" className="text-brand-600 hover:text-brand-700">Kebijakan Penjual</Link>{' '}
               dan{' '}
-              <Link href="/syarat" className="text-indigo-600 hover:text-indigo-700">Syarat & Ketentuan</Link>
+              <Link href="/syarat" className="text-brand-600 hover:text-brand-700">Syarat & Ketentuan</Link>
             </p>
           </Card>
         </div>

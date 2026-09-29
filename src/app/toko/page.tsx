@@ -101,7 +101,7 @@ export default function StoresPage() {
 
   const activeFilterCount = ['q', 'city', 'verified'].filter(key => filters[key]).length;
   const filterBadge = hasActiveFilters ? (
-    <span className="bg-indigo-100 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-300 px-2 py-0.5 rounded-full text-xs">
+    <span className="bg-brand-100 text-brand-700 dark:bg-brand-900/30 dark:text-brand-300 px-2 py-0.5 rounded-full text-xs">
       {activeFilterCount}
     </span>
   ) : null;
@@ -158,7 +158,7 @@ export default function StoresPage() {
               </div>
               
               <div className="space-y-2">
-                <h3 className="font-semibold text-gray-900 dark:text-white line-clamp-1 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
+                <h3 className="font-semibold text-gray-900 dark:text-white line-clamp-1 group-hover:text-brand-600 dark:group-hover:text-brand-400 transition-colors">
                   {store.name}
                 </h3>
                 <p className="text-sm text-gray-500 dark:text-gray-400 line-clamp-2">
@@ -234,7 +234,7 @@ export default function StoresPage() {
                     value={filters.q}
                     onChange={(e) => handleFilterChange('q', e.target.value)}
                     placeholder="Cari nama toko, kota, atau deskripsi..."
-                    className="w-full pl-10 pr-4 py-3 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                    className="w-full pl-10 pr-4 py-3 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-brand-500"
                   />
                 </div>
                 {clearFiltersButton}
@@ -254,7 +254,7 @@ export default function StoresPage() {
                       value={filters.city}
                       onChange={(e) => handleFilterChange('city', e.target.value)}
                       placeholder="Contoh: Jakarta, Bandung, Surabaya"
-                      className="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                      className="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-brand-500"
                     />
                   </div>
                   
@@ -263,7 +263,7 @@ export default function StoresPage() {
                     <select
                       value={filters.sortBy}
                       onChange={(e) => handleFilterChange('sortBy', e.target.value)}
-                      className="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                      className="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-brand-500"
                     >
                       <option value="rating">Rating Tertinggi</option>
                       <option value="terbaru">Terbaru</option>
@@ -277,7 +277,7 @@ export default function StoresPage() {
                     <select
                       value={filters.verified || ''}
                       onChange={(e) => handleFilterChange('verified', e.target.value)}
-                      className="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                      className="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-brand-500"
                     >
                       <option value="">Semua</option>
                       <option value="true">Terverifikasi saja</option>

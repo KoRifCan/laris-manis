@@ -96,8 +96,8 @@ function RegisterForm() {
         <div className="w-full max-w-md">
           <Card className="p-8">
             <div className="text-center mb-8">
-              <Link href="/" className="inline-flex items-center justify-center w-16 h-16 rounded-xl bg-indigo-100 dark:bg-indigo-900/30 mx-auto mb-4">
-                <svg className="w-8 h-8 text-indigo-600 dark:text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <Link href="/" className="inline-flex items-center justify-center w-16 h-16 rounded-xl bg-brand-100 dark:bg-brand-900/30 mx-auto mb-4">
+                <svg className="w-8 h-8 text-brand-600 dark:text-brand-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
                 </svg>
               </Link>
@@ -200,7 +200,7 @@ function RegisterForm() {
             <div className="mt-6 text-center">
               <p className="text-gray-600 dark:text-gray-400">
                 Sudah punya akun?{' '}
-                <Link href="/auth/login" className="text-indigo-600 hover:text-indigo-700 font-medium dark:text-indigo-400 dark:hover:text-indigo-300">
+                <Link href="/auth/login" className="text-brand-600 hover:text-brand-700 font-medium dark:text-brand-400 dark:hover:text-brand-300">
                   Masuk
                 </Link>
               </p>
@@ -215,7 +215,7 @@ function RegisterForm() {
 
 export default function RegisterPage() {
   return (
-    <Suspense fallback={<div className="flex flex-col min-h-screen"><Header /><main className="flex-1 flex items-center justify-center py-12"><div className="animate-spin rounded-full h-12 w-12 border-4 border-indigo-600 border-t-transparent"></div></main><Footer /></div>}>
+    <Suspense fallback={<div className="flex flex-col min-h-screen"><Header /><main className="flex-1 flex items-center justify-center py-12"><div className="animate-spin rounded-full h-12 w-12 border-4 border-brand-600 border-t-transparent"></div></main><Footer /></div>}>
       <RegisterForm />
     </Suspense>
   );

@@ -47,7 +47,7 @@ export function FilterSection({
               className="flex items-center gap-2"
             >
               <FunnelIcon className="h-5 w-5" />
-              Filter {hasActiveFilters && <span className="bg-indigo-100 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-300 px-2 py-0.5 rounded-full text-xs">{Object.values(filters).filter(v => v).length}</span>}
+              Filter {hasActiveFilters && <span className="bg-brand-100 text-brand-700 dark:bg-brand-900/30 dark:text-brand-300 px-2 py-0.5 rounded-full text-xs">{Object.values(filters).filter(v => v).length}</span>}
             </Button>
           </div>
 
@@ -60,7 +60,7 @@ export function FilterSection({
                   value={filters.q}
                   onChange={(e) => onFilterChange('q', e.target.value)}
                   placeholder="Cari nama produk, kategori, atau toko..."
-                  className="w-full pl-10 pr-4 py-3 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  className="w-full pl-10 pr-4 py-3 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-brand-500"
                 />
               </div>
               {hasActiveFilters && (
@@ -80,7 +80,7 @@ export function FilterSection({
                   <select
                     value={filters.categoryId}
                     onChange={(e) => onFilterChange('categoryId', e.target.value)}
-                    className="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                    className="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-brand-500"
                   >
                     <option value="">Semua Kategori</option>
                     {categories.map((cat) => (
@@ -96,7 +96,7 @@ export function FilterSection({
                     value={filters.minPrice}
                     onChange={(e) => onFilterChange('minPrice', e.target.value)}
                     placeholder="0"
-                    className="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                    className="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-brand-500"
                   />
                 </div>
                 
@@ -107,7 +107,7 @@ export function FilterSection({
                     value={filters.maxPrice}
                     onChange={(e) => onFilterChange('maxPrice', e.target.value)}
                     placeholder="1000000"
-                    className="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                    className="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-brand-500"
                   />
                 </div>
                 
@@ -118,7 +118,7 @@ export function FilterSection({
                     value={filters.city}
                     onChange={(e) => onFilterChange('city', e.target.value)}
                     placeholder="Contoh: Jakarta"
-                    className="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                    className="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-brand-500"
                   />
                 </div>
                 
@@ -127,7 +127,7 @@ export function FilterSection({
                   <select
                     value={filters.sortBy}
                     onChange={(e) => onFilterChange('sortBy', e.target.value)}
-                    className="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                    className="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-brand-500"
                   >
                     <option value="terbaru">Terbaru</option>
                     <option value="termurah">Termurah</option>

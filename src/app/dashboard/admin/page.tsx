@@ -140,7 +140,7 @@ export default function AdminDashboardPage() {
       <div className="flex flex-col min-h-screen">
         <Header />
         <main className="flex-1 flex items-center justify-center py-12">
-          <div className="animate-spin rounded-full h-12 w-12 border-4 border-indigo-600 border-t-transparent"></div>
+          <div className="animate-spin rounded-full h-12 w-12 border-4 border-brand-600 border-t-transparent"></div>
         </main>
         <Footer />
       </div>
@@ -194,7 +194,7 @@ export default function AdminDashboardPage() {
                 onClick={() => setActiveTab('umkm')}
                 className={`py-4 px-1 text-sm font-medium border-b-2 transition-colors ${
                   activeTab === 'umkm' 
-                    ? 'text-indigo-600 dark:text-indigo-400 border-indigo-600' 
+                    ? 'text-brand-600 dark:text-brand-400 border-brand-600' 
                     : 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200'
                 }`}
               >
@@ -204,7 +204,7 @@ export default function AdminDashboardPage() {
                 onClick={() => setActiveTab('produk')}
                 className={`py-4 px-1 text-sm font-medium border-b-2 transition-colors ${
                   activeTab === 'produk' 
-                    ? 'text-indigo-600 dark:text-indigo-400 border-indigo-600' 
+                    ? 'text-brand-600 dark:text-brand-400 border-brand-600' 
                     : 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200'
                 }`}
               >
@@ -291,7 +291,7 @@ export default function AdminDashboardPage() {
                         </div>
                         
                         <div className="space-y-2 mb-4">
-                          <p className="text-xs text-indigo-600 dark:text-indigo-400 font-medium">
+                          <p className="text-xs text-brand-600 dark:text-brand-400 font-medium">
                             {product.categoryName}
                           </p>
                           <h3 className="font-semibold text-gray-900 dark:text-white line-clamp-2">

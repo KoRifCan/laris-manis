@@ -40,7 +40,7 @@ export function FilterSection({
           <select
             value={filters.categoryId}
             onChange={(e) => onFilterChange('categoryId', e.target.value)}
-            className="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            className="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-brand-500"
           >
             <option value="">Semua Kategori</option>
             {categories.map((cat) => (
@@ -56,7 +56,7 @@ export function FilterSection({
             value={filters.minPrice}
             onChange={(e) => onFilterChange('minPrice', e.target.value)}
             placeholder="0"
-            className="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            className="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-brand-500"
           />
         </div>
         
@@ -67,7 +67,7 @@ export function FilterSection({
             value={filters.maxPrice}
             onChange={(e) => onFilterChange('maxPrice', e.target.value)}
             placeholder="1000000"
-            className="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            className="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-brand-500"
           />
         </div>
         
@@ -78,7 +78,7 @@ export function FilterSection({
             value={filters.city}
             onChange={(e) => onFilterChange('city', e.target.value)}
             placeholder="Contoh: Jakarta"
-            className="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            className="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-brand-500"
           />
         </div>
         
@@ -87,7 +87,7 @@ export function FilterSection({
           <select
             value={filters.sortBy}
             onChange={(e) => onFilterChange('sortBy', e.target.value)}
-            className="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            className="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-brand-500"
           >
             <option value="terbaru">Terbaru</option>
             <option value="termurah">Termurah</option>

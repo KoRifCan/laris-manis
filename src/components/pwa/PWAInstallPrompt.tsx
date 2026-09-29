@@ -79,8 +79,8 @@ export function PWAInstallPrompt() {
     )} role="dialog" aria-label="Pasang aplikasi Laris Manis">
       <div className="bg-white dark:bg-gray-800 rounded-xl shadow-xl border border-gray-200 dark:border-gray-700 p-4">
         <div className="flex items-start gap-3">
-          <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-indigo-100 dark:bg-indigo-900/30 flex-shrink-0">
-            <ArrowDownTrayIcon className="h-6 w-6 text-indigo-600 dark:text-indigo-400" />
+          <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-brand-100 dark:bg-brand-900/30 flex-shrink-0">
+            <ArrowDownTrayIcon className="h-6 w-6 text-brand-600 dark:text-brand-400" />
           </div>
           <div className="flex-1 min-w-0">
             <h3 className="font-semibold text-gray-900 dark:text-white">Pasang Aplikasi Laris Manis</h3>
@@ -99,7 +99,7 @@ export function PWAInstallPrompt() {
         <div className="mt-4 flex gap-2">
           <button
             onClick={handleInstall}
-            className="flex-1 bg-indigo-600 text-white py-2.5 px-4 rounded-lg font-medium text-sm hover:bg-indigo-700 transition-colors"
+            className="flex-1 bg-brand-600 text-white py-2.5 px-4 rounded-lg font-medium text-sm hover:bg-brand-700 transition-colors"
           >
             Pasang Sekarang
           </button>

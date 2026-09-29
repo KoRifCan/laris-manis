@@ -1,27 +1,75 @@
 @import "tailwindcss";
 
 @theme {
-  --font-sans: var(--font-geist-sans), system-ui, sans-serif;
-  --font-mono: var(--font-geist-mono), monospace;
-  
-  --color-primary-50: #eef2ff;
-  --color-primary-100: #e0e7ff;
-  --color-primary-200: #c7d2fe;
-  --color-primary-300: #a5b4fc;
-  --color-primary-400: #818cf8;
-  --color-primary-500: #6366f1;
-  --color-primary-600: #4f46e5;
-  --color-primary-700: #4338ca;
-  --color-primary-800: #3730a3;
-  --color-primary-900: #312e81;
-  --color-primary-950: #1e1b4b;
-  
-  --color-success-500: #22c55e;
-  --color-success-600: #16a34a;
-  --color-warning-500: #f59e0b;
-  --color-warning-600: #d97706;
-  --color-danger-500: #ef4444;
-  --color-danger-600: #dc2626;
+  /* Type — Fraunces (display) + Plus Jakarta Sans (body) */
+  --font-sans: var(--font-jakarta), system-ui, sans-serif;
+  --font-display: var(--font-fraunces), Georgia, serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, monospace;
+
+  /* Brand: Merah Pasar (payung pasar & gerobak) */
+  --color-brand-50: #fdf3f4;
+  --color-brand-100: #fbe3e7;
+  --color-brand-200: #f6c8d0;
+  --color-brand-300: #ee9dab;
+  --color-brand-400: #e0677b;
+  --color-brand-500: #c93a51;
+  --color-brand-600: #9e1b32;
+  --color-brand-700: #851528;
+  --color-brand-800: #6e1224;
+  --color-brand-900: #5c101f;
+  --color-brand-950: #3a0914;
+
+  /* Aksen: Kunyit Emas (jamu & kemakmuran) */
+  --color-kunyit-200: #f6dc9e;
+  --color-kunyit-300: #f0c463;
+  --color-kunyit-400: #e4a82e;
+  --color-kunyit-500: #d1941c;
+  --color-kunyit-600: #a8730f;
+
+  /* Aksen: Hijau Pandan (panganan segar / terverifikasi) */
+  --color-pandan-50: #edf6f1;
+  --color-pandan-100: #d7ebdf;
+  --color-pandan-400: #2e8b68;
+  --color-pandan-500: #1f6b4e;
+  --color-pandan-600: #17553d;
+  --color-pandan-700: #12442f;
+
+  /* Latar halaman: Kertas Bungkus */
+  --color-canvas: #fbf8f3;
+
+  /* Netral hangat (mengganti gradien abu-abu biru bawaan Tailwind) */
+  --color-gray-50: #faf8f5;
+  --color-gray-100: #f1ede7;
+  --color-gray-200: #e3ddd4;
+  --color-gray-300: #cec7bb;
+  --color-gray-400: #a79e92;
+  --color-gray-500: #857c71;
+  --color-gray-600: #665e55;
+  --color-gray-700: #4e4740;
+  --color-gray-800: #332d29;
+  --color-gray-900: #221d1a;
+  --color-gray-950: #161210;
+
+  /* Status disetel ke nuansa pandan/merah yang sama hangatnya */
+  --color-success-500: #1f6b4e;
+  --color-success-600: #17553d;
+  --color-warning-500: #d1941c;
+  --color-warning-600: #a8730f;
+  --color-danger-500: #d93b30;
+  --color-danger-600: #b72d24;
+
+  /* Ramp hijau diselaraskan dengan pandan (sukses/approve/chat) */
+  --color-green-50: #edf6f1;
+  --color-green-100: #d7ebdf;
+  --color-green-200: #b6dcc8;
+  --color-green-300: #86c5a7;
+  --color-green-400: #4ea783;
+  --color-green-500: #2e8b68;
+  --color-green-600: #1f6b4e;
+  --color-green-700: #17553d;
+  --color-green-800: #12442f;
+  --color-green-900: #0e3727;
+  --color-green-950: #07211a;
 }
 
 @layer base {
@@ -40,22 +88,21 @@
   }
   
   body {
-    @apply bg-gray-50 dark:bg-gray-950 text-gray-900 dark:text-gray-100 antialiased;
-    font-feature-settings: "cv11", "ss01";
+    @apply bg-canvas dark:bg-gray-950 text-gray-900 dark:text-gray-100 antialiased;
   }
-  
+
   html {
     scroll-behavior: smooth;
   }
-  
+
   /* Focus styles */
   *:focus-visible {
-    @apply outline-none ring-2 ring-indigo-500 ring-offset-2 ring-offset-white dark:ring-offset-gray-950;
+    @apply outline-none ring-2 ring-brand-500 ring-offset-2 ring-offset-white dark:ring-offset-gray-950;
   }
-  
+
   /* Selection styles */
   ::selection {
-    @apply bg-indigo-200 text-indigo-900 dark:bg-indigo-800 dark:text-indigo-100;
+    @apply bg-kunyit-200 text-gray-900 dark:bg-brand-800 dark:text-gray-100;
   }
 }
 
@@ -94,7 +141,7 @@
   .prose p { @apply my-4; }
   .prose ul, .prose ol { @apply my-4 pl-6; }
   .prose li { @apply my-1; }
-  .prose a { @apply text-indigo-600 hover:text-indigo-700 dark:text-indigo-400 dark:hover:text-indigo-300 underline; }
+  .prose a { @apply text-brand-600 hover:text-brand-700 dark:text-brand-400 dark:hover:text-brand-300 underline; }
   .prose code { @apply bg-gray-100 dark:bg-gray-800 px-1.5 py-0.5 rounded text-sm font-mono; }
   .prose pre { @apply bg-gray-900 dark:bg-gray-950 p-4 rounded-lg overflow-x-auto my-4; }
   .prose pre code { @apply bg-transparent p-0 text-sm; }
@@ -226,8 +273,8 @@
 /* High contrast mode */
 @media (prefers-contrast: high) {
   :root {
-    --color-primary-600: #312e81;
-    --color-primary-700: #1e1b4b;
+    --color-brand-600: #6e1224;
+    --color-brand-700: #5c101f;
   }
 }
 

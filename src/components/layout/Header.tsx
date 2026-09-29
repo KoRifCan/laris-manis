@@ -33,7 +33,7 @@ export function Header() {
           {/* Logo */}
           <div className="flex items-center gap-8">
             <Link href="/" className="flex items-center gap-2" aria-label="Laris Manis - Beranda">
-              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-indigo-600">
+              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-brand-600">
                 <ShoppingBagIcon className="h-5 w-5 text-white" aria-hidden="true" />
               </div>
               <span className="text-xl font-bold text-gray-900 dark:text-white hidden sm:block">
@@ -52,7 +52,7 @@ export function Header() {
                     className={cn(
                       'flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium transition-colors',
                       isActive
-                        ? 'text-indigo-600 bg-indigo-50 dark:text-indigo-400 dark:bg-indigo-900/20'
+                        ? 'text-brand-600 bg-brand-50 dark:text-brand-400 dark:bg-brand-900/20'
                         : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100 dark:text-gray-400 dark:hover:text-white dark:hover:bg-gray-800'
                     )}
                     aria-current={isActive ? 'page' : undefined}
@@ -115,7 +115,7 @@ export function Header() {
           <div className="fixed inset-y-0 right-0 z-50 w-full max-w-sm bg-white dark:bg-gray-900 shadow-xl">
             <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700">
               <Link href="/" className="flex items-center gap-2" aria-label="Laris Manis - Beranda">
-                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-indigo-600">
+                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-brand-600">
                   <ShoppingBagIcon className="h-5 w-5 text-white" />
                 </div>
                 <span className="text-xl font-bold text-gray-900 dark:text-white">Laris Manis</span>
@@ -139,7 +139,7 @@ export function Header() {
                     className={cn(
                       'flex items-center gap-3 px-3 py-3 rounded-lg text-base font-medium transition-colors',
                       isActive
-                        ? 'text-indigo-600 bg-indigo-50 dark:text-indigo-400 dark:bg-indigo-900/20'
+                        ? 'text-brand-600 bg-brand-50 dark:text-brand-400 dark:bg-brand-900/20'
                         : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100 dark:text-gray-400 dark:hover:text-white dark:hover:bg-gray-800'
                     )}
                     aria-current={isActive ? 'page' : undefined}
@@ -198,7 +198,7 @@ export function Header() {
                 <input
                   type="search"
                   placeholder="Cari produk..."
-                  className="w-full pl-10 pr-4 py-2.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  className="w-full pl-10 pr-4 py-2.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-brand-500"
                   autoFocus
                 />
               </div>

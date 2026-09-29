@@ -65,8 +65,8 @@ function LoginForm() {
         <div className="w-full max-w-md">
           <Card className="p-8">
             <div className="text-center mb-8">
-              <Link href="/" className="inline-flex items-center justify-center w-16 h-16 rounded-xl bg-indigo-100 dark:bg-indigo-900/30 mx-auto mb-4">
-                <svg className="w-8 h-8 text-indigo-600 dark:text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <Link href="/" className="inline-flex items-center justify-center w-16 h-16 rounded-xl bg-brand-100 dark:bg-brand-900/30 mx-auto mb-4">
+                <svg className="w-8 h-8 text-brand-600 dark:text-brand-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
                 </svg>
               </Link>
@@ -123,10 +123,10 @@ function LoginForm() {
 
               <div className="flex items-center justify-between">
                 <label className="flex items-center gap-2 cursor-pointer">
-                  <input type="checkbox" className="w-4 h-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500" />
+                  <input type="checkbox" className="w-4 h-4 rounded border-gray-300 text-brand-600 focus:ring-brand-500" />
                   <span className="text-sm text-gray-600 dark:text-gray-400">Ingat saya</span>
                 </label>
-                <Link href="/auth/lupa-password" className="text-sm text-indigo-600 hover:text-indigo-700 dark:text-indigo-400 dark:hover:text-indigo-300">
+                <Link href="/auth/lupa-password" className="text-sm text-brand-600 hover:text-brand-700 dark:text-brand-400 dark:hover:text-brand-300">
                   Lupa password?
                 </Link>
               </div>
@@ -140,7 +140,7 @@ function LoginForm() {
             <div className="mt-6 text-center">
               <p className="text-gray-600 dark:text-gray-400">
                 Belum punya akun?{' '}
-                <Link href="/auth/daftar" className="text-indigo-600 hover:text-indigo-700 font-medium dark:text-indigo-400 dark:hover:text-indigo-300">
+                <Link href="/auth/daftar" className="text-brand-600 hover:text-brand-700 font-medium dark:text-brand-400 dark:hover:text-brand-300">
                   Daftar Sekarang
                 </Link>
               </p>
@@ -155,7 +155,7 @@ function LoginForm() {
 
 export default function LoginPage() {
   return (
-    <Suspense fallback={<div className="flex flex-col min-h-screen"><Header /><main className="flex-1 flex items-center justify-center py-12"><div className="animate-spin rounded-full h-12 w-12 border-4 border-indigo-600 border-t-transparent"></div></main><Footer /></div>}>
+    <Suspense fallback={<div className="flex flex-col min-h-screen"><Header /><main className="flex-1 flex items-center justify-center py-12"><div className="animate-spin rounded-full h-12 w-12 border-4 border-brand-600 border-t-transparent"></div></main><Footer /></div>}>
       <LoginForm />
     </Suspense>
   );
