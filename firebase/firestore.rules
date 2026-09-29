@@ -1,0 +1,195 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Default deny all
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Helper functions
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function getUserData() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data;
+    }
+
+    function getUserRole() {
+      return getUserData().role;
+    }
+
+    function isRole(role) {
+      return getUserRole() == role;
+    }
+
+    function isSuperAdmin() {
+      return isRole('super_admin');
+    }
+
+    function isAdmin() {
+      return isRole('admin') || isSuperAdmin();
+    }
+
+    function isPenjual() {
+      return isRole('penjual');
+    }
+
+    function isStafToko() {
+      return isRole('staf_toko');
+    }
+
+    function isPembeli() {
+      return isRole('pembeli');
+    }
+
+    function isOwner(userId) {
+      return request.auth.uid == userId;
+    }
+
+    function isStoreOwner(storeId) {
+      return get(/databases/$(database)/documents/stores/$(storeId)).data.ownerId == request.auth.uid;
+    }
+
+    function isStoreStaff(storeId) {
+      let userData = getUserData();
+      return userData.assignedStoreIds != null && storeId in userData.assignedStoreIds;
+    }
+
+    function canManageStore(storeId) {
+      return isStoreOwner(storeId) || isStoreStaff(storeId) || isAdmin();
+    }
+
+    function canManageProduct(productId) {
+      let product = get(/databases/$(database)/documents/products/$(productId)).data;
+      return isOwner(product.sellerId) || canManageStore(product.storeId) || isAdmin();
+    }
+
+    // USERS collection
+    match /users/{userId} {
+      // Users can read their own profile
+      allow read: if isSignedIn() && (isOwner(userId) || isAdmin());
+      
+      // Users can update their own profile (except role)
+      allow update: if isSignedIn() && isOwner(userId) 
+        && request.resource.data.keys().hasOnly(['displayName', 'phoneNumber', 'notificationTokens', 'updatedAt'])
+        && request.resource.data.role == resource.data.role;
+      
+      // Only super_admin can create/delete/change role
+      allow create, delete: if isSuperAdmin();
+      
+      // Super admin can update any field including role
+      allow update: if isSuperAdmin();
+    }
+
+    // STORES collection
+    match /stores/{storeId} {
+      // Public read for verified stores
+      allow read: if resource.data.isVerified == true;
+      
+      // Owner can read their own store (even unverified)
+      allow read: if isSignedIn() && isStoreOwner(storeId);
+      
+      // Admin can read all stores
+      allow read: if isAdmin();
+      
+      // Penjual can create store (when approved)
+      allow create: if isSignedIn() && isPenjual() 
+        && request.resource.data.ownerId == request.auth.uid
+        && request.resource.data.isVerified == false;
+      
+      // Owner can update their store
+      allow update: if isSignedIn() && isStoreOwner(storeId)
+        && request.resource.data.ownerId == resource.data.ownerId
+        && request.resource.data.isVerified == resource.data.isVerified;
+      
+      // Admin can verify/update any store
+      allow update: if isAdmin();
+      
+      // Only super_admin can delete
+      allow delete: if isSuperAdmin();
+    }
+
+    // PRODUCTS collection
+    match /products/{productId} {
+      // Public read for active products
+      allow read: if resource.data.status == 'aktif';
+      
+      // Seller can read their own products (any status)
+      allow read: if isSignedIn() && isOwner(resource.data.sellerId);
+      
+      // Store staff can read assigned store products
+      allow read: if isSignedIn() && isStoreStaff(resource.data.storeId);
+      
+      // Admin can read all products
+      allow read: if isAdmin();
+      
+      // Penjual/Staf can create product (draft or menunggu_review)
+      allow create: if isSignedIn() && (isPenjual() || isStafToko())
+        && request.resource.data.sellerId == request.auth.uid
+        && request.resource.data.status in ['draft', 'menunggu_review']
+        && request.resource.data.images.size() <= 5
+        && request.resource.data.images.hasAll(url => url.matches('^https://.*'));
+      
+      // Seller can update their own product
+      allow update: if isSignedIn() && isOwner(resource.data.sellerId)
+        && request.resource.data.sellerId == resource.data.sellerId
+        && request.resource.data.storeId == resource.data.storeId;
+      
+      // Store staff can update assigned store products
+      allow update: if isSignedIn() && isStoreStaff(resource.data.storeId)
+        && request.resource.data.storeId == resource.data.storeId;
+      
+      // Admin can update any product (including status change)
+      allow update: if isAdmin();
+      
+      // Seller can delete their own product (only if not aktif)
+      allow delete: if isSignedIn() && isOwner(resource.data.sellerId)
+        && resource.data.status != 'aktif';
+      
+      // Admin can delete any product
+      allow delete: if isAdmin();
+    }
+
+    // CATEGORIES collection
+    match /categories/{categoryId} {
+      // Public read for active categories
+      allow read: if resource.data.isActive == true;
+      
+      // Admin can read all
+      allow read: if isAdmin();
+      
+      // Only super_admin can write
+      allow create, update, delete: if isSuperAdmin();
+    }
+
+    // REVIEWS collection
+    match /reviews/{reviewId} {
+      // Public read
+      allow read: if true;
+      
+      // Pembeli can create review (need to verify purchase in backend)
+      allow create: if isSignedIn() && isPembeli()
+        && request.resource.data.buyerId == request.auth.uid;
+      
+      // Admin can delete inappropriate reviews
+      allow delete: if isAdmin();
+    }
+
+    // FAVORITES subcollection
+    match /users/{userId}/favorites/{favoriteId} {
+      allow read: if isSignedIn() && isOwner(userId);
+      allow create: if isSignedIn() && isOwner(userId) && isPembeli();
+      allow delete: if isSignedIn() && isOwner(userId);
+    }
+
+    // AUDIT_LOGS collection
+    match /auditLogs/{logId} {
+      // Only super_admin can read
+      allow read: if isSuperAdmin();
+      
+      // System writes (via admin SDK) - no client write
+      allow create: if false;
+    }
+  }
+}

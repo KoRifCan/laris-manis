@@ -1,0 +1,97 @@
+{
+  "name": "Laris Manis",
+  "short_name": "Laris Manis",
+  "description": "Platform etalase produk UMKM Indonesia. Temukan ribuan produk berkualitas dari pengrajin dan pengusaha kecil seluruh Indonesia.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#4f46e5",
+  "orientation": "portrait-primary",
+  "scope": "/",
+  "lang": "id",
+  "icons": [
+    {
+      "src": "/icons/icon-72x72.svg",
+      "sizes": "72x72",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/icon-96x96.svg",
+      "sizes": "96x96",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/icon-128x128.svg",
+      "sizes": "128x128",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/icon-144x144.svg",
+      "sizes": "144x144",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/icon-152x152.svg",
+      "sizes": "152x152",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/icon-192x192.svg",
+      "sizes": "192x192",
+      "type": "image/svg+xml",
+      "purpose": "maskable any"
+    },
+    {
+      "src": "/icons/icon-384x384.svg",
+      "sizes": "384x384",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/icon-512x512.svg",
+      "sizes": "512x512",
+      "type": "image/svg+xml",
+      "purpose": "maskable any"
+    }
+  ],
+  "categories": ["shopping", "business"],
+  "shortcuts": [
+    {
+      "name": "Katalog Produk",
+      "short_name": "Katalog",
+      "description": "Jelajahi katalog produk UMKM",
+      "url": "/katalog",
+      "icons": [{ "src": "/icons/shortcut-katalog.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Favorit",
+      "short_name": "Favorit",
+      "description": "Lihat produk favorit Anda",
+      "url": "/favorit",
+      "icons": [{ "src": "/icons/shortcut-favorit.png", "sizes": "192x192" }]
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "/screenshots/home.png",
+      "sizes": "1280x720",
+      "type": "image/png",
+      "form_factor": "wide",
+      "label": "Halaman Utama Laris Manis"
+    },
+    {
+      "src": "/screenshots/katalog.png",
+      "sizes": "1280x720",
+      "type": "image/png",
+      "form_factor": "wide",
+      "label": "Katalog Produk"
+    }
+  ],
+  "prefer_related_applications": false,
+  "related_applications": []
+}

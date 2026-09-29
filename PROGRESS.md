@@ -1,0 +1,147 @@
+# Progress Tracking - Laris Manis
+
+## Project Overview
+Platform etalase produk UMKM (marketplace multi-toko) berbasis web + PWA
+
+## Phases
+
+### Phase 1: Arsitektur & Alur Pengguna ✅ COMPLETED
+- [x] Dokumentasi arsitektur sistem
+- [x] User flow diagrams
+- [x] Teknologi stack final
+- [x] Desain koleksi Firestore
+- [x] RBAC Matrix
+- [x] API Endpoints Overview
+
+### Phase 2: Struktur Koleksi Firestore & Security Rules ✅ COMPLETED
+- [x] Desain koleksi (users, stores, products, categories, reviews, auditLogs)
+- [x] Index yang diperlukan
+- [x] Security Rules (default-deny untuk klien)
+
+### Phase 3: Endpoint API + Matriks Hak Akses ✅ COMPLETED
+- [x] Daftar endpoint API
+- [x] RBAC matrix per role
+- [x] Validasi input & rate limiting
+
+### Phase 4: Kode Inti: Auth, RBAC, CRUD Produk ✅ COMPLETED
+- [x] Firebase Admin SDK setup
+- [x] Auth (daftar, login, lupa password, verifikasi email)
+- [x] Custom claims untuk role
+- [x] CRUD produk dengan alur review
+- [x] API Routes: Auth, Users, Products, Stores, Admin, Categories, Upload, Favorites, Reviews, Audit Logs
+- [x] Rate limiting middleware (basic)
+- [x] Input sanitization (Zod)
+
+### Phase 5: UI Halaman Utama ✅ COMPLETED
+- [x] Halaman publik (Beranda, Katalog, Detail Produk)
+- [x] Dashboard layout (Header, Footer, Navigation)
+- [x] UI Components (Button, Card, Badge, Input, Modal, Avatar)
+- [x] PWA manifest & service worker
+- [x] Install prompt component
+
+### Phase 6: Testing & Deploy Produksi (Vercel)
+- [ ] Unit & integration tests
+- [ ] Deploy ke Vercel
+- [ ] Environment variables setup
+
+### Phase 7: APK Android + Rilis Otomatis GitHub
+- [ ] Capacitor setup
+- [ ] Keystore & signing
+- [ ] GitHub Actions workflow
+- [ ] Release notes & checksum
+
+---
+
+## Current Status
+**Phase**: 5 - UI Halaman Utama (Complete)
+**Branch**: feat/ui-pages
+**Last Commit**: Public pages and PWA setup completed
+
+## Environment Variables Needed (for Vercel/GitHub Secrets)
+- `NEXT_PUBLIC_FIREBASE_API_KEY`
+- `NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN`
+- `NEXT_PUBLIC_FIREBASE_PROJECT_ID`
+- `NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET`
+- `NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID`
+- `NEXT_PUBLIC_FIREBASE_APP_ID`
+- `FIREBASE_ADMIN_PROJECT_ID`
+- `FIREBASE_ADMIN_CLIENT_EMAIL`
+- `FIREBASE_ADMIN_PRIVATE_KEY`
+- `NEXT_PUBLIC_VERCEL_BLOB_TOKEN`
+- `NEXT_PUBLIC_APP_URL`
+
+## GitHub Repository
+- URL: [TO BE CREATED]
+- Main branch: `main`
+- Current working branch: `feat/ui-pages`
+
+## Completed Files - Architecture & Backend
+- `docs/ARCHITECTURE.md` - Full architecture documentation
+- `firebase/firestore.rules` - Firestore security rules (default-deny)
+- `firebase/storage.rules` - Storage rules note (using Vercel Blob)
+- `scripts/seed-super-admin.js` - Super admin seed script
+- `src/lib/firebase-client.ts` - Firebase client config
+- `src/lib/firebase-admin.ts` - Firebase admin SDK config
+- `src/lib/types.ts` - TypeScript types
+- `src/lib/rbac.ts` - Role-based access control utilities
+- `src/lib/api-auth.ts` - API authentication middleware
+- `src/lib/validation.ts` - Zod validation schemas
+- `src/lib/utils.ts` - Utility functions (formatRupiah, etc.)
+
+## Completed Files - API Routes
+- `src/app/api/auth/register/route.ts` - Register endpoint
+- `src/app/api/auth/login/route.ts` - Login endpoint
+- `src/app/api/auth/logout/route.ts` - Logout endpoint
+- `src/app/api/auth/forgot-password/route.ts` - Forgot password endpoint
+- `src/app/api/auth/verify-email/route.ts` - Verify email endpoint
+- `src/app/api/auth/apply-seller/route.ts` - Apply seller endpoint
+- `src/app/api/users/me/route.ts` - User profile endpoint
+- `src/app/api/products/route.ts` - Public products list
+- `src/app/api/products/[id]/route.ts` - Product detail
+- `src/app/api/products/me/route.ts` - My products (seller)
+- `src/app/api/products/[id]/submit-review/route.ts` - Submit for review
+- `src/app/api/admin/products/pending/route.ts` - Admin pending products
+- `src/app/api/admin/products/[id]/review/route.ts` - Admin review product
+- `src/app/api/upload/route.ts` - Upload to Vercel Blob
+- `src/app/api/stores/me/route.ts` - My store (seller)
+- `src/app/api/stores/route.ts` - Public stores
+- `src/app/api/admin/users/route.ts` - Admin user management
+- `src/app/api/admin/stores/pending/route.ts` - Admin pending stores
+- `src/app/api/admin/stores/[id]/verify/route.ts` - Admin verify store
+- `src/app/api/categories/route.ts` - Categories CRUD
+- `src/app/api/categories/[id]/route.ts` - Category update/delete
+- `src/app/api/favorites/route.ts` - Favorites toggle
+- `src/app/api/reviews/route.ts` - Reviews CRUD
+- `src/app/api/audit-logs/route.ts` - Audit logs
+
+## Completed Files - UI Components
+- `src/components/ui/Button.tsx` - Button component with variants
+- `src/components/ui/Input.tsx` - Input with label/error/helper
+- `src/components/ui/Card.tsx` - Card with variants
+- `src/components/ui/Badge.tsx` - Badge with status variants
+- `src/components/ui/Avatar.tsx` - Avatar with fallback initials
+- `src/components/ui/Modal.tsx` - Accessible modal dialog
+- `src/components/layout/Header.tsx` - Responsive header with navigation
+- `src/components/layout/Footer.tsx` - Footer with links and social
+- `src/components/pwa/PWAInstallPrompt.tsx` - PWA install prompt
+
+## Completed Files - Pages
+- `src/app/page.tsx` - Homepage with hero, stats, categories, features
+- `src/app/katalog/page.tsx` - Product catalog with search/filter/pagination
+- `src/app/produk/[id]/page.tsx` - Product detail with gallery, store info, reviews
+- `src/app/layout.tsx` - Root layout with metadata, fonts, providers
+- `src/app/providers.tsx` - Session provider wrapper
+- `src/app/globals.css` - Global styles with Tailwind v4
+- `src/app/manifest.json` - PWA manifest
+- `public/sw.js` - Service worker for offline support
+- `public/icons/*.svg` - PWA icons (72-512px)
+
+## Next Steps
+1. Create dashboard pages for each role (penjual, admin, super_admin)
+2. Implement authentication pages (login, register, forgot password)
+3. Add rate limiting middleware (Upstash/Redis)
+4. Write unit & integration tests
+5. Deploy to Vercel and configure environment variables
+6. Setup GitHub repository and push code
+7. Configure Vercel project and connect to GitHub
+8. Test all API endpoints with real Firebase project
