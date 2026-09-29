@@ -113,3 +113,108 @@ export function errorMessage(err: unknown): string {
   }
   return 'Terjadi kesalahan yang tidak terduga. Silakan coba lagi.';
 }
+
+// --- Sesi tampilan (untuk Header & redirect halaman login) ---
+
+export const AUTH_EVENT = 'lm-auth-changed';
+
+export interface UserSession {
+  displayName?: string | null;
+  email?: string | null;
+  role?: string | null;
+}
+
+const USER_KEY = 'laris_manis_user';
+
+function notifyAuthChanged(): void {
+  if (typeof window !== 'undefined') {
+    window.dispatchEvent(new Event(AUTH_EVENT));
+  }
+}
+
+// Baca `exp` dari payload JWT (hanya untuk deteksi kedaluwarsa di UI;
+// verifikasi kriptografis tetap dilakukan server).
+function readExpiry(token: string): number | null {
+  try {
+    const payload = token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/');
+    const padded = payload + '='.repeat((4 - (payload.length % 4)) % 4);
+    const data = JSON.parse(atob(padded));
+    return typeof data.exp === 'number' ? data.exp * 1000 : null;
+  } catch {
+    return null;
+  }
+}
+
+export function isTokenValid(token: string | null): token is string {
+  if (!token) return false;
+  const exp = readExpiry(token);
+  return exp === null || exp > Date.now();
+}
+
+export function setSession(idToken: string, user: UserSession): void {
+  setToken(idToken);
+  if (typeof window !== 'undefined') {
+    try {
+      window.localStorage.setItem(USER_KEY, JSON.stringify(user));
+    } catch {
+      // abaikan storage penuh/private mode
+    }
+  }
+  notifyAuthChanged();
+}
+
+export function clearSession(): void {
+  clearToken();
+  if (typeof window !== 'undefined') {
+    try {
+      window.localStorage.removeItem(USER_KEY);
+    } catch {
+      // abaikan
+    }
+  }
+  notifyAuthChanged();
+}
+
+// Snapshot murni tanpa efek samping: hasilnya di-cache per token agar
+// aman dipakai sebagai getSnapshot() useSyncExternalStore (Object.is stabil).
+let snapshotCache: { token: string | null; user: UserSession | null } = {
+  token: null,
+  user: null,
+};
+
+export function getSessionSnapshot(): UserSession | null {
+  if (typeof window === 'undefined') return null;
+  const token = getToken();
+  if (token === snapshotCache.token) return snapshotCache.user;
+
+  let user: UserSession | null = null;
+  if (isTokenValid(token)) {
+    try {
+      const raw = window.localStorage.getItem(USER_KEY);
+      user = raw ? (JSON.parse(raw) as UserSession) : {};
+    } catch {
+      user = {};
+    }
+  }
+  snapshotCache = { token, user };
+  return user;
+}
+
+// null = belum login / token kedaluwarsa (token kedaluwarsa dibersihkan).
+export function getSession(): UserSession | null {
+  const user = getSessionSnapshot();
+  if (user === null && getToken()) {
+    clearSession();
+  }
+  return user;
+}
+
+export function subscribeSession(onChange: () => void): () => void {
+  if (typeof window === 'undefined') return () => {};
+  window.addEventListener(AUTH_EVENT, onChange);
+  window.addEventListener('storage', onChange);
+  return () => {
+    window.removeEventListener(AUTH_EVENT, onChange);
+    window.removeEventListener('storage', onChange);
+  };
+}

@@ -12,12 +12,42 @@ import {
   Bars3Icon,
   XMarkIcon,
 } from '@heroicons/react/24/outline';
-import { useState } from 'react';
+import { useSyncExternalStore, useState } from 'react';
+import { useRouter } from 'next/navigation';
+import {
+  getToken,
+  clearSession,
+  getSessionSnapshot,
+  subscribeSession,
+} from '@/lib/client-auth';
 
 export function Header() {
   const pathname = usePathname();
+  const router = useRouter();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
+  const session = useSyncExternalStore(
+    subscribeSession,
+    getSessionSnapshot,
+    () => null
+  );
+
+  const handleLogout = async () => {
+    const token = getToken();
+    try {
+      if (token) {
+        await fetch('/api/auth/logout', {
+          method: 'POST',
+          headers: { Authorization: `Bearer ${token}` },
+        });
+      }
+    } catch {
+      // tetap keluar lokal meski audit log gagal
+    }
+    clearSession();
+    setMobileMenuOpen(false);
+    router.push('/');
+  };
 
   const navLinks = [
     { href: '/', label: 'Beranda', icon: HomeIcon },
@@ -83,18 +113,39 @@ export function Header() {
 
             {/* Auth/Profile */}
             <div className="hidden sm:flex sm:items-center sm:gap-3">
-              <Link 
-                href="/auth/login" 
-                className="px-4 py-2 text-sm font-medium text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white"
-              >
-                Masuk
-              </Link>
-              <Link
-                href="/auth/daftar"
-                className="inline-flex items-center justify-center rounded-lg bg-brand-600 px-3 py-1.5 text-sm font-medium text-white transition-colors hover:bg-brand-700 focus:outline-none focus:ring-2 focus:ring-brand-500"
-              >
-                Daftar
-              </Link>
+              {session ? (
+                <>
+                  <span
+                    className="flex items-center gap-1.5 px-2 text-sm font-medium text-gray-700 dark:text-gray-300 max-w-[12rem] truncate"
+                    title={session.email || undefined}
+                  >
+                    <UserCircleIcon className="h-5 w-5 shrink-0" aria-hidden="true" />
+                    <span className="truncate">{session.displayName || session.email || 'Akun Saya'}</span>
+                  </span>
+                  <button
+                    type="button"
+                    onClick={handleLogout}
+                    className="px-3 py-1.5 text-sm font-medium rounded-lg border border-gray-300 text-gray-600 hover:text-gray-900 hover:border-gray-400 dark:border-gray-700 dark:text-gray-400 dark:hover:text-white dark:hover:border-gray-500 transition-colors"
+                  >
+                    Keluar
+                  </button>
+                </>
+              ) : (
+                <>
+                  <Link
+                    href="/auth/login"
+                    className="px-4 py-2 text-sm font-medium text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white"
+                  >
+                    Masuk
+                  </Link>
+                  <Link
+                    href="/auth/daftar"
+                    className="inline-flex items-center justify-center rounded-lg bg-brand-600 px-3 py-1.5 text-sm font-medium text-white transition-colors hover:bg-brand-700 focus:outline-none focus:ring-2 focus:ring-brand-500"
+                  >
+                    Daftar
+                  </Link>
+                </>
+              )}
             </div>
 
             {/* Mobile Menu Button */}
@@ -161,20 +212,37 @@ export function Header() {
                 Favorit
               </Link>
               <div className="pt-4 space-y-2">
-                <Link
-                  href="/auth/login"
-                  onClick={() => setMobileMenuOpen(false)}
-                  className="block w-full text-center px-4 py-3 rounded-lg text-base font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-100 dark:text-gray-400 dark:hover:text-white dark:hover:bg-gray-800"
-                >
-                  Masuk
-                </Link>
-                <Link
-                  href="/auth/daftar"
-                  onClick={() => setMobileMenuOpen(false)}
-                  className="block w-full rounded-lg bg-brand-600 px-4 py-3 text-center text-base font-medium text-white transition-colors hover:bg-brand-700"
-                >
-                  Daftar
-                </Link>
+                {session ? (
+                  <>
+                    <p className="px-3 text-sm font-medium text-gray-500 dark:text-gray-400 truncate">
+                      {session.displayName || session.email || 'Akun Saya'}
+                    </p>
+                    <button
+                      type="button"
+                      onClick={handleLogout}
+                      className="block w-full text-center px-4 py-3 rounded-lg text-base font-medium border border-gray-300 text-gray-600 hover:text-gray-900 hover:bg-gray-100 dark:border-gray-700 dark:text-gray-400 dark:hover:text-white dark:hover:bg-gray-800 transition-colors"
+                    >
+                      Keluar
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    <Link
+                      href="/auth/login"
+                      onClick={() => setMobileMenuOpen(false)}
+                      className="block w-full text-center px-4 py-3 rounded-lg text-base font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-100 dark:text-gray-400 dark:hover:text-white dark:hover:bg-gray-800"
+                    >
+                      Masuk
+                    </Link>
+                    <Link
+                      href="/auth/daftar"
+                      onClick={() => setMobileMenuOpen(false)}
+                      className="block w-full rounded-lg bg-brand-600 px-4 py-3 text-center text-base font-medium text-white transition-colors hover:bg-brand-700"
+                    >
+                      Daftar
+                    </Link>
+                  </>
+                )}
               </div>
             </nav>
           </div>

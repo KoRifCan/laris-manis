@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, Suspense } from 'react';
+import { useEffect, useState, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { Header } from '@/components/layout/Header';
@@ -9,7 +9,7 @@ import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { Card } from '@/components/ui/Card';
 import { formatRupiah } from '@/lib/utils';
-import { setToken, readJson } from '@/lib/client-auth';
+import { getSession, setSession, readJson } from '@/lib/client-auth';
 import { 
   EyeIcon, 
   EyeSlashIcon,
@@ -30,6 +30,13 @@ function LoginForm() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(errorParam || '');
   const [success, setSuccess] = useState('');
+
+  // Sudah login? tidak perlu menampilkan form lagi.
+  useEffect(() => {
+    if (getSession()) {
+      router.replace(callbackUrl);
+    }
+  }, [router, callbackUrl]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -64,7 +71,11 @@ function LoginForm() {
         return;
       }
 
-      setToken(data.data.idToken);
+      setSession(data.data.idToken, {
+        displayName: data.data.displayName ?? null,
+        email: data.data.email ?? null,
+        role: data.data.role ?? null,
+      });
       setSuccess('Login berhasil! Mengalihkan...');
       setTimeout(() => router.push(callbackUrl), 1500);
     } catch {
