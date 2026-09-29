@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { ShoppingBagIcon, TruckIcon, ShieldCheckIcon, ChatBubbleLeftRightIcon } from '@heroicons/react/24/outline';
+import { ShoppingBagIcon } from '@heroicons/react/24/outline';
 
 export function Footer() {
   const currentYear = new Date().getFullYear();
@@ -31,12 +31,6 @@ export function Footer() {
     ],
   };
 
-  const features = [
-    { icon: TruckIcon, title: 'Gratis Ongkir', desc: 'Untuk pembelian minimal' },
-    { icon: ShieldCheckIcon, title: 'Garansi Produk', desc: 'Produk asli & berkualitas' },
-    { icon: ChatBubbleLeftRightIcon, title: 'Chat Langsung', desc: 'Hubungi penjual via WA' },
-    { icon: ShoppingBagIcon, title: 'Ribuan Produk', desc: 'Dari UMKM seluruh Indonesia' },
-  ];
 
   return (
     <footer className="bg-gray-50 dark:bg-gray-950 border-t border-gray-200 dark:border-gray-800">
@@ -47,7 +41,7 @@ export function Footer() {
               <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-brand-600">
                 <ShoppingBagIcon className="h-6 w-6 text-white" aria-hidden="true" />
               </div>
-              <span className="text-2xl font-bold text-gray-900 dark:text-white">Laris Manis</span>
+              <span className="text-2xl font-semibold text-gray-900 dark:text-white" style={{ fontFamily: 'var(--font-display)' }}>Laris Manis</span>
             </Link>
             <p className="text-base text-gray-600 dark:text-gray-400 max-w-xs">
               Platform etalase produk UMKM terpercaya. Temukan ribuan produk berkualitas dari pengrajin dan pengusaha kecil seluruh Indonesia.
@@ -124,25 +118,10 @@ export function Footer() {
           </div>
         </div>
 
-        <div className="mt-12 border-t border-gray-200 dark:border-gray-800 pt-8">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-            {features.map((feature) => (
-              <div key={feature.title} className="flex items-start gap-4">
-                <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-brand-100 dark:bg-brand-900/30">
-                  <feature.icon className="h-6 w-6 text-brand-600 dark:text-brand-400" aria-hidden="true" />
-                </div>
-                <div>
-                  <h4 className="text-sm font-semibold text-gray-900 dark:text-white">{feature.title}</h4>
-                  <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">{feature.desc}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
 
         <div className="mt-12 border-t border-gray-200 dark:border-gray-800 pt-8">
           <p className="text-center text-sm text-gray-500 dark:text-gray-400">
-            &copy; {currentYear} Laris Manis. Hak cipta dilindungi.
+            &copy; {currentYear} Laris Manis · Dibuat untuk UMKM Indonesia. Hak cipta dilindungi.
           </p>
         </div>
       </div>

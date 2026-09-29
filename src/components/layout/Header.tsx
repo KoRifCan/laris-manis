@@ -3,7 +3,6 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
-import { Button } from '@/components/ui/Button';
 import { 
   HomeIcon, 
   MagnifyingGlassIcon, 
@@ -27,7 +26,7 @@ export function Header() {
   ];
 
   return (
-    <header className="sticky top-0 z-40 w-full bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm border-b border-gray-200 dark:border-gray-700">
+    <header className="sticky top-0 z-40 w-full bg-canvas/95 dark:bg-gray-950/95 backdrop-blur-sm border-b border-gray-200 dark:border-gray-800">
       <nav className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8" aria-label="Main navigation">
         <div className="flex h-16 items-center justify-between">
           {/* Logo */}
@@ -36,7 +35,7 @@ export function Header() {
               <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-brand-600">
                 <ShoppingBagIcon className="h-5 w-5 text-white" aria-hidden="true" />
               </div>
-              <span className="text-xl font-bold text-gray-900 dark:text-white hidden sm:block">
+              <span className="text-xl font-semibold text-gray-900 dark:text-white hidden sm:block" style={{ fontFamily: 'var(--font-display)' }}>
                 Laris Manis
               </span>
             </Link>
@@ -90,9 +89,12 @@ export function Header() {
               >
                 Masuk
               </Link>
-              <Button asChild variant="primary" size="sm">
-                <Link href="/auth/daftar">Daftar</Link>
-              </Button>
+              <Link
+                href="/auth/daftar"
+                className="inline-flex items-center justify-center rounded-lg bg-brand-600 px-3 py-1.5 text-sm font-medium text-white transition-colors hover:bg-brand-700 focus:outline-none focus:ring-2 focus:ring-brand-500"
+              >
+                Daftar
+              </Link>
             </div>
 
             {/* Mobile Menu Button */}
@@ -118,7 +120,7 @@ export function Header() {
                 <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-brand-600">
                   <ShoppingBagIcon className="h-5 w-5 text-white" />
                 </div>
-                <span className="text-xl font-bold text-gray-900 dark:text-white">Laris Manis</span>
+                <span className="text-xl font-semibold text-gray-900 dark:text-white" style={{ fontFamily: 'var(--font-display)' }}>Laris Manis</span>
               </Link>
               <button
                 onClick={() => setMobileMenuOpen(false)}
@@ -166,14 +168,13 @@ export function Header() {
                 >
                   Masuk
                 </Link>
-                <Button 
-                  asChild 
-                  variant="primary" 
-                  className="w-full"
+                <Link
+                  href="/auth/daftar"
                   onClick={() => setMobileMenuOpen(false)}
+                  className="block w-full rounded-lg bg-brand-600 px-4 py-3 text-center text-base font-medium text-white transition-colors hover:bg-brand-700"
                 >
-                  <Link href="/auth/daftar">Daftar</Link>
-                </Button>
+                  Daftar
+                </Link>
               </div>
             </nav>
           </div>
