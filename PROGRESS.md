@@ -88,7 +88,9 @@ Platform etalase produk UMKM (marketplace multi-toko) berbasis web + PWA
 - URL: https://github.com/KoRifCan/laris-manis
 - Main branch: `main`
 - Current working branch: `redesign/homepage-v2`
-- Preview deploy: menunggu login ulang Vercel CLI (`vercel login` / `VERCEL_TOKEN`)
+- Preview deploy (branch `redesign/homepage-v2`): https://laris-manis-o7sf2ma42-korifcan.vercel.app
+  - Dilindungi Vercel Deployment Protection (SSO); buka via login Vercel, atau verifikasi via `vercel curl <url>`
+  - Environment variable preview sudah terisi dari `.env.local` (14 var, production+preview)
 
 ## Completed Files - Architecture & Backend
 - `docs/ARCHITECTURE.md` - Full architecture documentation

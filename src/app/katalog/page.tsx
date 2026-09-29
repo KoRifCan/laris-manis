@@ -148,8 +148,9 @@ export default function KatalogPage() {
     setPagination(prev => ({ ...prev, page: 1 }));
   };
 
-  const hasActiveFilters = Object.values(filters).some(v => v !== '');
-  const activeFilterCount = Object.values(filters).filter(v => v !== '').length;
+  const isFilterField = (key: string, value: string) => key !== 'sortBy' && value !== '';
+  const hasActiveFilters = Object.entries(filters).some(([key, value]) => isFilterField(key, value));
+  const activeFilterCount = Object.entries(filters).filter(([key, value]) => isFilterField(key, value)).length;
   const filterBadge = hasActiveFilters ? (
     <span className="bg-brand-100 text-brand-700 dark:bg-brand-900/30 dark:text-brand-300 px-2 py-0.5 rounded-full text-xs">
       {activeFilterCount}

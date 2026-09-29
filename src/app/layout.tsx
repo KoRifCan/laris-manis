@@ -70,7 +70,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <link rel="manifest" href="/manifest.json" />
         <meta name="theme-color" content="#9e1b32" />
       </head>
-      <body className="min-h-full flex flex-col bg-gray-50 dark:bg-gray-950 text-gray-900 dark:text-gray-100">
+      <body className="min-h-full flex flex-col bg-canvas dark:bg-gray-950 text-gray-900 dark:text-gray-100">
         <Providers>{children}</Providers>
       </body>
     </html>
