@@ -1,0 +1,466 @@
+'use client';
+
+import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import { Header } from '@/components/layout/Header';
+import { Footer } from '@/components/layout/Footer';
+import { Card } from '@/components/ui/Card';
+import { Badge, StatusBadge } from '@/components/ui/Badge';
+import { Button } from '@/components/ui/Button';
+import { formatRupiah } from '@/lib/utils';
+import { 
+  PlusIcon,
+  PencilIcon,
+  TrashIcon,
+  EyeIcon,
+  ShoppingBagIcon,
+  ChartBarIcon,
+  Cog6ToothIcon,
+  ArrowRightOnRectangleIcon,
+  ExclamationTriangleIcon,
+  ClockIcon,
+  CheckCircleIcon,
+  XCircleIcon,
+  HeartIcon,
+} from '@heroicons/react/24/outline';
+import Link from 'next/link';
+
+interface Product {
+  id: string;
+  name: string;
+  description: string;
+  price: number;
+  stock: number;
+  images: string[];
+  categoryName: string;
+  status: string;
+  viewCount: number;
+  favoriteCount: number;
+  rejectionReason?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+interface Store {
+  id: string;
+  name: string;
+  slug: string;
+  isVerified: boolean;
+}
+
+export default function SellerDashboardPage() {
+  const router = useRouter();
+  const [products, setProducts] = useState<Product[]>([]);
+  const [store, setStore] = useState<Store | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [activeTab, setActiveTab] = useState<'produk' | 'statistik' | 'profil'>('produk');
+  const [statusFilter, setStatusFilter] = useState<'all' | 'aktif' | 'menunggu_review' | 'ditolak' | 'draft' | 'nonaktif'>('all');
+
+  useEffect(() => {
+    fetchData();
+  }, []);
+
+  const fetchData = async () => {
+    try {
+      const [productsRes, storeRes] = await Promise.all([
+        fetch('/api/products/me', { credentials: 'include' }),
+        fetch('/api/stores/me', { credentials: 'include' }),
+      ]);
+
+      if (productsRes.status === 401 || storeRes.status === 401) {
+        router.push('/auth/login?callbackUrl=/dashboard/penjual');
+        return;
+      }
+
+      const productsData = await productsRes.json();
+      const storeData = await storeRes.json();
+
+      if (productsData.success) {
+        setProducts(productsData.data.items);
+      }
+      if (storeData.success) {
+        setStore(storeData.data);
+      }
+    } catch {
+      console.error('Failed to fetch dashboard data');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const filteredProducts = products.filter(p => {
+    if (statusFilter === 'all') return true;
+    return p.status === statusFilter;
+  });
+
+  const getStatusCounts = () => {
+    return {
+      all: products.length,
+      aktif: products.filter(p => p.status === 'aktif').length,
+      menunggu_review: products.filter(p => p.status === 'menunggu_review').length,
+      ditolak: products.filter(p => p.status === 'ditolak').length,
+      draft: products.filter(p => p.status === 'draft').length,
+      nonaktif: products.filter(p => p.status === 'nonaktif').length,
+    };
+  };
+
+  const statusCounts = getStatusCounts();
+
+  const handleDelete = async (id: string) => {
+    if (!confirm('Yakin ingin menghapus produk ini?')) return;
+    
+    try {
+      const res = await fetch(`/api/products/${id}`, {
+        method: 'DELETE',
+        credentials: 'include',
+      });
+      
+      if (res.ok) {
+        setProducts(prev => prev.filter(p => p.id !== id));
+      }
+    } catch {
+      console.error('Failed to delete product');
+    }
+  };
+
+  const handleSubmitReview = async (id: string) => {
+    try {
+      const res = await fetch(`/api/products/${id}/submit-review`, {
+        method: 'POST',
+        credentials: 'include',
+      });
+      
+      if (res.ok) {
+        setProducts(prev => prev.map(p => p.id === id ? { ...p, status: 'menunggu_review' } : p));
+      } else {
+        const data = await res.json();
+        alert(data.error || 'Gagal submit review');
+      }
+    } catch {
+      console.error('Failed to submit review');
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="flex flex-col min-h-screen">
+        <Header />
+        <main className="flex-1 flex items-center justify-center py-12">
+          <div className="animate-spin rounded-full h-12 w-12 border-4 border-indigo-600 border-t-transparent"></div>
+        </main>
+        <Footer />
+      </div>
+    );
+  }
+
+  return (
+    <div className="flex flex-col min-h-screen">
+      <Header />
+      
+      <main className="flex-1 bg-gray-50 dark:bg-gray-900">
+        <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+          {/* Header */}
+          <div className="mb-8">
+            <div className="flex items-center justify-between">
+              <div>
+                <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Dashboard Penjual</h1>
+                <p className="text-gray-600 dark:text-gray-400 mt-1">
+                  Kelola toko dan produk Anda
+                </p>
+              </div>
+              <Link href="/produk/baru">
+                <Button className="flex items-center gap-2">
+                  <PlusIcon className="h-5 w-5" />
+                  Tambah Produk
+                </Button>
+              </Link>
+            </div>
+
+            {/* Store Status */}
+            {store && (
+              <Card className="mt-6 p-4 bg-indigo-50 dark:bg-indigo-900/20 border-indigo-200 dark:border-indigo-800">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-4">
+                    <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-indigo-100 dark:bg-indigo-900/30">
+                      <ShoppingBagIcon className="h-6 w-6 text-indigo-600 dark:text-indigo-400" />
+                    </div>
+                    <div>
+                      <h3 className="font-semibold text-gray-900 dark:text-white">{store.name}</h3>
+                      <p className="text-sm text-gray-600 dark:text-gray-400">Slug: {store.slug}</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-4">
+                    {store.isVerified ? (
+                      <Badge variant="success" className="flex items-center gap-1">
+                        <CheckCircleIcon className="h-3 w-3" />
+                        Terverifikasi
+                      </Badge>
+                    ) : (
+                      <Badge variant="warning" className="flex items-center gap-1">
+                        <ClockIcon className="h-3 w-3" />
+                        Menunggu Verifikasi
+                      </Badge>
+                    )}
+                    <Link href={`/toko/${store.slug}`} target="_blank">
+                      <Button variant="outline" size="sm">
+                        <ArrowRightOnRectangleIcon className="h-4 w-4 mr-1" />
+                        Lihat Toko
+                      </Button>
+                    </Link>
+                  </div>
+                </div>
+              </Card>
+            )}
+          </div>
+
+          {/* Tabs */}
+          <div className="border-b border-gray-200 dark:border-gray-700 mb-6">
+            <nav className="flex gap-8" aria-label="Dashboard tabs">
+              <button
+                onClick={() => setActiveTab('produk')}
+                className={`py-4 px-1 text-sm font-medium border-b-2 transition-colors ${
+                  activeTab === 'produk' 
+                    ? 'text-indigo-600 dark:text-indigo-400 border-indigo-600' 
+                    : 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200'
+                }`}
+              >
+                Produk ({statusCounts.all})
+              </button>
+              <button
+                onClick={() => setActiveTab('statistik')}
+                className={`py-4 px-1 text-sm font-medium border-b-2 transition-colors ${
+                  activeTab === 'statistik' 
+                    ? 'text-indigo-600 dark:text-indigo-400 border-indigo-600' 
+                    : 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200'
+                }`}
+              >
+                Statistik
+              </button>
+              <button
+                onClick={() => setActiveTab('profil')}
+                className={`py-4 px-1 text-sm font-medium border-b-2 transition-colors ${
+                  activeTab === 'profil' 
+                    ? 'text-indigo-600 dark:text-indigo-400 border-indigo-600' 
+                    : 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200'
+                }`}
+              >
+                Profil Toko
+              </button>
+            </nav>
+          </div>
+
+          {/* Tab Content */}
+          {activeTab === 'produk' && (
+            <div>
+              {/* Status Filter */}
+              <div className="flex flex-wrap gap-2 mb-6">
+                {[
+                  { key: 'all', label: 'Semua', count: statusCounts.all },
+                  { key: 'aktif', label: 'Aktif', count: statusCounts.aktif },
+                  { key: 'menunggu_review', label: 'Review', count: statusCounts.menunggu_review },
+                  { key: 'ditolak', label: 'Ditolak', count: statusCounts.ditolak },
+                  { key: 'draft', label: 'Draft', count: statusCounts.draft },
+                  { key: 'nonaktif', label: 'Nonaktif', count: statusCounts.nonaktif },
+                ].map(({ key, label, count }) => (
+                  <button
+                    key={key}
+                    onClick={() => setStatusFilter(key as any)}
+                    className={`px-3 py-1.5 rounded-full text-sm font-medium transition-colors ${
+                      statusFilter === key
+                        ? 'bg-indigo-600 text-white'
+                        : 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700'
+                    }`}
+                  >
+                    {label} ({count})
+                  </button>
+                ))}
+              </div>
+
+              {/* Products Grid */}
+              {filteredProducts.length === 0 ? (
+                <Card className="text-center py-12">
+                  <ShoppingBagIcon className="h-16 w-16 text-gray-300 dark:text-gray-600 mx-auto mb-4" />
+                  <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
+                    {statusFilter === 'all' ? 'Belum ada produk' : `Tidak ada produk dengan status ${statusFilter}`}
+                  </h3>
+                  <p className="text-gray-600 dark:text-gray-400 mb-6">
+                    {statusFilter === 'all' 
+                      ? 'Mulai tambahkan produk pertama Anda' 
+                      : 'Coba ubah filter status'}
+                  </p>
+                  {statusFilter === 'all' && (
+                    <Link href="/produk/baru">
+                      <Button className="mt-2">
+                        <PlusIcon className="h-5 w-5 mr-2" />
+                        Tambah Produk Pertama
+                      </Button>
+                    </Link>
+                  )}
+                </Card>
+              ) : (
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                  {filteredProducts.map((product) => {
+                    const image = product.images[0] || 'https://via.placeholder.com/400';
+                    return (
+                      <Card key={product.id} className="relative">
+                        <div className="relative aspect-square overflow-hidden rounded-lg bg-gray-100 dark:bg-gray-800 mb-3">
+                          <img
+                            src={image}
+                            alt={product.name}
+                            className="w-full h-full object-cover"
+                            loading="lazy"
+                          />
+                          <StatusBadge status={product.status} className="absolute top-2 right-2" />
+                        </div>
+                        
+                        <div className="space-y-2 mb-4">
+                          <p className="text-xs text-indigo-600 dark:text-indigo-400 font-medium">
+                            {product.categoryName}
+                          </p>
+                          <h3 className="font-semibold text-gray-900 dark:text-white line-clamp-2">
+                            {product.name}
+                          </h3>
+                          <p className="text-xl font-bold text-gray-900 dark:text-white">
+                            {formatRupiah(product.price)}
+                          </p>
+                          <div className="flex items-center gap-3 text-sm text-gray-500 dark:text-gray-400">
+                            <span className="flex items-center gap-1">
+                              <EyeIcon className="h-4 w-4" />
+                              {product.viewCount}
+                            </span>
+                            <span className="flex items-center gap-1">
+                              <HeartIcon className="h-4 w-4" />
+                              {product.favoriteCount}
+                            </span>
+                          </div>
+                          {product.rejectionReason && (
+                            <p className="text-sm text-red-600 dark:text-red-400">
+                              Alasan tolak: {product.rejectionReason}
+                            </p>
+                          )}
+                        </div>
+
+                        <div className="flex gap-2">
+                          <Link href={`/produk/${product.id}/edit`}>
+                            <Button variant="outline" className="flex-1 flex items-center justify-center gap-1" size="sm">
+                              <PencilIcon className="h-4 w-4" />
+                              Edit
+                            </Button>
+                          </Link>
+                          {product.status === 'ditolak' && (
+                            <Button
+                              onClick={() => handleSubmitReview(product.id)}
+                              variant="primary"
+                              className="flex-1 flex items-center justify-center gap-1"
+                              size="sm"
+                            >
+                              <ArrowRightOnRectangleIcon className="h-4 w-4" />
+                              Review
+                            </Button>
+                          )}
+                          <Button
+                            onClick={() => handleDelete(product.id)}
+                            variant="danger"
+                            className="flex-1 flex items-center justify-center gap-1"
+                            size="sm"
+                          >
+                            <TrashIcon className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </Card>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+          )}
+
+          {activeTab === 'statistik' && (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+              <Card className="p-6 text-center">
+                <div className="flex h-14 w-14 items-center justify-center rounded-xl bg-indigo-100 dark:bg-indigo-900/30 mx-auto mb-4">
+                  <ShoppingBagIcon className="h-7 w-7 text-indigo-600 dark:text-indigo-400" />
+                </div>
+                <p className="text-3xl font-bold text-gray-900 dark:text-white">{statusCounts.aktif}</p>
+                <p className="text-gray-600 dark:text-gray-400 mt-1">Produk Aktif</p>
+              </Card>
+              <Card className="p-6 text-center">
+                <div className="flex h-14 w-14 items-center justify-center rounded-xl bg-yellow-100 dark:bg-yellow-900/30 mx-auto mb-4">
+                  <ClockIcon className="h-7 w-7 text-yellow-600 dark:text-yellow-400" />
+                </div>
+                <p className="text-3xl font-bold text-gray-900 dark:text-white">{statusCounts.menunggu_review}</p>
+                <p className="text-gray-600 dark:text-gray-400 mt-1">Menunggu Review</p>
+              </Card>
+              <Card className="p-6 text-center">
+                <div className="flex h-14 w-14 items-center justify-center rounded-xl bg-red-100 dark:bg-red-900/30 mx-auto mb-4">
+                  <XCircleIcon className="h-7 w-7 text-red-600 dark:text-red-400" />
+                </div>
+                <p className="text-3xl font-bold text-gray-900 dark:text-white">{statusCounts.ditolak}</p>
+                <p className="text-gray-600 dark:text-gray-400 mt-1">Ditolak</p>
+              </Card>
+              <Card className="p-6 text-center">
+                <div className="flex h-14 w-14 items-center justify-center rounded-xl bg-gray-100 dark:bg-gray-800 mx-auto mb-4">
+                  <ChartBarIcon className="h-7 w-7 text-gray-600 dark:text-gray-400" />
+                </div>
+                <p className="text-3xl font-bold text-gray-900 dark:text-white">{statusCounts.all}</p>
+                <p className="text-gray-600 dark:text-gray-400 mt-1">Total Produk</p>
+              </Card>
+            </div>
+          )}
+
+          {activeTab === 'profil' && store && (
+            <Card className="p-6">
+              <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-6">Profil Toko</h2>
+              <div className="grid sm:grid-cols-2 gap-6">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Nama Toko</label>
+                  <p className="text-gray-900 dark:text-white">{store.name}</p>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Slug</label>
+                  <p className="text-gray-900 dark:text-white">{store.slug}</p>
+                </div>
+                <div className="sm:col-span-2">
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Status Verifikasi</label>
+                  <div className="flex items-center gap-3">
+                    {store.isVerified ? (
+                      <Badge variant="success" className="flex items-center gap-1">
+                        <CheckCircleIcon className="h-3 w-3" />
+                        Terverifikasi
+                      </Badge>
+                    ) : (
+                      <>
+                        <Badge variant="warning" className="flex items-center gap-1">
+                          <ClockIcon className="h-3 w-3" />
+                          Menunggu Verifikasi Admin
+                        </Badge>
+                        <span className="text-sm text-gray-500 dark:text-gray-400">
+                          Tim kami akan meninjau toko Anda dalam 1-2 hari kerja
+                        </span>
+                      </>
+                    )}
+                  </div>
+                </div>
+              </div>
+              <div className="mt-6 flex gap-4">
+                <Link href={`/toko/${store.slug}`} target="_blank">
+                  <Button variant="outline">
+                    <ArrowRightOnRectangleIcon className="h-5 w-5 mr-2" />
+                    Lihat Toko Publik
+                  </Button>
+                </Link>
+                <Link href="/dashboard/penjual/edit">
+                  <Button>
+                    <Cog6ToothIcon className="h-5 w-5 mr-2" />
+                    Edit Profil Toko
+                  </Button>
+                </Link>
+              </div>
+            </Card>
+          )}
+        </div>
+      </main>
+      <Footer />
+    </div>
+  );
+}

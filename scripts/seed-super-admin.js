@@ -12,9 +12,9 @@
  * - SUPER_ADMIN_NAME
  */
 
-import { initializeApp, cert, getApps } from 'firebase-admin/app';
-import { getAuth } from 'firebase-admin/auth';
-import { getFirestore } from 'firebase-admin/firestore';
+const { initializeApp, cert, getApps } = require('firebase-admin/app');
+const { getAuth } = require('firebase-admin/auth');
+const { getFirestore } = require('firebase-admin/firestore');
 
 const adminConfig = {
   projectId: process.env.FIREBASE_ADMIN_PROJECT_ID,
@@ -57,7 +57,7 @@ async function seedSuperAdmin() {
     try {
       userRecord = await adminAuth.getUserByEmail(superAdminEmail);
       console.log(`✅ User already exists: ${userRecord.uid}`);
-    } catch (error: any) {
+    } catch (error) {
       if (error.code === 'auth/user-not-found') {
         console.log('👤 Creating new super admin user...');
         userRecord = await adminAuth.createUser({
@@ -95,7 +95,7 @@ async function seedSuperAdmin() {
     console.log('\n⚠️  IMPORTANT: Change the password after first login!');
     console.log('⚠️  Delete this script or remove credentials from env after use!');
 
-  } catch (error: any) {
+  } catch (error) {
     console.error('❌ Error seeding super admin:', error.message);
     process.exit(1);
   }

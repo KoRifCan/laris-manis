@@ -231,7 +231,6 @@ export default function KatalogPage() {
           onFilterChange={handleFilterChange}
           onSearch={handleSearch}
           onClearFilters={clearFilters}
-          hasActiveFilters={hasActiveFilters}
           onToggleFilters={() => setShowFilters(!showFilters)}
         />
         

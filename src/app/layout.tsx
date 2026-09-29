@@ -27,7 +27,7 @@ export const metadata: Metadata = {
   openGraph: {
     type: 'website',
     locale: 'id_ID',
-    url: 'https://larismanis.app',
+    url: 'https://laris-manis-id.vercel.app',
     siteName: 'Laris Manis',
     title: 'Laris Manis - Etalase Produk UMKM Indonesia',
     description: 'Platform etalase produk UMKM terpercaya. Temukan ribuan produk berkualitas dari pengrajin dan pengusaha kecil seluruh Indonesia.',
@@ -45,9 +45,6 @@ export const metadata: Metadata = {
     title: 'Laris Manis - Etalase Produk UMKM',
     description: 'Platform etalase produk UMKM terpercaya. Temukan ribuan produk berkualitas dari pengrajin dan pengusaha kecil seluruh Indonesia.',
     images: ['/og-image.png'],
-  },
-  verification: {
-    google: 'google-site-verification-code',
   },
 };
 

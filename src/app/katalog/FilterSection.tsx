@@ -20,7 +20,6 @@ interface FilterSectionProps {
   onFilterChange: (key: string, value: string) => void;
   onSearch: (e: React.FormEvent) => void;
   onClearFilters: () => void;
-  hasActiveFilters: boolean;
   onToggleFilters: () => void;
 }
 
@@ -31,9 +30,12 @@ export function FilterSection({
   onFilterChange,
   onSearch,
   onClearFilters,
-  hasActiveFilters,
   onToggleFilters,
 }: FilterSectionProps) {
+  // Exclude sortBy from active filters count since it has a default value
+  const activeFilterKeys = Object.keys(filters).filter(key => key !== 'sortBy');
+  const hasActiveFilters = activeFilterKeys.some(key => filters[key as keyof typeof filters]);
+  const activeFilterCount = activeFilterKeys.filter(key => filters[key as keyof typeof filters]).length;
   return (
     <>
       <section className="bg-white dark:bg-gray-950 border-b border-gray-200 dark:border-gray-800">
@@ -51,7 +53,7 @@ export function FilterSection({
               className="flex items-center gap-2"
             >
               <FunnelIcon className="h-5 w-5" />
-              Filter {hasActiveFilters && <span className="bg-indigo-100 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-300 px-2 py-0.5 rounded-full text-xs">{Object.values(filters).filter(v => v).length}</span>}
+              Filter {hasActiveFilters && <span className="bg-indigo-100 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-300 px-2 py-0.5 rounded-full text-xs">{activeFilterCount}</span>}
             </Button>
           </div>
 
