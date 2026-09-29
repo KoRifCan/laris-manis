@@ -8,6 +8,7 @@ import { Card } from '@/components/ui/Card';
 import { Badge, StatusBadge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
 import { formatRupiah } from '@/lib/utils';
+import { ApiError, authFetch, errorMessage, readJson } from '@/lib/client-auth';
 import { 
   HeartIcon, 
   TrashIcon,
@@ -37,49 +38,61 @@ export default function FavoritesPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
-  useEffect(() => {
-    fetchFavorites();
-  }, []);
+  const sessionExpired = () => {
+    router.push(
+      '/auth/login?callbackUrl=/favorit&error=' +
+        encodeURIComponent('Sesi berakhir atau Anda belum login. Silakan masuk kembali.')
+    );
+  };
 
   const fetchFavorites = async () => {
     try {
-      const res = await fetch('/api/favorites', {
-        credentials: 'include',
-      });
-      
-      if (res.status === 401) {
-        router.push('/auth/login?callbackUrl=/favorit');
+      const res = await authFetch('/api/favorites');
+      const data = await readJson<{ items: FavoriteProduct[] }>(res);
+      if (!data) {
+        setError('Server memberi respons yang tidak dikenali. Silakan coba lagi nanti.');
         return;
       }
-      
-      const data = await res.json();
       if (data.success) {
-        setFavorites(data.data.items);
+        setFavorites(data.data?.items ?? []);
       } else {
         setError(data.error || 'Gagal memuat favorit');
       }
-    } catch {
-      setError('Terjadi kesalahan jaringan');
+    } catch (err) {
+      if (err instanceof ApiError && err.kind === 'session') {
+        sessionExpired();
+        return;
+      }
+      setError(errorMessage(err));
     } finally {
       setLoading(false);
     }
   };
 
+  useEffect(() => {
+    fetchFavorites();
+  }, []);
+
   const removeFavorite = async (productId: string) => {
     try {
-      const res = await fetch('/api/favorites', {
+      const res = await authFetch('/api/favorites', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ productId }),
-        credentials: 'include',
       });
-      
-      const data = await res.json();
-      if (data.success && !data.data.isFavorite) {
+
+      const data = await readJson<{ isFavorite: boolean }>(res);
+      if (data?.success && !data.data?.isFavorite) {
         setFavorites(prev => prev.filter(f => f.productId !== productId));
+      } else {
+        setError(data?.error || 'Gagal menghapus favorit');
       }
-    } catch {
-      console.error('Failed to remove favorite');
+    } catch (err) {
+      if (err instanceof ApiError && err.kind === 'session') {
+        sessionExpired();
+        return;
+      }
+      setError(errorMessage(err));
     }
   };
 

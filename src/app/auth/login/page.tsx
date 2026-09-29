@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { Card } from '@/components/ui/Card';
 import { formatRupiah } from '@/lib/utils';
+import { setToken, readJson } from '@/lib/client-auth';
 import { 
   EyeIcon, 
   EyeSlashIcon,
@@ -36,23 +37,42 @@ function LoginForm() {
     setLoading(true);
 
     try {
+      if (typeof navigator !== 'undefined' && !navigator.onLine) {
+        setError('Tidak ada koneksi internet. Periksa jaringan Anda lalu coba lagi.');
+        return;
+      }
+
       const res = await fetch('/api/auth/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password }),
       });
 
-      const data = await res.json();
+      const data = await readJson<{ idToken: string }>(res);
 
       if (!res.ok) {
-        setError(data.error || 'Login gagal');
+        if (res.status >= 500) {
+          setError(data?.error || 'Server sedang mengalami gangguan. Silakan coba lagi beberapa saat lagi.');
+        } else {
+          setError(data?.error || 'Login gagal. Periksa email dan password Anda.');
+        }
         return;
       }
 
+      if (!data?.success || !data.data?.idToken) {
+        setError('Respons server tidak valid. Silakan coba lagi nanti.');
+        return;
+      }
+
+      setToken(data.data.idToken);
       setSuccess('Login berhasil! Mengalihkan...');
       setTimeout(() => router.push(callbackUrl), 1500);
     } catch {
-      setError('Terjadi kesalahan jaringan');
+      setError(
+        typeof navigator !== 'undefined' && !navigator.onLine
+          ? 'Tidak ada koneksi internet. Periksa jaringan Anda lalu coba lagi.'
+          : 'Tidak dapat terhubung ke server. Periksa koneksi Anda lalu coba lagi.'
+      );
     } finally {
       setLoading(false);
     }
