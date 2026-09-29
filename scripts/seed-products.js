@@ -130,8 +130,16 @@ async function seedProducts() {
   }
   const seller = sellerSnap.docs[0];
   
+  // Idempoten: lewati produk yang sudah ada (nama + toko sama)
+  const existingSnap = await adminDb.collection('products').where('storeId', '==', store.id).get();
+  const existingNames = new Set(existingSnap.docs.map((d) => d.data().name));
+
   for (const prod of sampleProducts) {
     try {
+      if (existingNames.has(prod.name)) {
+        console.log(`  ⏭️  Product "${prod.name}" already exists`);
+        continue;
+      }
       const categoryId = categoryMap[prod.categorySlug];
       if (!categoryId) {
         console.log(`  ⚠️  Category ${prod.categorySlug} not found for product ${prod.name}`);

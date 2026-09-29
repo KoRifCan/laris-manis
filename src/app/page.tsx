@@ -166,10 +166,10 @@ export default function HomePage() {
                 </p>
               </div>
               <Link
-                href="/kategori"
+                href="/katalog"
                 className="shrink-0 text-sm font-semibold text-brand-600 hover:text-brand-700 dark:text-brand-400"
               >
-                Semua kategori →
+                Lihat di katalog →
               </Link>
             </div>
 

@@ -39,6 +39,20 @@ Platform etalase produk UMKM (marketplace multi-toko) berbasis web + PWA
 - [x] PWA manifest & service worker
 - [x] Install prompt component
 
+### Phase 5b: Redesign Visual "Etalase Gerobak" ✅ COMPLETED (branch `redesign/homepage-v2`)
+- [x] Palet baru: Merah Pasar `#9E1B32`, Kunyit Emas `#E4A82E`, Hijau Pandan `#1F6B4E`, Ink Hangat `#1D1714`, Kertas Bungkus `#FBF8F3` + netral hangat menggantikan abu-abu biru
+- [x] Tipografi: Fraunces (judul/wordmark) + Plus Jakarta Sans (body/UI), menggantikan Geist
+- [x] Token `brand-*` menggantikan `indigo-*` di seluruh halaman (124 occurrences)
+- [x] Hero baru: tanpa angka statistik palsu, search bar, 3 chip kepercayaan, kolase produk asli (fetch `/api/products` + skeleton + fallback ilustrasi)
+- [x] Animasi tunggal: kartu kolase "turun ke rak" (`shelf-settle`), hormati `prefers-reduced-motion`
+- [x] Ikon kategori: heroicons outline, emoji dihapus
+- [x] Section "Yang bikin beda" (bento asimetris) menggantikan 4 kartu seragam
+- [x] Alur 3 langkah bergaya stempel + band CTA emas ("Punya dagangan? Pasang etalasenya.")
+- [x] Footer: blok 4 poin pengulangan dihapus
+- [x] Katalog membaca `?q=` dan `?category=` dari URL
+- [x] Composite index Firestore dideploy (`firestore.indexes.json`, 23 index) — katalog & API produk sebelumnya gagal total ("requires an index")
+- [x] Seed produk dideduplikasi (13 produk) dan script seed dibuat idempoten
+
 ### Phase 6: Testing & Deploy Produksi (Vercel)
 - [ ] Unit & integration tests
 - [ ] Deploy ke Vercel
@@ -53,9 +67,9 @@ Platform etalase produk UMKM (marketplace multi-toko) berbasis web + PWA
 ---
 
 ## Current Status
-**Phase**: 5 - UI Halaman Utama (Complete)
-**Branch**: feat/ui-pages
-**Last Commit**: Public pages and PWA setup completed
+**Phase**: 5b - Redesign Visual Homepage v2 (Complete, menunggu deploy)
+**Branch**: redesign/homepage-v2
+**Last Commit**: Palet Merah Pasar/Kunyit/Pandan, font Fraunces + Plus Jakarta Sans, homepage v2
 
 ## Environment Variables Needed (for Vercel/GitHub Secrets)
 - `NEXT_PUBLIC_FIREBASE_API_KEY`
@@ -71,9 +85,10 @@ Platform etalase produk UMKM (marketplace multi-toko) berbasis web + PWA
 - `NEXT_PUBLIC_APP_URL`
 
 ## GitHub Repository
-- URL: [TO BE CREATED]
+- URL: https://github.com/KoRifCan/laris-manis
 - Main branch: `main`
-- Current working branch: `feat/ui-pages`
+- Current working branch: `redesign/homepage-v2`
+- Preview deploy: menunggu login ulang Vercel CLI (`vercel login` / `VERCEL_TOKEN`)
 
 ## Completed Files - Architecture & Backend
 - `docs/ARCHITECTURE.md` - Full architecture documentation
