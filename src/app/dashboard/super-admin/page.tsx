@@ -115,7 +115,6 @@ export default function SuperAdminDashboardPage() {
     if (!confirm('Yakin ingin menghapus user ini? Tindakan ini tidak bisa dibatalkan.')) return;
     
     try {
-      // Note: DELETE endpoint would need to be implemented
       alert('Fungsi hapus user belum diimplementasikan');
     } catch {
       console.error('Failed to delete user');
@@ -230,14 +229,17 @@ export default function SuperAdminDashboardPage() {
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
-                    {filteredUsers.length === 0 ? (
-                      <tr>
-                        <td colSpan={6} className="px-6 py-12 text-center text-gray-500 dark:text-gray-400">
-                          Tidak ada pengguna ditemukan
-                        </td>
-                      </tr>
-                    ) : (
-                      filteredUsers.map((user) => (
+                    {(() => {
+                      if (filteredUsers.length === 0) {
+                        return (
+                          <tr>
+                            <td colSpan={6} className="px-6 py-12 text-center text-gray-500 dark:text-gray-400">
+                              Tidak ada pengguna ditemukan
+                            </td>
+                          </tr>
+                        );
+                      }
+                      return filteredUsers.map((user) => (
                         <tr key={user.uid} className="hover:bg-gray-50 dark:hover:bg-gray-800">
                           <td className="px-6 py-4">
                             <div className="flex items-center gap-3">
@@ -309,8 +311,8 @@ export default function SuperAdminDashboardPage() {
                             </div>
                           </td>
                         </tr>
-                      ))}
-                    )}
+                      )
+                    )})}
                   </tbody>
                 </table>
               </div>

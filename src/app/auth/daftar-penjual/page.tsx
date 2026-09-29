@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { Card } from '@/components/ui/Card';
 import Link from 'next/link';
-import { ShieldCheckIcon, StorefrontIcon, ArrowRightOnRectangleIcon, CheckCircleIcon } from '@heroicons/react/24/outline';
+import { ShieldCheckIcon, ShoppingBagIcon, ArrowRightOnRectangleIcon, CheckCircleIcon } from '@heroicons/react/24/outline';
 
 export default function DaftarPenjualPage() {
   const router = useRouter();
@@ -111,11 +111,11 @@ export default function DaftarPenjualPage() {
               <div>
                 <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Jadi Penjual di Laris Manis</h2>
                 <ul className="mt-3 space-y-2 text-sm text-gray-600 dark:text-gray-400">
-                  <li className="flex items-center gap-2"><StorefrontIcon className="h-5 w-5 text-indigo-600" /> Kelola toko online sendiri gratis</li>
-                  <li className="flex items-center gap-2"><StorefrontIcon className="h-5 w-5 text-indigo-600" /> Upload produk tanpa batas (max 5 foto/produk)</li>
-                  <li className="flex items-center gap-2"><StorefrontIcon className="h-5 w-5 text-indigo-600" /> Chat langsung dengan pembeli via WhatsApp</li>
-                  <li className="flex items-center gap-2"><StorefrontIcon className="h-5 w-5 text-indigo-600" /> Statistik penjualan & pelacakan stok</li>
-                  <li className="flex items-center gap-2"><StorefrontIcon className="h-5 w-5 text-indigo-600" /> Verifikasi admin untuk kepercayaan pembeli</li>
+                  <li className="flex items-center gap-2"><ShoppingBagIcon className="h-5 w-5 text-indigo-600" /> Kelola toko online sendiri gratis</li>
+                  <li className="flex items-center gap-2"><ShoppingBagIcon className="h-5 w-5 text-indigo-600" /> Upload produk tanpa batas (max 5 foto/produk)</li>
+                  <li className="flex items-center gap-2"><ShoppingBagIcon className="h-5 w-5 text-indigo-600" /> Chat langsung dengan pembeli via WhatsApp</li>
+                  <li className="flex items-center gap-2"><ShoppingBagIcon className="h-5 w-5 text-indigo-600" /> Statistik penjualan & pelacakan stok</li>
+                  <li className="flex items-center gap-2"><ShoppingBagIcon className="h-5 w-5 text-indigo-600" /> Verifikasi admin untuk kepercayaan pembeli</li>
                 </ul>
               </div>
             </div>

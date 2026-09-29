@@ -11,7 +11,6 @@ import { formatRupiah } from '@/lib/utils';
 import { 
   UsersIcon,
   ShoppingBagIcon,
-  StorefrontIcon,
   ExclamationTriangleIcon,
   CheckCircleIcon,
   XCircleIcon,
@@ -167,7 +166,7 @@ export default function AdminDashboardPage() {
             <Card className="p-6 bg-orange-50 dark:bg-orange-900/20 border-orange-200 dark:border-orange-800">
               <div className="flex items-center gap-4">
                 <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-orange-100 dark:bg-orange-900/30">
-                  <StorefrontIcon className="h-6 w-6 text-orange-600 dark:text-orange-400" />
+                  <ShoppingBagIcon className="h-6 w-6 text-orange-600 dark:text-orange-400" />
                 </div>
                 <div>
                   <p className="text-3xl font-bold text-gray-900 dark:text-white">{pendingStores.length}</p>
@@ -219,7 +218,7 @@ export default function AdminDashboardPage() {
             <div>
               {pendingStores.length === 0 ? (
                 <Card className="text-center py-12">
-                  <StorefrontIcon className="h-16 w-16 text-gray-300 dark:text-gray-600 mx-auto mb-4" />
+                  <ShoppingBagIcon className="h-16 w-16 text-gray-300 dark:text-gray-600 mx-auto mb-4" />
                   <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">Tidak ada UMKM menunggu verifikasi</h3>
                   <p className="text-gray-600 dark:text-gray-400">Semua pengajuan toko telah diproses</p>
                 </Card>

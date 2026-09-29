@@ -6,13 +6,11 @@ import { Footer } from '@/components/layout/Footer';
 import { Card } from '@/components/ui/Card';
 import { Badge, StatusBadge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
-import { Input } from '@/components/ui/Input';
-import { formatRupiah, truncate } from '@/lib/utils';
+import { formatRupiah } from '@/lib/utils';
 import { 
   MagnifyingGlassIcon, 
   FunnelIcon, 
   XMarkIcon,
-  ChevronLeftIcon,
   ChevronRightIcon,
   ShoppingBagIcon,
   ChatBubbleLeftRightIcon,
@@ -125,115 +123,82 @@ export default function KatalogPage() {
   };
 
   const hasActiveFilters = Object.values(filters).some(v => v !== '');
+  const activeFilterCount = Object.values(filters).filter(v => v !== '').length;
+  const filterBadge = hasActiveFilters ? (
+    <span className="bg-indigo-100 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-300 px-2 py-0.5 rounded-full text-xs">
+      {activeFilterCount}
+    </span>
+  ) : null;
+
+  const clearFiltersButton = hasActiveFilters ? (
+    <Button type="button" variant="ghost" onClick={clearFilters} className="whitespace-nowrap">
+      <XMarkIcon className="h-5 w-5 mr-1" />
+      Hapus Filter
+    </Button>
+  ) : null;
 
   const formatLocation = (store?: Store) => {
     if (!store) return '';
     return `${store.city}, ${store.province}`;
   };
 
-  const productGridContent = loading ? (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-      {[...Array(8)].map((_, i) => (
-        <Card key={i} className="animate-pulse">
-          <div className="aspect-square bg-gray-200 dark:bg-gray-700 rounded-lg mb-4" />
-          <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-3/4 mb-2" />
-          <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-1/2 mb-2" />
-          <div className="h-5 bg-gray-200 dark:bg-gray-700 rounded w-1/4" />
-        </Card>
-      ))}
-    </div>
-  ) : products.length === 0 ? (
-    <div className="text-center py-16">
-      <MagnifyingGlassIcon className="h-16 w-16 text-gray-300 dark:text-gray-600 mx-auto mb-4" />
-      <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">Tidak ada produk ditemukan</h3>
-      <p className="text-gray-600 dark:text-gray-400 mb-6">Coba ubah filter atau kata kunci pencarian Anda</p>
-      <Button variant="outline" onClick={clearFilters}>Hapus Semua Filter</Button>
-    </div>
-  ) : (
-    <div>
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-        {products.map((product) => {
-          const store = stores[product.storeId];
-          const image = product.images[0] || 'https://via.placeholder.com/400';
-          
-          return (
-            <Link key={product.id} href={`/produk/${product.id}`} className="group">
-              <Card className="h-full group-hover:shadow-lg transition-shadow cursor-pointer">
-                <div className="relative aspect-square overflow-hidden rounded-lg bg-gray-100 dark:bg-gray-800 mb-3">
-                  <img
-                    src={image}
-                    alt={product.name}
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                    loading="lazy"
-                  />
-                  <StatusBadge status={product.status} className="absolute top-2 right-2" />
-                  {product.favoriteCount > 0 && (
-                    <Badge variant="secondary" className="absolute bottom-2 right-2 flex items-center gap-1">
-                      <HeartIcon className="h-3 w-3" />
-                      {product.favoriteCount}
-                    </Badge>
-                  )}
-                </div>
-                
-                <div className="space-y-2">
-                  <p className="text-xs text-indigo-600 dark:text-indigo-400 font-medium">
-                    {product.categoryName}
-                  </p>
-                  <h3 className="font-semibold text-gray-900 dark:text-white line-clamp-2 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
-                    {product.name}
-                  </h3>
-                  <p className="text-xl font-bold text-gray-900 dark:text-white">
-                    {formatRupiah(product.price)}
-                  </p>
-                  <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
-                    <ShoppingBagIcon className="h-4 w-4" />
-                    <span className="truncate">{product.storeName}</span>
-                    {store?.isVerified && (
-                      <span className="text-green-500">✓</span>
-                    )}
-                  </div>
-                  {store && (
-                    <div className="flex items-center gap-1 text-xs text-gray-400 dark:text-gray-500">
-                      <span>{formatLocation(store)}</span>
-                    </div>
-                  )}
-                </div>
-              </Card>
-            </Link>
-          );
-        })}
-      </div>
-
-      {pagination.hasMore && (
-        <div className="mt-8 flex justify-center">
-          <Button 
-            variant="outline" 
-            onClick={() => setPagination(prev => ({ ...prev, page: prev.page + 1 }))}
-            disabled={loading}
-          >
-            Muat Lebih Banyak
-            <ChevronRightIcon className="h-4 w-4 ml-2" />
-          </Button>
-        </div>
-      )}
-    </div>
-  );
-
   return (
     <div className="flex flex-col min-h-screen">
       <Header />
       
       <main className="flex-1">
-        <FilterSection
-          filters={filters}
-          categories={categories}
-          showFilters={showFilters}
-          onFilterChange={handleFilterChange}
-          onSearch={handleSearch}
-          onClearFilters={clearFilters}
-          onToggleFilters={() => setShowFilters(!showFilters)}
-        />
-        
+        {/* Page Header & Filters */}
+        <section className="bg-white dark:bg-gray-950 border-b border-gray-200 dark:border-gray-800">
+          <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+              <div>
+                <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Katalog Produk</h1>
+                <p className="text-gray-600 dark:text-gray-400 mt-1">
+                  Temukan ribuan produk UMKM berkualitas dari seluruh Indonesia
+                </p>
+              </div>
+              <Button 
+                variant="outline" 
+                onClick={() => setShowFilters(!showFilters)}
+                className="flex items-center gap-2"
+              >
+                <FunnelIcon className="h-5 w-5" />
+                Filter {filterBadge}
+              </Button>
+            </div>
+
+            <form onSubmit={handleSearch} className="mx-auto max-w-7xl px-4 pb-8 sm:px-6 lg:px-8">
+              <div className="flex gap-2 max-w-2xl">
+                <div className="relative flex-1">
+                  <MagnifyingGlassIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
+                  <input
+                    type="search"
+                    value={filters.q}
+                    onChange={(e) => handleFilterChange('q', e.target.value)}
+                    placeholder="Cari nama produk, kategori, atau toko..."
+                    className="w-full pl-10 pr-4 py-3 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  />
+                </div>
+                {clearFiltersButton}
+              </div>
+            </form>
+          </div>
+        </section>
+
+        {showFilters && (
+          <FilterSection
+            filters={filters}
+            categories={categories}
+            showFilters={showFilters}
+            onFilterChange={handleFilterChange}
+            onSearch={handleSearch}
+            onClearFilters={clearFilters}
+            hasActiveFilters={hasActiveFilters}
+            onToggleFilters={() => setShowFilters(!showFilters)}
+          />
+        )}
+
+        {/* Products Grid */}
         <section className="py-8 bg-gray-50 dark:bg-gray-900">
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <div className="flex items-center justify-between mb-6">
@@ -242,9 +207,102 @@ export default function KatalogPage() {
               </p>
             </div>
 
-            <div>
-              {productGridContent}
-            </div>
+            {(() => {
+              if (loading) {
+                return (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                    {[...Array(8)].map((_, i) => (
+                      <Card key={i} className="animate-pulse">
+                        <div className="aspect-square bg-gray-200 dark:bg-gray-700 rounded-lg mb-4" />
+                        <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-3/4 mb-2" />
+                        <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-1/2 mb-2" />
+                        <div className="h-5 bg-gray-200 dark:bg-gray-700 rounded w-1/4" />
+                      </Card>
+                    ))}
+                  </div>
+                );
+              }
+              if (products.length === 0) {
+                return (
+                  <div className="text-center py-16">
+                    <MagnifyingGlassIcon className="h-16 w-16 text-gray-300 dark:text-gray-600 mx-auto mb-4" />
+                    <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">Tidak ada produk ditemukan</h3>
+                    <p className="text-gray-600 dark:text-gray-400 mb-6">Coba ubah filter atau kata kunci pencarian Anda</p>
+                    <Button variant="outline" onClick={clearFilters}>Hapus Semua Filter</Button>
+                  </div>
+                );
+              }
+              return (
+                <>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                    {products.map((product) => {
+                      const store = stores[product.storeId];
+                      const image = product.images[0] || 'https://via.placeholder.com/400';
+                      
+                      return (
+                        <Link key={product.id} href={`/produk/${product.id}`} className="group">
+                          <Card className="h-full group-hover:shadow-lg transition-shadow cursor-pointer">
+                            <div className="relative aspect-square overflow-hidden rounded-lg bg-gray-100 dark:bg-gray-800 mb-3">
+                              <img
+                                src={image}
+                                alt={product.name}
+                                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                                loading="lazy"
+                              />
+                              <StatusBadge status={product.status} className="absolute top-2 right-2" />
+                              {product.favoriteCount > 0 && (
+                                <Badge variant="secondary" className="absolute bottom-2 right-2 flex items-center gap-1">
+                                  <HeartIcon className="h-3 w-3" />
+                                  {product.favoriteCount}
+                                </Badge>
+                              )}
+                            </div>
+                            
+                            <div className="space-y-2">
+                              <p className="text-xs text-indigo-600 dark:text-indigo-400 font-medium">
+                                {product.categoryName}
+                              </p>
+                              <h3 className="font-semibold text-gray-900 dark:text-white line-clamp-2 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
+                                {product.name}
+                              </h3>
+                              <p className="text-xl font-bold text-gray-900 dark:text-white">
+                                {formatRupiah(product.price)}
+                              </p>
+                              <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
+                                <ShoppingBagIcon className="h-4 w-4" />
+                                <span className="truncate">{product.storeName}</span>
+                                {store?.isVerified && (
+                                  <span className="text-green-500">✓</span>
+                                )}
+                              </div>
+                              {store && (
+                                <div className="flex items-center gap-1 text-xs text-gray-400 dark:text-gray-500">
+                                  <span>{formatLocation(store)}</span>
+                                </div>
+                              )}
+                            </div>
+                          </Card>
+                        </Link>
+                      );
+                    })}
+                  </div>
+
+                  {/* Pagination */}
+                  {pagination.hasMore && (
+                    <div className="mt-8 flex justify-center">
+                      <Button 
+                        variant="outline" 
+                        onClick={() => setPagination(prev => ({ ...prev, page: prev.page + 1 }))}
+                        disabled={loading}
+                      >
+                        Muat Lebih Banyak
+                        <ChevronRightIcon className="h-4 w-4 ml-2" />
+                      </Button>
+                    </div>
+                  )}
+                </>
+              );
+            })()}
           </div>
         </section>
       </main>

@@ -15,7 +15,7 @@ import {
   ChatBubbleLeftRightIcon,
   XMarkIcon,
   MagnifyingGlassIcon,
-  BuildingStorefrontIcon,
+  HomeIcon,
 } from '@heroicons/react/24/outline';
 import Link from 'next/link';
 
@@ -193,7 +193,7 @@ export default function FavoritesPage() {
                             </Link>
                             <Link href={`/toko/${fav.storeSlug}`}>
                               <Button variant="ghost" className="flex-1 flex items-center justify-center gap-1 text-sm py-2" size="sm">
-                                <BuildingStorefrontIcon className="h-4 w-4" />
+                                <HomeIcon className="h-4 w-4" />
                                 Toko
                               </Button>
                             </Link>
@@ -213,5 +213,3 @@ export default function FavoritesPage() {
     </div>
   );
 }
-
-// Need to import BuildingStorefrontIcon

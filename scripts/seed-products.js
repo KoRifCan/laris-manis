@@ -9,6 +9,8 @@
  * - FIREBASE_ADMIN_PRIVATE_KEY
  */
 
+require('dotenv').config({ path: '.env.local' });
+
 const { initializeApp, cert, getApps } = require('firebase-admin/app');
 const { getFirestore, FieldValue } = require('firebase-admin/firestore');
 

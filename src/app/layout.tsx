@@ -24,6 +24,9 @@ export const metadata: Metadata = {
   creator: 'Laris Manis',
   publisher: 'Laris Manis',
   robots: 'index, follow',
+  verification: {
+    google: 'google-site-verification-code-here',
+  },
   openGraph: {
     type: 'website',
     locale: 'id_ID',
