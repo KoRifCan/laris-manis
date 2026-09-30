@@ -84,6 +84,12 @@ Urutan kerja disepakati: rute 404 → tema → menu hamburger → akun/peran →
 - **Aset ikut rapikan**: `manifest.json` theme_color indigo `#4f46e5` → `#176B51` (blok screenshots dihapus — filenya tidak pernah ada); ikon PWA PNG semuanya **placeholder 1×1** & SVG indigo → diregenerasi hijau (PIL); `shortcut-*.png` yang hilang dibuat; **`og-image.png` 404 → dibuat baru** 1200×630 (putih + logo hijau + aksen kunyit)
 - **Verifikasi production** (deploy Ready `laris-manis-6bn7tuisq`): meta theme-color `#ffffff` ✓; nol hash `9e1b32`/`4f46e5` di HTML ✓; CSS build `--color-canvas:#fff`, `--color-brand-600:#176b51` ✓; kode toggle (`laris_manis_theme`) ada di JS bundle ✓; `/og-image.png`, `/icons/icon-512x512.png`, `/manifest.json` → 200, `theme_color: #176B51` ✓
 
+#### Kategori 3: Menu hamburger & pencarian mobile ✅ COMPLETED (commit `4a4e0c1`, deploy `laris-manis-py5clqoxb`)
+- Panel menu & pencarian mobile: `bg-white dark:bg-gray-950` **solid** + `border-l` + `shadow-2xl` (sebelumnya panel terang di atas halaman terang hanya bermodal `shadow-xl` — terlihat "tembus"); overlay `bg-black/60` + `backdrop-blur-[2px]`
+- Konten panel: `flex-1 overflow-y-auto overscroll-contain` + padding `safe-area-inset-bottom` (menu panjang bisa di-scroll, tidak keluar layar)
+- Halaman di belakang dikunci (`body overflow hidden`) selama panel terbuka; tombol **Escape** menutup panel; klik overlay menutup
+- Verifikasi production (deploy Ready `laris-manis-py5clqoxb`): kode panel baru (`border-l ... shadow-2xl`, `bg-black/60`, `overscroll-contain`, `safe-area-inset-bottom`, handler `Escape`) ada di JS bundle ✓; kelas `shadow-2xl`/`backdrop-blur`/`safe-area` ada di CSS build ✓ (interaksi diverifikasi dari kode/bundle — lingkungan ini tanpa browser)
+
 ### Phase 6: Testing & Deploy Produksi (Vercel)
 - [ ] Unit & integration tests
 - [ ] Deploy ke Vercel
