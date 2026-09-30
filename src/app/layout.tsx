@@ -16,6 +16,7 @@ const fraunces = Fraunces({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL('https://laris-manis-id.vercel.app'),
   title: {
     default: 'Laris Manis - Etalase Produk UMKM Indonesia',
     template: '%s | Laris Manis',

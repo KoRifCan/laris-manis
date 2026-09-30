@@ -25,6 +25,7 @@ import {
 } from '@heroicons/react/24/outline';
 import Link from 'next/link';
 import { authFetch, readJson, ApiError, errorMessage } from '@/lib/client-auth';
+import { ProductImage } from '@/components/ProductImage';
 
 interface Product {
   id: string;
@@ -368,15 +369,13 @@ export default function SellerDashboardPage() {
               ) : (
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                   {filteredProducts.map((product) => {
-                    const image = product.images[0] || 'https://via.placeholder.com/400';
                     return (
                       <Card key={product.id} className="relative">
                         <div className="relative aspect-square overflow-hidden rounded-lg bg-gray-100 dark:bg-gray-800 mb-3">
-                          <img
-                            src={image}
+                          <ProductImage
+                            src={product.images?.[0]}
                             alt={product.name}
                             className="w-full h-full object-cover"
-                            loading="lazy"
                           />
                           <StatusBadge status={product.status} className="absolute top-2 right-2" />
                         </div>

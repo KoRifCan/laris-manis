@@ -26,13 +26,18 @@ export const applySellerSchema = z.object({
   storeWhatsapp: z.string().min(10, 'Nomor WhatsApp tidak valid').max(20),
 });
 
+// Sumber gambar: path lokal (mulai dengan /) atau URL http(s)
+const imageSrc = z
+  .string()
+  .refine((v) => v.startsWith('/') || /^https?:\/\//.test(v), 'URL gambar tidak valid');
+
 export const createProductSchema = z.object({
   name: z.string().min(2, 'Nama produk minimal 2 karakter').max(100),
   description: z.string().min(10, 'Deskripsi minimal 10 karakter').max(5000),
   categoryId: z.string().min(1, 'Kategori wajib dipilih'),
   price: z.number().int().positive('Harga harus berupa angka positif'),
   stock: z.number().int().nonnegative('Stok tidak boleh negatif'),
-  images: z.array(z.string().url('URL gambar tidak valid')).min(1, 'Minimal 1 foto').max(5, 'Maksimal 5 foto'),
+  images: z.array(imageSrc).min(1, 'Minimal 1 foto').max(5, 'Maksimal 5 foto'),
   status: z.enum(['draft', 'menunggu_review']).default('draft'),
 });
 
@@ -42,7 +47,7 @@ export const updateProductSchema = z.object({
   categoryId: z.string().optional(),
   price: z.number().int().positive().optional(),
   stock: z.number().int().nonnegative().optional(),
-  images: z.array(z.string().url()).min(1).max(5).optional(),
+  images: z.array(imageSrc).min(1).max(5).optional(),
   status: z.enum(['draft', 'menunggu_review', 'aktif', 'nonaktif', 'ditolak']).optional(),
 });
 
@@ -102,7 +107,7 @@ export const createReviewSchema = z.object({
   productId: z.string().min(1),
   rating: z.number().int().min(1).max(5),
   comment: z.string().min(5).max(1000),
-  images: z.array(z.string().url()).max(3).optional(),
+  images: z.array(imageSrc).max(3).optional(),
 });
 
 export const productFiltersSchema = z.object({

@@ -19,6 +19,7 @@ import {
   HomeIcon,
 } from '@heroicons/react/24/outline';
 import Link from 'next/link';
+import { ProductImage } from '@/components/ProductImage';
 
 interface FavoriteProduct {
   id: string;
@@ -159,7 +160,6 @@ export default function FavoritesPage() {
             ) : (
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                 {favorites.map((fav) => {
-                  const image = fav.productImage || 'https://via.placeholder.com/400';
                   const whatsappLink = `https://wa.me/${fav.storeName.replace(/\D/g, '')}?text=${encodeURIComponent(`Halo, saya tertarik dengan produk "${fav.productName}" di Laris Manis. Apakah masih tersedia?`)}`;
                   
                   return (
@@ -178,11 +178,10 @@ export default function FavoritesPage() {
                         </button>
                         
                         <div className="relative aspect-square overflow-hidden rounded-lg bg-gray-100 dark:bg-gray-800 mb-3">
-                          <img
-                            src={image}
+                          <ProductImage
+                            src={fav.productImage}
                             alt={fav.productName}
                             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                            loading="lazy"
                           />
                         </div>
                         
@@ -204,7 +203,7 @@ export default function FavoritesPage() {
                                 Chat
                               </Button>
                             </Link>
-                            <Link href={`/toko/${fav.storeSlug}`}>
+                            <Link href={fav.storeSlug ? `/toko/${fav.storeSlug}` : '/toko'}>
                               <Button variant="ghost" className="flex-1 flex items-center justify-center gap-1 text-sm py-2" size="sm">
                                 <HomeIcon className="h-4 w-4" />
                                 Toko

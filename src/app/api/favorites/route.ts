@@ -18,6 +18,16 @@ export async function GET(request: NextRequest) {
     const limit = parseInt(searchParams.get('limit') || '20');
 
     const favoritesRef = adminDb.collection('users').doc(user.uid).collection('favorites');
+
+    // Status favorit untuk satu produk (dipakai tombol di halaman detail)
+    const statusProductId = searchParams.get('productId');
+    if (statusProductId) {
+      const favDoc = await favoritesRef.doc(statusProductId).get();
+      return NextResponse.json({
+        success: true,
+        data: { productId: statusProductId, isFavorite: favDoc.exists },
+      });
+    }
     
     const countSnapshot = await favoritesRef.count().get();
     const total = countSnapshot.data().count;
@@ -124,6 +134,7 @@ export async function POST(request: NextRequest) {
         productImage: product.images[0] || '',
         storeId: product.storeId,
         storeName: store.name,
+        storeSlug: store.slug || '',
         price: product.price,
         createdAt: new Date(),
       });

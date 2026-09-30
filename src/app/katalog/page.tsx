@@ -18,6 +18,7 @@ import {
 } from '@heroicons/react/24/outline';
 import Link from 'next/link';
 import { FilterSection } from './FilterSection';
+import { ProductImage } from '@/components/ProductImage';
 
 interface Product {
   id: string;
@@ -264,17 +265,15 @@ export default function KatalogPage() {
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                     {products.map((product) => {
                       const store = stores[product.storeId];
-                      const image = product.images[0] || 'https://via.placeholder.com/400';
                       
                       return (
                         <Link key={product.id} href={`/produk/${product.id}`} className="group">
                           <Card className="h-full group-hover:shadow-lg transition-shadow cursor-pointer">
                             <div className="relative aspect-square overflow-hidden rounded-lg bg-gray-100 dark:bg-gray-800 mb-3">
-                              <img
-                                src={image}
+                              <ProductImage
+                                src={product.images?.[0]}
                                 alt={product.name}
                                 className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                                loading="lazy"
                               />
                               <StatusBadge status={product.status} className="absolute top-2 right-2" />
                               {product.favoriteCount > 0 && (

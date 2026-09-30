@@ -390,7 +390,7 @@ export default function SuperAdminDashboardPage() {
                     <h3 className="font-medium text-gray-900 dark:text-white mb-2">Audit Logs</h3>
                     <p className="text-gray-600 dark:text-gray-400 text-sm">Lihat log aktivitas admin dan sistem</p>
                     <Button asChild variant="outline" className="mt-2" size="sm">
-                      <Link href="/api/audit-logs">Lihat Logs</Link>
+                      <Link href="/dashboard/super-admin/logs">Lihat Logs</Link>
                     </Button>
                   </div>
                   <div>

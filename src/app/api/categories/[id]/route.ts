@@ -3,6 +3,45 @@ import { authenticateRequest } from '@/lib/api-auth';
 import { adminDb } from '@/lib/firebase-admin';
 import { createAuditLog } from '@/lib/rbac';
 
+export async function GET(
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  try {
+    const authResult = await authenticateRequest(request);
+
+    if (authResult instanceof NextResponse) {
+      return authResult;
+    }
+
+    const { user } = authResult;
+    const { id } = await params;
+
+    if (user.role !== 'super_admin') {
+      return NextResponse.json(
+        { success: false, error: 'Hanya super admin yang bisa melihat detail kategori' },
+        { status: 403 }
+      );
+    }
+
+    const doc = await adminDb.collection('categories').doc(id).get();
+    if (!doc.exists) {
+      return NextResponse.json(
+        { success: false, error: 'Kategori tidak ditemukan' },
+        { status: 404 }
+      );
+    }
+
+    return NextResponse.json({ success: true, data: { id: doc.id, ...doc.data() } });
+  } catch (error: any) {
+    console.error('Get category error:', error);
+    return NextResponse.json(
+      { success: false, error: error.message || 'Terjadi kesalahan server' },
+      { status: 500 }
+    );
+  }
+}
+
 export async function PATCH(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }

@@ -1,30 +1,27 @@
 import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { Header } from '@/components/layout/Header';
+import { ProductActions } from '@/components/product/ProductActions';
+import { ProductGallery } from '@/components/product/ProductGallery';
 import { Footer } from '@/components/layout/Footer';
 import { Card } from '@/components/ui/Card';
 import { Badge, StatusBadge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
 import { Avatar } from '@/components/ui/Avatar';
-import { Modal } from '@/components/ui/Modal';
 import { formatRupiah, formatDate, truncate } from '@/lib/utils';
+import { serverOrigin } from '@/lib/server-origin';
 import { 
   ChatBubbleLeftRightIcon, 
   HeartIcon, 
-  ShareIcon,
   TruckIcon,
   ShieldCheckIcon,
   MapPinIcon,
   ClockIcon,
   StarIcon,
-  ChevronLeftIcon,
-  ChevronRightIcon,
-  XMarkIcon,
   ArrowRightIcon,
   ShoppingBagIcon,
 } from '@heroicons/react/24/outline';
 import Link from 'next/link';
-import Image from 'next/image';
 
 interface Product {
   id: string;
@@ -63,11 +60,12 @@ interface Review {
 
 async function getProduct(id: string): Promise<{ product: Product; reviews: Review[] } | null> {
   try {
+    const origin = await serverOrigin();
     const [productRes, reviewsRes] = await Promise.all([
-      fetch(`${process.env.NEXT_PUBLIC_APP_URL || ''}/api/products/${id}`, { next: { revalidate: 60 } }),
-      fetch(`${process.env.NEXT_PUBLIC_APP_URL || ''}/api/reviews?productId=${id}&limit=5`, { next: { revalidate: 60 } }),
+      fetch(`${origin}/api/products/${id}`, { next: { revalidate: 60 } }),
+      fetch(`${origin}/api/reviews?productId=${id}&limit=5`, { next: { revalidate: 60 } }),
     ]);
-    
+
     if (!productRes.ok) return null;
     
     const productData = await productRes.json();
@@ -154,44 +152,16 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
           <div className="grid lg:grid-cols-12 gap-8">
             {/* Product Gallery */}
             <div className="lg:col-span-7 space-y-4">
-              <div className="relative aspect-[4/3] rounded-xl overflow-hidden bg-gray-100 dark:bg-gray-800">
-                {product.images.length > 0 ? (
-                  <Image
-                    src={product.images[0]}
-                    alt={product.name}
-                    fill
-                    className="object-cover"
-                    priority
-                    sizes="(max-width: 1024px) 100vw, 50vw"
-                  />
-                ) : (
-                  <div className="flex items-center justify-center h-full text-gray-400">
-                    <svg className="h-16 w-16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                    </svg>
-                  </div>
-                )}
-                <StatusBadge status={product.status} className="absolute top-3 right-3" />
+              <div className="relative">
+                <ProductGallery images={product.images} name={product.name} />
+                <StatusBadge status={product.status} className="absolute top-3 right-3 z-10" />
                 {product.storeIsVerified && (
-                  <Badge variant="success" className="absolute top-3 left-3 flex items-center gap-1">
+                  <Badge variant="success" className="absolute top-3 left-3 z-10 flex items-center gap-1">
                     <ShieldCheckIcon className="h-3 w-3" />
                     Terverifikasi
                   </Badge>
                 )}
               </div>
-              
-              {product.images.length > 1 && (
-                <div className="flex gap-2 overflow-x-auto pb-2">
-                  {product.images.map((image, index) => (
-                    <button
-                      key={index}
-                      className="flex-shrink-0 w-20 h-20 rounded-lg overflow-hidden border-2 border-transparent hover:border-brand-500 transition-colors"
-                    >
-                      <Image src={image} alt={`${product.name} - ${index + 1}`} fill className="object-cover" sizes="80px" />
-                    </button>
-                  ))}
-                </div>
-              )}
             </div>
 
             {/* Product Info */}
@@ -238,9 +208,11 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
                         Pesan via WhatsApp
                       </Button>
                     </a>
-                    <Button variant="outline" className="p-3" aria-label="Bagikan produk">
-                      <ShareIcon className="h-5 w-5" />
-                    </Button>
+                    <ProductActions
+                      productId={product.id}
+                      productName={product.name}
+                      productDescription={product.description}
+                    />
                   </div>
                 </Card>
 

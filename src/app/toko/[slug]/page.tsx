@@ -25,6 +25,8 @@ import {
 } from '@heroicons/react/24/outline';
 import Link from 'next/link';
 import Image from 'next/image';
+import { ProductImage } from '@/components/ProductImage';
+import { serverOrigin } from '@/lib/server-origin';
 
 interface Store {
   id: string;
@@ -62,7 +64,7 @@ interface Product {
 
 async function getStore(slug: string): Promise<{ store: Store; products: Product[] } | null> {
   try {
-    const res = await fetch(`${process.env.NEXT_PUBLIC_APP_URL || ''}/api/stores?slug=${slug}`, { 
+    const res = await fetch(`${await serverOrigin()}/api/stores?slug=${slug}`, { 
       next: { revalidate: 60 },
       cache: 'no-store'
     });
@@ -229,16 +231,14 @@ export default async function StoreDetailPage({ params }: { params: Promise<{ sl
             ) : (
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                 {activeProducts.map((product) => {
-                  const image = product.images[0] || 'https://via.placeholder.com/400';
                   return (
                     <Link key={product.id} href={`/produk/${product.id}`} className="group">
                       <Card className="h-full group-hover:shadow-lg transition-shadow cursor-pointer">
                         <div className="relative aspect-square overflow-hidden rounded-lg bg-gray-100 dark:bg-gray-800 mb-3">
-                          <img
-                            src={image}
+                          <ProductImage
+                            src={product.images?.[0]}
                             alt={product.name}
                             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                            loading="lazy"
                           />
                           <StatusBadge status={product.status} className="absolute top-2 right-2" />
                           {product.favoriteCount > 0 && (

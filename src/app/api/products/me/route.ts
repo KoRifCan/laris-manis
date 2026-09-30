@@ -129,6 +129,10 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
+    // Foto kosong → placeholder lokal supaya produk selalu punya gambar
+    if (!Array.isArray(body.images) || body.images.filter((v: string) => typeof v === 'string' && v).length === 0) {
+      body.images = ['/products/ph-umum.png'];
+    }
     const { validateSchema, createProductSchema } = await import('@/lib/validation');
     const { success, data, errors } = validateSchema(createProductSchema, body);
 
@@ -186,6 +190,20 @@ export async function POST(request: NextRequest) {
       );
     }
     const categoryName = categoryDoc.data()!.name;
+
+    // Sesuaikan placeholder generik dengan kategori
+    const placeholderFor = (name: string) => {
+      const n = (name || '').toLowerCase();
+      if (n.includes('makanan')) return '/products/ph-makanan.png';
+      if (n.includes('minuman')) return '/products/ph-minuman.png';
+      if (n.includes('fashion') || n.includes('pakaian')) return '/products/ph-fashion.png';
+      if (n.includes('kriya') || n.includes('kerajinan')) return '/products/ph-kriya.png';
+      if (n.includes('elektronik') || n.includes('gadget')) return '/products/ph-elektronik.png';
+      return '/products/ph-umum.png';
+    };
+    if (data.images.length === 1 && data.images[0] === '/products/ph-umum.png') {
+      data.images = [placeholderFor(categoryName)];
+    }
 
     // Create product
     const productRef = adminDb.collection('products').doc();
