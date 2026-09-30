@@ -90,6 +90,14 @@ Urutan kerja disepakati: rute 404 → tema → menu hamburger → akun/peran →
 - Halaman di belakang dikunci (`body overflow hidden`) selama panel terbuka; tombol **Escape** menutup panel; klik overlay menutup
 - Verifikasi production (deploy Ready `laris-manis-py5clqoxb`): kode panel baru (`border-l ... shadow-2xl`, `bg-black/60`, `overscroll-contain`, `safe-area-inset-bottom`, handler `Escape`) ada di JS bundle ✓; kelas `shadow-2xl`/`backdrop-blur`/`safe-area` ada di CSS build ✓ (interaksi diverifikasi dari kode/bundle — lingkungan ini tanpa browser)
 
+#### Kategori 4: Akun, peran ganda & RBAC kepemilikan ✅ COMPLETED (commits `c779e24`+`e5f8d97`+`6bd2114`, deploy `laris-manis-rnwtw7s11`)
+- **Temuan (alur penjual mati)**: `apply-seller` tidak pernah membuat dokumen toko → admin tak punya daftar pengajuan → peran tak pernah jadi `penjual`; dashboard memanggil API dengan `credentials: 'include'` tanpa Bearer → selalu 401; `/produk/baru` ditautkan tapi tidak ada halamannya
+- **Model peran ganda**: sumber kebenaran = atribut kepemilikan (`stores.ownerId`, `users.storeId`), bukan peran eksklusif — pemilik toko tetap `pembeli` di klaim hingga disetujui, dan penjal tetap bisa memakai fitur pembeli (favorit dll lolos uji)
+- **Backend**: `apply-seller` membuat/memperbarui toko (`reviewStatus: pending`, `ownerId`, slug unik); verifikasi admin menyetel `reviewStatus` + klaim `penjual`; pintu gerbang toko/produk/favorit berbasis kepemilikan, submit-review hanya untuk produk milik sendiri (milik orang lain → 403); `PATCH /api/users/me` (nama/alamat/foto data-URL ≤300KB, sinkron Auth + normalisasi E.164) + `PUT /api/users/me/password` (verifikasi sandi lama via Identity Toolkit)
+- **Bug produksi yang ikut diperbaiki**: (1) `GET /api/products/[id]` **tidak pernah ada** → semua halaman detail produk 404/500 — kini ada, join info toko; (2) `formatDate` meledak pada Firestore Timestamp (`{_seconds}`) → halaman detail 500 — kini tahan timestamp/kosong; (3) `createAuditLog` menulis `undefined` → approve toko 500 setelah peran sempat ter-set; (4) skema `verifyStore`/`reviewProduct` mewajibkan field body yang tak dikirim route → "Validasi gagal"; (5) tautan verifikasi/reset menolak domain produksi (`unauthorized-continue-uri`) → registrasi 500 **setelah** akun dibuat — dibuat non-fatal; (6) `FilterSection.tsx` duplikat mati dihapus
+- **UI baru**: `/akun/profil` (data diri + foto + status toko + ganti mode), `/akun/pengaturan` (tema terang/gelap/sistem, ganti sandi, sesi), `/produk/baru` (buat produk → `/api/products/me`); `Header`: dropdown profil + pindah mode belanja↔toko; dashboard penjual: state "belum punya toko" & banner tunggu verifikasi (tombol produk dinonaktifkan)
+- **e2e production** (40/40 cek PASS pada deploy `laris-manis-rnwtw7s11`): daftar → login → PATCH profil → ganti sandi (login ulang) → apply-seller (pending, dobel ditolak) → blokir produk sebelum verifikasi → admin list/approve → klaim jadi `penjual` → buat/PATCH produk → submit-review sendiri `menunggu_review` → admin approve → `aktif` + join toko ✓; negatif: user lain PATCH/DELETE produk → 403, pembeli submit-review → 403, penjual akses endpoint admin → 403, produk tak ada → 404
+
 ### Phase 6: Testing & Deploy Produksi (Vercel)
 - [ ] Unit & integration tests
 - [ ] Deploy ke Vercel
@@ -104,10 +112,11 @@ Urutan kerja disepakati: rute 404 → tema → menu hamburger → akun/peran →
 ---
 
 ## Current Status
-**Phase**: 8 - Audit Menyeluruh, Kategori 1-2 Rute & Tema (selesai, tayang di production)
+**Phase**: 8 - Audit Menyeluruh, Kategori 1-4 Rute, Tema, Menu & Akun/Peran (selesai, tayang di production)
 **Branch**: fix/audit-menyeluruh
-**Last Commit**: aset PWA/og-image dibuat ulang hijau Pandan
-**Production**: https://laris-manis-id.vercel.app (deploy `laris-manis-6bn7tuisq`)
+**Last Commit**: kategori 4 — peran ganda & RBAC kepemilikan (e2e 40/40 PASS)
+**Production**: https://laris-manis-id.vercel.app (deploy `laris-manis-rnwtw7s11`)
+**Tersisa**: kategori 5 — sisa desain (google-site-verification placeholder, favicon, screenshots, crawl link final)
 
 ## Environment Variables Needed (for Vercel/GitHub Secrets)
 - `NEXT_PUBLIC_FIREBASE_API_KEY`
