@@ -54,13 +54,21 @@ export async function POST(request: NextRequest) {
       updatedAt: new Date(),
     });
 
-    // Send verification email
-    const actionCodeSettings = {
-      url: `${process.env.NEXT_PUBLIC_APP_URL}/auth/verify-email`,
-      handleCodeInApp: true,
-    };
-    await adminAuth.generateEmailVerificationLink(email, actionCodeSettings);
-    // Note: In production, send this link via email service (SendGrid, etc.)
+    // Send verification email — non-fatal: kegagalan membuat tautan
+    // (mis. domain belum masuk allowlist Firebase) tidak boleh menggagalkan
+    // registrasi karena akun sudah terlanjur dibuat
+    const origin =
+      process.env.NEXT_PUBLIC_APP_URL ||
+      `${request.nextUrl.protocol}//${request.headers.get('host') || request.nextUrl.host}`;
+    try {
+      await adminAuth.generateEmailVerificationLink(email, {
+        url: `${origin}/auth/verify-email`,
+        handleCodeInApp: true,
+      });
+      // Note: In production, send this link via email service (SendGrid, etc.)
+    } catch (e: any) {
+      console.warn('Gagal membuat tautan verifikasi email:', e?.message || e);
+    }
 
     // Audit log
     await createAuditLog(

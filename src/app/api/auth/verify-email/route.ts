@@ -23,12 +23,18 @@ export async function POST(request: NextRequest) {
       });
     }
 
-    // Send verification email
-    const actionCodeSettings = {
-      url: `${process.env.NEXT_PUBLIC_APP_URL}/auth/verify-email`,
-      handleCodeInApp: true,
-    };
-    await adminAuth.generateEmailVerificationLink(userRecord.email!, actionCodeSettings);
+    // Send verification email — non-fatal (lihat catatan di register)
+    const origin =
+      process.env.NEXT_PUBLIC_APP_URL ||
+      `${request.nextUrl.protocol}//${request.headers.get('host') || request.nextUrl.host}`;
+    try {
+      await adminAuth.generateEmailVerificationLink(userRecord.email!, {
+        url: `${origin}/auth/verify-email`,
+        handleCodeInApp: true,
+      });
+    } catch (e: any) {
+      console.warn('Gagal membuat tautan verifikasi email:', e?.message || e);
+    }
 
     // Audit log
     await createAuditLog(

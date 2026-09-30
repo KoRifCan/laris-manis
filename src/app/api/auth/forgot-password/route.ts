@@ -30,16 +30,21 @@ export async function POST(request: NextRequest) {
       throw error;
     }
 
-    // Generate password reset link
-    const actionCodeSettings = {
-      url: `${process.env.NEXT_PUBLIC_APP_URL}/auth/reset-password`,
-      handleCodeInApp: true,
-    };
-    
-    const resetLink = await adminAuth.generatePasswordResetLink(email, actionCodeSettings);
-    
-    // Note: In production, send this link via email service
-    console.log(`Password reset link for ${email}: ${resetLink}`);
+    // Generate password reset link — non-fatal agar permintaan reset
+    // tidak berakhir 500 bila domain belum masuk allowlist Firebase
+    const origin =
+      process.env.NEXT_PUBLIC_APP_URL ||
+      `${request.nextUrl.protocol}//${request.headers.get('host') || request.nextUrl.host}`;
+    try {
+      const resetLink = await adminAuth.generatePasswordResetLink(email, {
+        url: `${origin}/auth/reset-password`,
+        handleCodeInApp: true,
+      });
+      // Note: In production, send this link via email service
+      console.log(`Password reset link for ${email}: ${resetLink}`);
+    } catch (e: any) {
+      console.warn('Gagal membuat tautan reset sandi:', e?.message || e);
+    }
 
     return NextResponse.json({
       success: true,
