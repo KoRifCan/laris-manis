@@ -105,6 +105,17 @@ Urutan kerja disepakati: rute 404 → tema → menu hamburger → akun/peran →
 - **Meta final**: `theme-color` `#ffffff` dinamis ✓, `og:image` absolut + 1200×630 ✓, `twitter:card summary_large_image` ✓, 0 kemunculan merah/indigo (`9e1b32`/`4f46e5`) ✓, `/og-image.png` & `/manifest.json` → 200 ✓
 - **Crawl final production**: 42 URL (semua halaman dari beranda + aset statis) → **42/42 200**, nol link rusak
 
+#### Perbaikan susulan: 404, fitur per-role, gambar produk ✅ COMPLETED (commit `9e3ca6d`, deploy `laris-manis-7umu97swy`)
+- **404 dibasmi**: 4 halaman yang ditaut tapi tidak ada dibuat — `/produk/[id]/edit` (form edit produk + alasan penolakan admin), `/dashboard/penjual/edit` (edit profil toko, empty-state bila belum punya toko), `/dashboard/super-admin/kategori/baru` + `/dashboard/super-admin/kategori/[id]/edit` (CRUD kategori; slug auto dari nama, toggle aktif); semua verifikasi lokal + produksi → 200
+- **Fitur per-role**: `/dashboard/super-admin/logs` (tabel audit-log: filter aksi, paginasi, detail JSON; link "Lihat Logs" di super-admin diarahkan ke sini, sebelumnya mentah ke JSON `/api/audit-logs`); endpoint baru `GET /api/categories/[id]` (super_admin) untuk halaman edit
+- **Gambar produk**: 13 produk di DB menunjuk `via.placeholder.com` (host mati) → di-backfill ke placeholder lokal per kategori (`public/products/ph-{makanan,minuman,fashion,kriya,elektronik,umum}.png`, dibuat via PIL, dicek visual); komponen `ProductImage` (`<img>` + `onError` fallback) dipakai di katalog, toko, favorit, dashboard penjual/admin, galeri detail (ganti `next/image`), form edit; skema validasi menerima path lokal `/...`; `POST /api/products/me` memberi foto default per kategori bila kosong; form foto produk jadi opsional
+- **Detail produk kini interaktif** (sebelumnya tombol mati): `ProductActions` (toggle favorit via `GET/POST /api/favorites` — endpoint status `?productId=` baru — + share `navigator.share`/clipboard), `ProductGallery` (klik thumbnail ganti foto utama)
+- **Favorit**: `storeSlug` disimpan saat toggle (dokumen lama tak punya → link `/toko/undefined`; kini guard fallback `/toko` + backfill tak perlu karena koleksi favorit kosong)
+- **Crawl/SEO**: `src/app/robots.ts` (disallow `/api/ /dashboard/ /akun/`) + `src/app/sitemap.ts` (route statis + produk aktif + toko terverifikasi + kategori, fallback statis bila Firestore gagal) → keduanya 200; direktori kosong `src/app/(public)`, `(dashboard)`, `products`, `stores` dihapus (tidak menghasilkan route, tak direferensikan)
+- **Perbaikan internal**: fetch API dari server component kini pakai origin absolut via `src/lib/server-origin.ts` (Next 16 tidak lagi me-resolve fetch relatif — sebelumnya halaman detail/toko 404 di lokal bila `NEXT_PUBLIC_APP_URL` salah); `metadataBase` diset (hilangkan warning OG lokal)
+- **Insiden data (diperbaiki)**: backfill awal memakai Firestore REST PATCH **tanpa `updateMask`** → 13 dokumen produk tersisa field `images`; dipulihkan penuh dari `scripts/restore-products.js` (data seed + join toko/seller/kategori, ID dokumen dipertahankan), `productCount` toko disinkronkan = 13; verifikasi: API produksi 13/13 produk lengkap, 0 gambar rusak
+- **Verifikasi produksi**: semua route baru → 200; crawl 41 URL → 40 OK + 1 SSL retry (semua 200); link internal 41/41 dari 17 halaman → 200; e2e API `13/13 PASS` (CRUD kategori + slug auto + nonaktif tersembunyi, audit-log terekam, status/toggle favorit on-off, delete uji)
+
 ### Phase 6: Testing & Deploy Produksi (Vercel)
 - [ ] Unit & integration tests
 - [ ] Deploy ke Vercel
@@ -119,10 +130,10 @@ Urutan kerja disepakati: rute 404 → tema → menu hamburger → akun/peran →
 ---
 
 ## Current Status
-**Phase**: 8 - Audit Menyeluruh Produksi — Kategori 1-5 **SELESAI SEMUA**, tayang di production
+**Phase**: 8 - Audit Menyeluruh Produksi — Kategori 1-5 + sidebar Android + basmi-404/fitur-per-role/gambar **SELESAI SEMUA**, tayang di production
 **Branch**: fix/audit-menyeluruh
-**Last Commit**: kategori 5 — favicon hijau + bersih-bersih aset + crawl final 42/42
-**Production**: https://laris-manis-id.vercel.app (deploy `laris-manis-mpkxae3qg`)
+**Last Commit**: `9e3ca6d` — 4 halaman 404 baru, gambar produk placeholder lokal, favorit/share/galeri detail, logs super-admin, robots/sitemap
+**Production**: https://laris-manis-id.vercel.app (deploy `laris-manis-7umu97swy`)
 **Belum / butuh tindakan di luar repo**: kode google-site-verification (Google Search Console); domain produksi masuk Firebase *Authorized domains* + penyedia email untuk kirim tautan verifikasi/reset (tanpa ini reset-sandi produksi tidak terkirim); wiring service worker (`sw.js` disajikan tapi belum pernah didaftarkan); rate limiting & unit test (Phase 6, di luar lingkup audit)
 
 ## Environment Variables Needed (for Vercel/GitHub Secrets)
