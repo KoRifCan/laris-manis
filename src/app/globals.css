@@ -20,19 +20,27 @@
   --color-brand-950: #3a0914;
 
   /* Aksen: Kunyit Emas (jamu & kemakmuran) */
+  --color-kunyit-50: #fdf6e6;
   --color-kunyit-200: #f6dc9e;
   --color-kunyit-300: #f0c463;
   --color-kunyit-400: #e4a82e;
   --color-kunyit-500: #d1941c;
   --color-kunyit-600: #a8730f;
+  --color-kunyit-800: #7a540b;
+  --color-kunyit-900: #5b3e08;
+  --color-kunyit-950: #332204;
 
   /* Aksen: Hijau Pandan (panganan segar / terverifikasi) */
   --color-pandan-50: #edf6f1;
   --color-pandan-100: #d7ebdf;
+  --color-pandan-200: #b6dcc8;
   --color-pandan-400: #2e8b68;
   --color-pandan-500: #1f6b4e;
   --color-pandan-600: #17553d;
   --color-pandan-700: #12442f;
+  --color-pandan-800: #0d3323;
+  --color-pandan-900: #0a261a;
+  --color-pandan-950: #061a12;
 
   /* Latar halaman: Kertas Bungkus */
   --color-canvas: #fbf8f3;
