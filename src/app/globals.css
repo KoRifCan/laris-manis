@@ -1,29 +1,32 @@
 @import "tailwindcss";
 
+/* Mode gelap dikendalikan kelas .dark pada <html> (toggle tema + localStorage) */
+@custom-variant dark (&:where(.dark, .dark *));
+
 @theme {
   /* Type — Fraunces (display) + Plus Jakarta Sans (body) */
   --font-sans: var(--font-jakarta), system-ui, sans-serif;
   --font-display: var(--font-fraunces), Georgia, serif;
   --font-mono: ui-monospace, SFMono-Regular, Menlo, monospace;
 
-  /* Brand: Merah Pasar (payung pasar & gerobak) */
-  --color-brand-50: #fdf3f4;
-  --color-brand-100: #fbe3e7;
-  --color-brand-200: #f6c8d0;
-  --color-brand-300: #ee9dab;
-  --color-brand-400: #e0677b;
-  --color-brand-500: #c93a51;
-  --color-brand-600: #9e1b32;
-  --color-brand-700: #851528;
-  --color-brand-800: #6e1224;
-  --color-brand-900: #5c101f;
-  --color-brand-950: #3a0914;
+  /* Brand: Pandan Hijau (putih dominan, tanpa merah) */
+  --color-brand-50: #eef7f3;
+  --color-brand-100: #d7ede4;
+  --color-brand-200: #b0dacb;
+  --color-brand-300: #7fc2ae;
+  --color-brand-400: #4ea891;
+  --color-brand-500: #2a8e74;
+  --color-brand-600: #176b51;
+  --color-brand-700: #0e4f3b;
+  --color-brand-800: #0b3f2f;
+  --color-brand-900: #08301f;
+  --color-brand-950: #052015;
 
   /* Aksen: Kunyit Emas (jamu & kemakmuran) */
   --color-kunyit-50: #fdf6e6;
   --color-kunyit-200: #f6dc9e;
   --color-kunyit-300: #f0c463;
-  --color-kunyit-400: #e4a82e;
+  --color-kunyit-400: #e8a317;
   --color-kunyit-500: #d1941c;
   --color-kunyit-600: #a8730f;
   --color-kunyit-800: #7a540b;
@@ -42,8 +45,8 @@
   --color-pandan-900: #0a261a;
   --color-pandan-950: #061a12;
 
-  /* Latar halaman: Kertas Bungkus */
-  --color-canvas: #fbf8f3;
+  /* Latar halaman: Putih dominan, kertas hangat di section abu-abu */
+  --color-canvas: #ffffff;
 
   /* Netral hangat (mengganti gradien abu-abu biru bawaan Tailwind) */
   --color-gray-50: #faf8f5;
@@ -303,8 +306,8 @@
 /* High contrast mode */
 @media (prefers-contrast: high) {
   :root {
-    --color-brand-600: #6e1224;
-    --color-brand-700: #5c101f;
+    --color-brand-600: #0b3f2f;
+    --color-brand-700: #052015;
   }
 }
 
@@ -316,4 +319,12 @@
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
   }
+}
+
+/* Skema warna native mengikuti tema */
+:root {
+  color-scheme: light;
+}
+.dark {
+  color-scheme: dark;
 }

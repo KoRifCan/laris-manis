@@ -25,14 +25,14 @@ function FallbackEtalase() {
   return (
     <div className="rounded-3xl border border-dashed border-white/30 bg-white/5 p-6 sm:p-8">
       <svg viewBox="0 0 260 150" className="w-full" role="img" aria-label="Ilustrasi etalase">
-        <rect x="20" y="40" width="220" height="95" rx="8" fill="#161210" stroke="#E4A82E" strokeWidth="2" />
-        <path d="M14 40h232l-12-22H26z" fill="#E4A82E" />
-        <path d="M40 18h26l-6 22H34zM92 18h26l-4 22H86zM144 18h26l-2 22h-28zM196 18h26l2 22h-30z" fill="#9E1B32" />
+        <rect x="20" y="40" width="220" height="95" rx="8" fill="#161210" stroke="#E8A317" strokeWidth="2" />
+        <path d="M14 40h232l-12-22H26z" fill="#E8A317" />
+        <path d="M40 18h26l-6 22H34zM92 18h26l-4 22H86zM144 18h26l-2 22h-28zM196 18h26l2 22h-30z" fill="#176B51" />
         <rect x="36" y="98" width="188" height="6" rx="3" fill="#4E4740" />
         <rect x="50" y="72" width="34" height="26" rx="4" fill="#FBF8F3" opacity="0.85" />
         <rect x="110" y="66" width="40" height="32" rx="4" fill="#FBF8F3" opacity="0.65" />
         <rect x="172" y="76" width="30" height="22" rx="4" fill="#FBF8F3" opacity="0.5" />
-        <path d="M60 72l6-10 6 10M124 66l6-12 6 12" stroke="#9E1B32" strokeWidth="2" fill="none" />
+        <path d="M60 72l6-10 6 10M124 66l6-12 6 12" stroke="#176B51" strokeWidth="2" fill="none" />
       </svg>
       <p className="mt-4 text-center text-sm text-white/70">
         Etalase sedang dilengkapi dagangan baru.

@@ -54,21 +54,21 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: [
-    { media: '(prefers-color-scheme: light)', color: '#fbf8f3' },
-    { media: '(prefers-color-scheme: dark)', color: '#161210' },
-  ],
   width: 'device-width',
   initialScale: 1,
   maximumScale: 5,
 };
 
+// Terapkan tema tersimpan SEBELUM paint supaya tidak ada kedip terang->gelap.
+const themeInit = `(function(){try{var s=localStorage.getItem('laris_manis_theme');var m=window.matchMedia('(prefers-color-scheme: dark)').matches;var d=s==='dark'||(s!=='light'&&m);if(d)document.documentElement.classList.add('dark');var t=document.getElementById('lm-theme-color');if(t)t.setAttribute('content',d?'#141310':'#ffffff');}catch(e){}})();`;
+
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="id" className={`${jakarta.variable} ${fraunces.variable} h-full antialiased`}>
+    <html lang="id" className={`${jakarta.variable} ${fraunces.variable} h-full antialiased`} suppressHydrationWarning>
       <head>
         <link rel="manifest" href="/manifest.json" />
-        <meta name="theme-color" content="#9e1b32" />
+        <meta name="theme-color" content="#ffffff" id="lm-theme-color" />
+        <script dangerouslySetInnerHTML={{ __html: themeInit }} />
       </head>
       <body className="min-h-full flex flex-col bg-canvas dark:bg-gray-950 text-gray-900 dark:text-gray-100">
         <Providers>{children}</Providers>

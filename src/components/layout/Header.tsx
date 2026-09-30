@@ -20,6 +20,7 @@ import {
   getSessionSnapshot,
   subscribeSession,
 } from '@/lib/client-auth';
+import { ThemeToggle } from '@/components/ThemeToggle';
 
 export function Header() {
   const pathname = usePathname();
@@ -110,6 +111,9 @@ export function Header() {
               <HeartIcon className="h-5 w-5" />
               <span className="hidden sm:inline">Favorit</span>
             </Link>
+
+            {/* Ganti tema terang/gelap */}
+            <ThemeToggle />
 
             {/* Auth/Profile */}
             <div className="hidden sm:flex sm:items-center sm:gap-3">
