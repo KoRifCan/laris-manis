@@ -12,7 +12,7 @@ import {
   Bars3Icon,
   XMarkIcon,
 } from '@heroicons/react/24/outline';
-import { useSyncExternalStore, useState } from 'react';
+import { useSyncExternalStore, useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import {
   getToken,
@@ -55,6 +55,25 @@ export function Header() {
     { href: '/katalog', label: 'Katalog', icon: MagnifyingGlassIcon },
     { href: '/toko', label: 'Toko', icon: ShoppingBagIcon },
   ];
+
+  const overlayOpen = mobileMenuOpen || searchOpen;
+
+  // Selama panel terbuka: kunci scroll halaman di belakang & tutup dengan Escape
+  useEffect(() => {
+    if (!overlayOpen) return;
+    document.body.style.overflow = 'hidden';
+    const onKey = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        setMobileMenuOpen(false);
+        setSearchOpen(false);
+      }
+    };
+    window.addEventListener('keydown', onKey);
+    return () => {
+      document.body.style.overflow = '';
+      window.removeEventListener('keydown', onKey);
+    };
+  }, [overlayOpen]);
 
   return (
     <header className="sticky top-0 z-40 w-full bg-canvas/95 dark:bg-gray-950/95 backdrop-blur-sm border-b border-gray-200 dark:border-gray-800">
@@ -168,9 +187,9 @@ export function Header() {
       {/* Mobile Menu */}
       {mobileMenuOpen && (
         <div className="fixed inset-0 z-50 md:hidden">
-          <div className="fixed inset-0 bg-black/50" onClick={() => setMobileMenuOpen(false)} />
-          <div className="fixed inset-y-0 right-0 z-50 w-full max-w-sm bg-white dark:bg-gray-900 shadow-xl">
-            <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700">
+          <div className="fixed inset-0 bg-black/60 backdrop-blur-[2px]" onClick={() => setMobileMenuOpen(false)} />
+          <div className="fixed inset-y-0 right-0 z-50 flex w-full max-w-sm flex-col bg-white dark:bg-gray-950 border-l border-gray-200 dark:border-gray-800 shadow-2xl">
+            <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-800 shrink-0">
               <Link href="/" className="flex items-center gap-2" aria-label="Laris Manis - Beranda">
                 <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-brand-600">
                   <ShoppingBagIcon className="h-5 w-5 text-white" />
@@ -185,7 +204,7 @@ export function Header() {
                 <XMarkIcon className="h-6 w-6" />
               </button>
             </div>
-            <nav className="p-4 space-y-2" aria-label="Mobile navigation">
+            <nav className="p-4 space-y-2 overflow-y-auto overscroll-contain flex-1 pb-[max(1rem,env(safe-area-inset-bottom))]" aria-label="Mobile navigation">
               {navLinks.map((link) => {
                 const isActive = pathname === link.href || (link.href !== '/' && pathname.startsWith(link.href));
                 return (
@@ -256,9 +275,9 @@ export function Header() {
       {/* Search Modal */}
       {searchOpen && (
         <div className="fixed inset-0 z-50 md:hidden">
-          <div className="fixed inset-0 bg-black/50" onClick={() => setSearchOpen(false)} />
-          <div className="fixed inset-y-0 right-0 z-50 w-full max-w-sm bg-white dark:bg-gray-900 shadow-xl">
-            <div className="flex items-center gap-2 p-4 border-b border-gray-200 dark:border-gray-700">
+          <div className="fixed inset-0 bg-black/60 backdrop-blur-[2px]" onClick={() => setSearchOpen(false)} />
+          <div className="fixed inset-y-0 right-0 z-50 flex w-full max-w-sm flex-col bg-white dark:bg-gray-950 border-l border-gray-200 dark:border-gray-800 shadow-2xl">
+            <div className="flex items-center gap-2 p-4 border-b border-gray-200 dark:border-gray-800 shrink-0">
               <button
                 onClick={() => setSearchOpen(false)}
                 className="p-2 rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-100 dark:hover:bg-gray-800"
@@ -276,7 +295,7 @@ export function Header() {
                 />
               </div>
             </div>
-            <div className="p-4 space-y-4 max-h-[60vh] overflow-y-auto">
+            <div className="p-4 space-y-4 overflow-y-auto overscroll-contain flex-1 pb-[max(1rem,env(safe-area-inset-bottom))]">
               <p className="text-sm text-gray-500 dark:text-gray-400 text-center py-8">
                 Fitur pencarian akan segera hadir
               </p>
