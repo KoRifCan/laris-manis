@@ -25,8 +25,7 @@ export async function GET(request: NextRequest) {
 
     let query = adminDb
       .collection('stores')
-      .where('isVerified', '==', false)
-      .orderBy('createdAt', 'asc');
+      .where('reviewStatus', '==', 'pending');
 
     const countSnapshot = await query.count().get();
     const total = countSnapshot.data().count;

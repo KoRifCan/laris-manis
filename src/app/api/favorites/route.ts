@@ -13,13 +13,6 @@ export async function GET(request: NextRequest) {
 
     const { user } = authResult;
 
-    if (user.role !== 'pembeli') {
-      return NextResponse.json(
-        { success: false, error: 'Hanya pembeli yang punya favorit' },
-        { status: 403 }
-      );
-    }
-
     const { searchParams } = new URL(request.url);
     const page = parseInt(searchParams.get('page') || '1');
     const limit = parseInt(searchParams.get('limit') || '20');
@@ -73,13 +66,6 @@ export async function POST(request: NextRequest) {
     }
 
     const { user } = authResult;
-
-    if (user.role !== 'pembeli') {
-      return NextResponse.json(
-        { success: false, error: 'Hanya pembeli yang bisa menambah favorit' },
-        { status: 403 }
-      );
-    }
 
     const body = await request.json();
     const { productId } = body;

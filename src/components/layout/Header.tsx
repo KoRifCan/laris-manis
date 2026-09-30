@@ -11,8 +11,12 @@ import {
   ShoppingBagIcon,
   Bars3Icon,
   XMarkIcon,
+  ChevronDownIcon,
+  UserIcon,
+  Cog6ToothIcon,
+  ArrowRightOnRectangleIcon,
 } from '@heroicons/react/24/outline';
-import { useSyncExternalStore, useEffect, useState } from 'react';
+import { useSyncExternalStore, useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import {
   getToken,
@@ -21,6 +25,8 @@ import {
   subscribeSession,
 } from '@/lib/client-auth';
 import { ThemeToggle } from '@/components/ThemeToggle';
+import { getModeSnapshot, subscribeMode, setMode } from '@/lib/mode';
+import { getMyAccount, type MyAccount } from '@/lib/account';
 
 export function Header() {
   const pathname = usePathname();
@@ -32,6 +38,56 @@ export function Header() {
     getSessionSnapshot,
     () => null
   );
+  const mode = useSyncExternalStore(subscribeMode, getModeSnapshot, () => 'belanja' as const);
+  const [profileOpen, setProfileOpen] = useState(false);
+  const [account, setAccount] = useState<MyAccount | null>(null);
+  const profileRef = useRef<HTMLDivElement | null>(null);
+
+  // Muat data akun (status toko) untuk menentukan item menu mode ganda
+  useEffect(() => {
+    let alive = true;
+    if (session) {
+      getMyAccount().then((data) => {
+        if (alive) setAccount(data);
+      });
+    } else {
+      setAccount(null);
+    }
+    return () => {
+      alive = false;
+    };
+  }, [session]);
+
+  // Tutup dropdown profil saat klik di luar / tekan Escape
+  useEffect(() => {
+    if (!profileOpen) return;
+    const onDown = (event: MouseEvent) => {
+      if (profileRef.current && !profileRef.current.contains(event.target as Node)) {
+        setProfileOpen(false);
+      }
+    };
+    const onKey = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') setProfileOpen(false);
+    };
+    document.addEventListener('mousedown', onDown);
+    document.addEventListener('keydown', onKey);
+    return () => {
+      document.removeEventListener('mousedown', onDown);
+      document.removeEventListener('keydown', onKey);
+    };
+  }, [profileOpen]);
+
+  const handleModeSwitch = () => {
+    setProfileOpen(false);
+    setMobileMenuOpen(false);
+    if (mode === 'belanja') {
+      setMode('toko');
+      router.push('/dashboard/penjual');
+    } else {
+      setMode('belanja');
+      router.push('/');
+    }
+  };
 
   const handleLogout = async () => {
     const token = getToken();
@@ -135,23 +191,78 @@ export function Header() {
             <ThemeToggle />
 
             {/* Auth/Profile */}
-            <div className="hidden sm:flex sm:items-center sm:gap-3">
+            <div className="hidden sm:flex sm:items-center sm:gap-3" ref={profileRef}>
               {session ? (
                 <>
-                  <span
-                    className="flex items-center gap-1.5 px-2 text-sm font-medium text-gray-700 dark:text-gray-300 max-w-[12rem] truncate"
-                    title={session.email || undefined}
-                  >
-                    <UserCircleIcon className="h-5 w-5 shrink-0" aria-hidden="true" />
-                    <span className="truncate">{session.displayName || session.email || 'Akun Saya'}</span>
-                  </span>
-                  <button
-                    type="button"
-                    onClick={handleLogout}
-                    className="px-3 py-1.5 text-sm font-medium rounded-lg border border-gray-300 text-gray-600 hover:text-gray-900 hover:border-gray-400 dark:border-gray-700 dark:text-gray-400 dark:hover:text-white dark:hover:border-gray-500 transition-colors"
-                  >
-                    Keluar
-                  </button>
+                  <div className="relative">
+                    <button
+                      type="button"
+                      onClick={() => setProfileOpen((open) => !open)}
+                      className="flex items-center gap-1.5 px-2 py-1.5 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800 transition-colors"
+                      aria-haspopup="menu"
+                      aria-expanded={profileOpen}
+                      title={session.email || undefined}
+                    >
+                      <UserCircleIcon className="h-5 w-5 shrink-0" aria-hidden="true" />
+                      <span className="max-w-[10rem] truncate">
+                        {session.displayName || session.email || 'Akun Saya'}
+                      </span>
+                      <ChevronDownIcon className="h-4 w-4 shrink-0" aria-hidden="true" />
+                    </button>
+
+                    {profileOpen && (
+                      <div
+                        className="absolute right-0 top-full z-50 mt-1.5 w-64 rounded-xl border border-gray-200 bg-white p-1.5 shadow-2xl dark:border-gray-800 dark:bg-gray-950"
+                        role="menu"
+                      >
+                        <div className="px-3 py-2 text-xs text-gray-500 dark:text-gray-400 truncate">
+                          {session.email}
+                        </div>
+                        <Link
+                          href="/akun/profil"
+                          onClick={() => setProfileOpen(false)}
+                          className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800"
+                          role="menuitem"
+                        >
+                          <UserIcon className="h-4 w-4" aria-hidden="true" />
+                          Profil
+                        </Link>
+                        <Link
+                          href="/akun/pengaturan"
+                          onClick={() => setProfileOpen(false)}
+                          className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800"
+                          role="menuitem"
+                        >
+                          <Cog6ToothIcon className="h-4 w-4" aria-hidden="true" />
+                          Pengaturan
+                        </Link>
+                        {account?.store?.isVerified && (
+                          <button
+                            type="button"
+                            onClick={handleModeSwitch}
+                            className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-sm font-medium text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800"
+                            role="menuitem"
+                          >
+                            <ShoppingBagIcon className="h-4 w-4" aria-hidden="true" />
+                            {mode === 'belanja' ? 'Mode Kelola Toko' : 'Mode Belanja'}
+                          </button>
+                        )}
+                        <hr className="my-1.5 border-gray-200 dark:border-gray-800" />
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setProfileOpen(false);
+                            handleLogout();
+                          }}
+                          className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800"
+                          role="menuitem"
+                        >
+                          <ArrowRightOnRectangleIcon className="h-4 w-4" aria-hidden="true" />
+                          Keluar
+                        </button>
+                      </div>
+                    )}
+                  </div>
                 </>
               ) : (
                 <>
@@ -240,6 +351,32 @@ export function Header() {
                     <p className="px-3 text-sm font-medium text-gray-500 dark:text-gray-400 truncate">
                       {session.displayName || session.email || 'Akun Saya'}
                     </p>
+                    <Link
+                      href="/akun/profil"
+                      onClick={() => setMobileMenuOpen(false)}
+                      className="flex items-center gap-3 px-3 py-3 rounded-lg text-base font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-100 dark:text-gray-400 dark:hover:text-white dark:hover:bg-gray-800"
+                    >
+                      <UserIcon className="h-6 w-6" aria-hidden="true" />
+                      Profil
+                    </Link>
+                    <Link
+                      href="/akun/pengaturan"
+                      onClick={() => setMobileMenuOpen(false)}
+                      className="flex items-center gap-3 px-3 py-3 rounded-lg text-base font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-100 dark:text-gray-400 dark:hover:text-white dark:hover:bg-gray-800"
+                    >
+                      <Cog6ToothIcon className="h-6 w-6" aria-hidden="true" />
+                      Pengaturan
+                    </Link>
+                    {account?.store?.isVerified && (
+                      <button
+                        type="button"
+                        onClick={handleModeSwitch}
+                        className="flex w-full items-center gap-3 px-3 py-3 rounded-lg text-base font-medium text-brand-600 hover:bg-brand-50 dark:text-brand-400 dark:hover:bg-brand-900/20"
+                      >
+                        <ShoppingBagIcon className="h-6 w-6" aria-hidden="true" />
+                        {mode === 'belanja' ? 'Mode Kelola Toko' : 'Mode Belanja'}
+                      </button>
+                    )}
                     <button
                       type="button"
                       onClick={handleLogout}

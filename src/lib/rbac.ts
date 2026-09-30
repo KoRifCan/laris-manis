@@ -78,17 +78,23 @@ export function createAuditLog(
   ipAddress?: string,
   userAgent?: string
 ) {
-  return adminDb.collection('auditLogs').add({
-    actorId,
-    actorRole,
-    action,
-    targetType,
-    targetId,
-    details,
-    ipAddress,
-    userAgent,
-    createdAt: new Date(),
-  });
+  // Firestore menolak nilai undefined — buang field opsional yang kosong
+  const clean = (obj: Record<string, any>) =>
+    Object.fromEntries(Object.entries(obj).filter(([, v]) => v !== undefined));
+
+  return adminDb.collection('auditLogs').add(
+    clean({
+      actorId,
+      actorRole,
+      action,
+      targetType,
+      targetId,
+      details: clean(details),
+      ipAddress,
+      userAgent,
+      createdAt: new Date(),
+    })
+  );
 }
 
 export const ROLE_PERMISSIONS: Record<UserRole, string[]> = {

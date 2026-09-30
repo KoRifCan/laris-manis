@@ -57,6 +57,7 @@ export async function PATCH(
       // Update store
       await adminDb.collection('stores').doc(id).update({
         isVerified: true,
+        reviewStatus: 'approved',
         verifiedAt: new Date(),
         verifiedBy: user.uid,
         updatedAt: new Date(),
@@ -73,7 +74,12 @@ export async function PATCH(
       });
 
     } else {
-      // Reject - update user application status
+      // Reject - tandai toko ditolak & update status pengajuan user
+      await adminDb.collection('stores').doc(id).update({
+        reviewStatus: 'rejected',
+        rejectedAt: new Date(),
+        updatedAt: new Date(),
+      });
       await adminDb.collection('users').doc(store.ownerId).update({
         sellerApplicationStatus: 'rejected',
         sellerApplicationRejectionReason: data.reason,

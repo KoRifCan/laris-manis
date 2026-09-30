@@ -22,6 +22,7 @@ import {
   ExclamationTriangleIcon,
 } from '@heroicons/react/24/outline';
 import Link from 'next/link';
+import { authFetch, readJson, ApiError, errorMessage } from '@/lib/client-auth';
 
 interface User {
   uid: string;
@@ -57,26 +58,25 @@ export default function SuperAdminDashboardPage() {
   const fetchData = async () => {
     try {
       const [usersRes, categoriesRes] = await Promise.all([
-        fetch('/api/admin/users', { credentials: 'include' }),
-        fetch('/api/categories', { credentials: 'include' }),
+        authFetch('/api/admin/users'),
+        authFetch('/api/categories'),
       ]);
 
-      if (usersRes.status === 401 || categoriesRes.status === 401) {
+      const usersData = await readJson<{ items: User[] }>(usersRes);
+      const categoriesData = await readJson<Category[]>(categoriesRes);
+
+      if (usersData?.success) {
+        setUsers(usersData.data?.items ?? []);
+      }
+      if (categoriesData?.success) {
+        setCategories(categoriesData.data ?? []);
+      }
+    } catch (err) {
+      if (err instanceof ApiError && err.kind === 'session') {
         router.push('/auth/login?callbackUrl=/dashboard/super-admin');
         return;
       }
-
-      const usersData = await usersRes.json();
-      const categoriesData = await categoriesRes.json();
-
-      if (usersData.success) {
-        setUsers(usersData.data.items);
-      }
-      if (categoriesData.success) {
-        setCategories(categoriesData.data);
-      }
-    } catch {
-      console.error('Failed to fetch super admin data');
+      console.error('Failed to fetch super admin data:', errorMessage(err));
     } finally {
       setLoading(false);
     }
@@ -93,11 +93,10 @@ export default function SuperAdminDashboardPage() {
     if (!confirm(`Yakin ingin mengubah role menjadi ${newRole}?`)) return;
 
     try {
-      const res = await fetch('/api/admin/users', {
+      const res = await authFetch('/api/admin/users', {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ uid, role: newRole }),
-        credentials: 'include',
       });
       
       if (res.ok) {

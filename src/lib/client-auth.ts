@@ -163,6 +163,28 @@ export function setSession(idToken: string, user: UserSession): void {
   notifyAuthChanged();
 }
 
+// Perbarui sebagian data sesi (mis. nama setelah edit profil) tanpa
+// menyentuh token; memancarkan lm-auth-changed agar Header ikut segar.
+export function updateSessionUser(patch: Partial<UserSession>): void {
+  if (typeof window === 'undefined') return;
+  const token = getToken();
+  if (!token || !isTokenValid(token)) return;
+  let current: UserSession = {};
+  try {
+    const raw = window.localStorage.getItem(USER_KEY);
+    current = raw ? (JSON.parse(raw) as UserSession) : {};
+  } catch {
+    current = {};
+  }
+  try {
+    window.localStorage.setItem(USER_KEY, JSON.stringify({ ...current, ...patch }));
+  } catch {
+    // abaikan storage penuh/private mode
+  }
+  snapshotCache = { token, user: null }; // invalidate cache useSyncExternalStore
+  notifyAuthChanged();
+}
+
 export function clearSession(): void {
   clearToken();
   if (typeof window !== 'undefined') {

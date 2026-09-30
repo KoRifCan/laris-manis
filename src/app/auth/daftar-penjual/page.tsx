@@ -1,7 +1,8 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { authFetch, readJson, ApiError, errorMessage, getSession } from '@/lib/client-auth';
 import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
 import { Button } from '@/components/ui/Button';
@@ -15,6 +16,16 @@ export default function DaftarPenjualPage() {
   const [step, setStep] = useState<'form' | 'success'>('form');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+
+  useEffect(() => {
+    if (!getSession()) {
+      router.push(
+        '/auth/login?callbackUrl=/auth/daftar-penjual&error=' +
+          encodeURIComponent('Silakan masuk dulu untuk mengajukan toko.')
+      );
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const [formData, setFormData] = useState({
     storeName: '',
@@ -37,25 +48,27 @@ export default function DaftarPenjualPage() {
     setLoading(true);
 
     try {
-      const res = await fetch('/api/auth/apply-seller', {
+      const res = await authFetch('/api/auth/apply-seller', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData),
       });
 
-      const data = await res.json();
+      const data = await readJson(res);
 
-      if (!res.ok) {
-        setError(data.error || 'Pengajuan gagal');
-        if (data.details) {
-          setError(data.details.join(', '));
-        }
+      if (!res.ok || !data?.success) {
+        const details = Array.isArray(data?.details) ? (data!.details as string[]).join(', ') : '';
+        setError(details || data?.error || 'Pengajuan gagal');
         return;
       }
 
       setStep('success');
-    } catch {
-      setError('Terjadi kesalahan jaringan');
+    } catch (err) {
+      if (err instanceof ApiError && err.kind === 'session') {
+        setError('Sesi berakhir. Silakan masuk kembali untuk mengirim pengajuan.');
+        return;
+      }
+      setError(errorMessage(err));
     } finally {
       setLoading(false);
     }
@@ -73,19 +86,19 @@ export default function DaftarPenjualPage() {
               </div>
               <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">Pengajuan Dikirim!</h1>
               <p className="text-gray-600 dark:text-gray-400 mb-8">
-                Pengajuan menjadi penjual Anda telah dikirim. Tim kami akan meninjau dalam 1-2 hari kerja.
-                Anda akan menerima notifikasi email setelah diverifikasi.
+                Pengajuan toko Anda sudah kami terima dan sedang menunggu verifikasi admin.
+                Setelah disetujui, Anda bisa menerbitkan produk dari dashboard penjual.
               </p>
               <div className="space-y-3">
-                <Link href="/">
+                <Link href="/akun/profil" className="block">
                   <Button className="w-full" size="lg">
                     <ArrowRightOnRectangleIcon className="h-5 w-5 mr-2" />
-                    Kembali ke Beranda
+                    Lihat Status di Profil
                   </Button>
                 </Link>
-                <Link href="/auth/login">
+                <Link href="/" className="block">
                   <Button variant="outline" className="w-full" size="lg">
-                    Masuk ke Akun
+                    Kembali ke Beranda
                   </Button>
                 </Link>
               </div>

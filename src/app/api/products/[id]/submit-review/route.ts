@@ -35,23 +35,18 @@ export async function POST(
 
     const product = productDoc.data()!;
 
-    // Check ownership
-    if (user.role === 'penjual' && product.sellerId !== user.uid) {
+    // Kepemilikan: penjual pemilik produk, pemilik toko, atau staf yang ditugasi
+    const storeDoc = await adminDb.collection('stores').doc(product.storeId).get();
+    const isSeller = product.sellerId === user.uid;
+    const isStoreOwner = storeDoc.exists && storeDoc.data()!.ownerId === user.uid;
+    const isAssignedStaff =
+      user.role === 'staf_toko' && user.assignedStoreIds?.includes(product.storeId);
+
+    if (!isSeller && !isStoreOwner && !isAssignedStaff) {
       return NextResponse.json(
         { success: false, error: 'Produk ini bukan milik Anda' },
         { status: 403 }
       );
-    }
-
-    if (user.role === 'staf_toko') {
-      const userDoc = await adminDb.collection('users').doc(user.uid).get();
-      const userData = userDoc.data();
-      if (!userData?.assignedStoreIds?.includes(product.storeId)) {
-        return NextResponse.json(
-          { success: false, error: 'Anda tidak memiliki akses ke toko ini' },
-          { status: 403 }
-        );
-      }
     }
 
     // Validate product is ready for review

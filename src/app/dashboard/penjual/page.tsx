@@ -24,6 +24,7 @@ import {
   HeartIcon,
 } from '@heroicons/react/24/outline';
 import Link from 'next/link';
+import { authFetch, readJson, ApiError, errorMessage } from '@/lib/client-auth';
 
 interface Product {
   id: string;
@@ -53,6 +54,7 @@ export default function SellerDashboardPage() {
   const [products, setProducts] = useState<Product[]>([]);
   const [store, setStore] = useState<Store | null>(null);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState('');
   const [activeTab, setActiveTab] = useState<'produk' | 'statistik' | 'profil'>('produk');
   const [statusFilter, setStatusFilter] = useState<'all' | 'aktif' | 'menunggu_review' | 'ditolak' | 'draft' | 'nonaktif'>('all');
 
@@ -62,27 +64,26 @@ export default function SellerDashboardPage() {
 
   const fetchData = async () => {
     try {
+      // authFetch menyertakan Bearer token; 401 → lempar ApiError 'session'
       const [productsRes, storeRes] = await Promise.all([
-        fetch('/api/products/me', { credentials: 'include' }),
-        fetch('/api/stores/me', { credentials: 'include' }),
+        authFetch('/api/products/me'),
+        authFetch('/api/stores/me'),
       ]);
 
-      if (productsRes.status === 401 || storeRes.status === 401) {
+      const productsData = await readJson<{ items: Product[] }>(productsRes);
+      const storeData = await readJson<Store>(storeRes);
+
+      if (productsData?.success) {
+        setProducts(productsData.data?.items ?? []);
+      }
+      // 404 dari /api/stores/me = belum punya toko → tampilkan empty state
+      setStore(storeRes.ok && storeData?.success && storeData.data ? storeData.data : null);
+    } catch (err) {
+      if (err instanceof ApiError && err.kind === 'session') {
         router.push('/auth/login?callbackUrl=/dashboard/penjual');
         return;
       }
-
-      const productsData = await productsRes.json();
-      const storeData = await storeRes.json();
-
-      if (productsData.success) {
-        setProducts(productsData.data.items);
-      }
-      if (storeData.success) {
-        setStore(storeData.data);
-      }
-    } catch {
-      console.error('Failed to fetch dashboard data');
+      setLoadError(errorMessage(err));
     } finally {
       setLoading(false);
     }
@@ -108,36 +109,40 @@ export default function SellerDashboardPage() {
 
   const handleDelete = async (id: string) => {
     if (!confirm('Yakin ingin menghapus produk ini?')) return;
-    
+
     try {
-      const res = await fetch(`/api/products/${id}`, {
-        method: 'DELETE',
-        credentials: 'include',
-      });
-      
+      const res = await authFetch(`/api/products/${id}`, { method: 'DELETE' });
       if (res.ok) {
         setProducts(prev => prev.filter(p => p.id !== id));
+      } else {
+        const data = await readJson(res);
+        alert(data?.error || 'Gagal menghapus produk');
       }
-    } catch {
-      console.error('Failed to delete product');
+    } catch (err) {
+      if (err instanceof ApiError && err.kind === 'session') {
+        router.push('/auth/login?callbackUrl=/dashboard/penjual');
+        return;
+      }
+      alert(errorMessage(err));
     }
   };
 
   const handleSubmitReview = async (id: string) => {
     try {
-      const res = await fetch(`/api/products/${id}/submit-review`, {
-        method: 'POST',
-        credentials: 'include',
-      });
-      
+      const res = await authFetch(`/api/products/${id}/submit-review`, { method: 'POST' });
+
       if (res.ok) {
         setProducts(prev => prev.map(p => p.id === id ? { ...p, status: 'menunggu_review' } : p));
       } else {
-        const data = await res.json();
-        alert(data.error || 'Gagal submit review');
+        const data = await readJson(res);
+        alert(data?.error || 'Gagal submit review');
       }
-    } catch {
-      console.error('Failed to submit review');
+    } catch (err) {
+      if (err instanceof ApiError && err.kind === 'session') {
+        router.push('/auth/login?callbackUrl=/dashboard/penjual');
+        return;
+      }
+      alert(errorMessage(err));
     }
   };
 
@@ -147,6 +152,47 @@ export default function SellerDashboardPage() {
         <Header />
         <main className="flex-1 flex items-center justify-center py-12">
           <div className="animate-spin rounded-full h-12 w-12 border-4 border-brand-600 border-t-transparent"></div>
+        </main>
+        <Footer />
+      </div>
+    );
+  }
+
+  // Belum punya toko → ajukan dulu
+  if (!store) {
+    return (
+      <div className="flex flex-col min-h-screen">
+        <Header />
+        <main className="flex-1 flex items-center justify-center bg-gray-50 px-4 py-12 dark:bg-gray-900">
+          <Card className="w-full max-w-md p-8 text-center">
+            <ShoppingBagIcon className="mx-auto h-12 w-12 text-brand-600" aria-hidden="true" />
+            <h1 className="mt-4 text-xl font-bold text-gray-900 dark:text-white">
+              {loadError ? 'Gagal memuat dashboard' : 'Anda belum memiliki toko'}
+            </h1>
+            <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">
+              {loadError
+                ? loadError
+                : 'Ajukan toko Anda terlebih dahulu. Setelah disetujui admin, Anda bisa menerbitkan produk dan mengelola toko dari sini.'}
+            </p>
+            <div className="mt-6 space-y-3">
+              {!loadError && (
+                <Link href="/auth/daftar-penjual" className="block">
+                  <Button className="w-full">Ajukan Jadi Penjual</Button>
+                </Link>
+              )}
+              <Button
+                variant="outline"
+                className="w-full"
+                onClick={() => {
+                  setLoadError('');
+                  setLoading(true);
+                  fetchData();
+                }}
+              >
+                Coba Lagi
+              </Button>
+            </div>
+          </Card>
         </main>
         <Footer />
       </div>
@@ -168,13 +214,35 @@ export default function SellerDashboardPage() {
                   Kelola toko dan produk Anda
                 </p>
               </div>
-              <Link href="/produk/baru">
-                <Button className="flex items-center gap-2">
+              {store?.isVerified ? (
+                <Link href="/produk/baru">
+                  <Button className="flex items-center gap-2">
+                    <PlusIcon className="h-5 w-5" />
+                    Tambah Produk
+                  </Button>
+                </Link>
+              ) : (
+                <span
+                  className="inline-flex items-center gap-2 rounded-lg bg-gray-200 px-4 py-2 text-sm font-medium text-gray-500 cursor-not-allowed dark:bg-gray-800 dark:text-gray-400"
+                  title="Tunggu verifikasi admin"
+                >
                   <PlusIcon className="h-5 w-5" />
                   Tambah Produk
-                </Button>
-              </Link>
+                </span>
+              )}
             </div>
+
+            {store && !store.isVerified && (
+              <div className="mt-4 rounded-xl border border-yellow-200 bg-yellow-50 p-4 text-sm text-yellow-800 dark:border-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-200">
+                <strong>Toko sedang menunggu verifikasi admin.</strong> Penambahan produk dan
+                penayangan di katalog dibuka setelah pengajuan disetujui.
+              </div>
+            )}
+            {loadError && (
+              <div className="mt-4 rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700 dark:border-red-800 dark:bg-red-900/20 dark:text-red-300">
+                {loadError}
+              </div>
+            )}
 
             {/* Store Status */}
             {store && (

@@ -3,6 +3,19 @@ import { authenticateRequest, requireRole } from '@/lib/api-auth';
 import { adminDb } from '@/lib/firebase-admin';
 import { validateSchema, productFiltersSchema } from '@/lib/validation';
 
+// Izin berbasis kepemilikan toko: pemilik toko (role apa pun, termasuk
+// penjual yang menunggu verifikasi) & staf toko yang ditugaskan.
+async function getOwnedStoreIds(user: { uid: string; role: string; assignedStoreIds?: string[] }): Promise<string[]> {
+  if (user.role === 'staf_toko') {
+    return user.assignedStoreIds ?? [];
+  }
+  const userDoc = await adminDb.collection('users').doc(user.uid).get();
+  const userData = userDoc.data();
+  if (userData?.storeId) return [userData.storeId];
+  const snapshot = await adminDb.collection('stores').where('ownerId', '==', user.uid).limit(3).get();
+  return snapshot.docs.map(doc => doc.id);
+}
+
 export async function GET(request: NextRequest) {
   try {
     const authResult = await authenticateRequest(request);
@@ -13,9 +26,10 @@ export async function GET(request: NextRequest) {
 
     const { user } = authResult;
 
-    if (!['penjual', 'staf_toko'].includes(user.role)) {
+    const ownedStoreIds = await getOwnedStoreIds(user);
+    if (!['penjual', 'staf_toko', 'admin', 'super_admin'].includes(user.role) && ownedStoreIds.length === 0) {
       return NextResponse.json(
-        { success: false, error: 'Hanya penjual dan staf toko yang bisa mengakses' },
+        { success: false, error: 'Anda belum memiliki toko' },
         { status: 403 }
       );
     }
@@ -27,14 +41,13 @@ export async function GET(request: NextRequest) {
 
     let query: any;
     
-    if (user.role === 'penjual') {
+    if (user.role !== 'staf_toko') {
+      // Pemilik toko melihat produk yang ia buat (sellerId = pembuat produk)
       query = adminDb.collection('products').where('sellerId', '==', user.uid);
     } else {
       // Staf toko - get products from assigned stores
-      const userDoc = await adminDb.collection('users').doc(user.uid).get();
-      const userData = userDoc.data();
-      const storeIds = userData?.assignedStoreIds || [];
-      
+      const storeIds = ownedStoreIds;
+
       if (storeIds.length === 0) {
         return NextResponse.json({
           success: true,
@@ -59,12 +72,10 @@ export async function GET(request: NextRequest) {
     
     if (offset > 0) {
       const cursorQuery = adminDb.collection('products');
-      if (user.role === 'penjual') {
+      if (user.role !== 'staf_toko') {
         cursorQuery.where('sellerId', '==', user.uid);
       } else {
-        const userDoc = await adminDb.collection('users').doc(user.uid).get();
-        const userData = userDoc.data();
-        cursorQuery.where('storeId', 'in', userData?.assignedStoreIds || []);
+        cursorQuery.where('storeId', 'in', ownedStoreIds);
       }
       if (status) cursorQuery.where('status', '==', status);
       cursorQuery.orderBy('updatedAt', 'desc').limit(offset);
@@ -109,9 +120,10 @@ export async function POST(request: NextRequest) {
 
     const { user } = authResult;
 
-    if (!['penjual', 'staf_toko'].includes(user.role)) {
+    const ownedStoreIdsPost = await getOwnedStoreIds(user);
+    if (!['penjual', 'staf_toko', 'admin', 'super_admin'].includes(user.role) && ownedStoreIdsPost.length === 0) {
       return NextResponse.json(
-        { success: false, error: 'Hanya penjual dan staf toko yang bisa membuat produk' },
+        { success: false, error: 'Anda belum memiliki toko. Ajukan toko dulu lewat halaman Jadi Penjual.' },
         { status: 403 }
       );
     }
@@ -127,18 +139,13 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Get store info
+    // Get store info — pemilik pakai tokonya sendiri, staf wajib menentukan storeId
     let storeId: string;
-    if (user.role === 'penjual') {
-      const userDoc = await adminDb.collection('users').doc(user.uid).get();
-      const userData = userDoc.data();
-      storeId = userData?.storeId;
+    if (user.role !== 'staf_toko') {
+      storeId = ownedStoreIdsPost[0];
     } else {
-      // Staf toko - need to specify storeId in request or use first assigned
       storeId = body.storeId;
-      const userDoc = await adminDb.collection('users').doc(user.uid).get();
-      const userData = userDoc.data();
-      if (!userData?.assignedStoreIds?.includes(storeId)) {
+      if (!ownedStoreIdsPost.includes(storeId)) {
         return NextResponse.json(
           { success: false, error: 'Anda tidak memiliki akses ke toko ini' },
           { status: 403 }
@@ -161,6 +168,14 @@ export async function POST(request: NextRequest) {
       );
     }
     const store = storeDoc.data()!;
+
+    // Produk baru hanya boleh dibuat setelah toko disetujui admin
+    if (!store.isVerified && !['admin', 'super_admin'].includes(user.role)) {
+      return NextResponse.json(
+        { success: false, error: 'Toko belum terverifikasi admin. Penambahan produk dibuka setelah pengajuan disetujui.' },
+        { status: 403 }
+      );
+    }
 
     // Get category name
     const categoryDoc = await adminDb.collection('categories').doc(data.categoryId).get();

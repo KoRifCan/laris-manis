@@ -20,6 +20,7 @@ import {
   ChevronRightIcon,
 } from '@heroicons/react/24/outline';
 import Link from 'next/link';
+import { authFetch, readJson, ApiError, errorMessage } from '@/lib/client-auth';
 
 interface PendingStore {
   id: string;
@@ -60,26 +61,25 @@ export default function AdminDashboardPage() {
   const fetchData = async () => {
     try {
       const [storesRes, productsRes] = await Promise.all([
-        fetch('/api/admin/stores/pending', { credentials: 'include' }),
-        fetch('/api/admin/products/pending', { credentials: 'include' }),
+        authFetch('/api/admin/stores/pending'),
+        authFetch('/api/admin/products/pending'),
       ]);
 
-      if (storesRes.status === 401 || productsRes.status === 401) {
+      const storesData = await readJson<{ items: PendingStore[] }>(storesRes);
+      const productsData = await readJson<{ items: PendingProduct[] }>(productsRes);
+
+      if (storesData?.success) {
+        setPendingStores(storesData.data?.items ?? []);
+      }
+      if (productsData?.success) {
+        setPendingProducts(productsData.data?.items ?? []);
+      }
+    } catch (err) {
+      if (err instanceof ApiError && err.kind === 'session') {
         router.push('/auth/login?callbackUrl=/dashboard/admin');
         return;
       }
-
-      const storesData = await storesRes.json();
-      const productsData = await productsRes.json();
-
-      if (storesData.success) {
-        setPendingStores(storesData.data.items);
-      }
-      if (productsData.success) {
-        setPendingProducts(productsData.data.items);
-      }
-    } catch {
-      console.error('Failed to fetch admin data');
+      console.error('Failed to fetch admin data:', errorMessage(err));
     } finally {
       setLoading(false);
     }
@@ -92,11 +92,10 @@ export default function AdminDashboardPage() {
     if (action === 'reject' && !reason) return;
 
     try {
-      const res = await fetch(`/api/admin/stores/${storeId}/verify`, {
+      const res = await authFetch(`/api/admin/stores/${storeId}/verify`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ action, reason }),
-        credentials: 'include',
       });
       
       if (res.ok) {
@@ -117,11 +116,10 @@ export default function AdminDashboardPage() {
     if (action === 'reject' && !reason) return;
 
     try {
-      const res = await fetch(`/api/admin/products/${productId}/review`, {
+      const res = await authFetch(`/api/admin/products/${productId}/review`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ action, reason }),
-        credentials: 'include',
       });
       
       if (res.ok) {

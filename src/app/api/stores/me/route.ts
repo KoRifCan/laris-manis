@@ -14,13 +14,8 @@ export async function GET(request: NextRequest) {
 
     const { user } = authResult;
 
-    if (user.role !== 'penjual') {
-      return NextResponse.json(
-        { success: false, error: 'Hanya penjual yang bisa mengakses toko sendiri' },
-        { status: 403 }
-      );
-    }
-
+    // Kepemilikan toko diambil dari dokumen user (bukan role tunggal),
+    // sehingga akun dengan mode ganda tetap bisa mengelola tokonya.
     const userDoc = await adminDb.collection('users').doc(user.uid).get();
     const userData = userDoc.data();
     
@@ -62,13 +57,6 @@ export async function POST(request: NextRequest) {
     }
 
     const { user } = authResult;
-
-    if (user.role !== 'penjual') {
-      return NextResponse.json(
-        { success: false, error: 'Hanya penjual yang bisa membuat toko' },
-        { status: 403 }
-      );
-    }
 
     const userDoc = await adminDb.collection('users').doc(user.uid).get();
     const userData = userDoc.data();
@@ -170,13 +158,6 @@ export async function PATCH(request: NextRequest) {
     }
 
     const { user } = authResult;
-
-    if (user.role !== 'penjual') {
-      return NextResponse.json(
-        { success: false, error: 'Hanya penjual yang bisa update toko' },
-        { status: 403 }
-      );
-    }
 
     const userDoc = await adminDb.collection('users').doc(user.uid).get();
     const userData = userDoc.data();

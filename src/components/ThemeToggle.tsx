@@ -2,26 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { SunIcon, MoonIcon } from '@heroicons/react/24/outline';
-
-const STORAGE_KEY = 'laris_manis_theme';
-
-function isDarkNow(): boolean {
-  try {
-    const stored = localStorage.getItem(STORAGE_KEY);
-    if (stored === 'dark') return true;
-    if (stored === 'light') return false;
-  } catch {
-    // localStorage tidak tersedia — ikuti sistem
-  }
-  return window.matchMedia('(prefers-color-scheme: dark)').matches;
-}
-
-function applyTheme(dark: boolean) {
-  document.documentElement.classList.toggle('dark', dark);
-  document
-    .getElementById('lm-theme-color')
-    ?.setAttribute('content', dark ? '#141310' : '#ffffff');
-}
+import { isDarkNow, applyTheme, setThemePref } from '@/lib/theme';
 
 // Tombol ganti tema terang/gelap. Pilihan disimpan di localStorage;
 // bila belum pernah memilih, mengikuti preferensi sistem.
@@ -32,7 +13,7 @@ export function ThemeToggle({ className }: { className?: string }) {
     setDark(isDarkNow());
     const onChange = (event: MediaQueryListEvent) => {
       // hanya ikuti sistem bila pengguna belum memilih sendiri
-      if (!localStorage.getItem(STORAGE_KEY)) {
+      if (!localStorage.getItem('laris_manis_theme')) {
         setDark(event.matches);
         applyTheme(event.matches);
       }
@@ -44,12 +25,7 @@ export function ThemeToggle({ className }: { className?: string }) {
 
   const toggle = () => {
     const next = !isDarkNow();
-    try {
-      localStorage.setItem(STORAGE_KEY, next ? 'dark' : 'light');
-    } catch {
-      // tetap ganti tema walau tidak bisa menyimpan
-    }
-    applyTheme(next);
+    setThemePref(next ? 'dark' : 'light');
     setDark(next);
   };
 

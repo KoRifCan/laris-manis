@@ -17,7 +17,14 @@ async function checkProductAccess(user: any, productId: string) {
     return { success: true, product, productDoc };
   }
 
-  if (user.role === 'penjual' && product.sellerId === user.uid) {
+  // Pemilik: pembuat produk ATAU pemilik toko produknya
+  // (role bisa masih 'pembeli' selama verifikasi toko berjalan)
+  if (product.sellerId === user.uid) {
+    return { success: true, product, productDoc };
+  }
+
+  const storeDoc = await adminDb.collection('stores').doc(product.storeId).get();
+  if (storeDoc.exists && storeDoc.data()!.ownerId === user.uid) {
     return { success: true, product, productDoc };
   }
 
@@ -30,6 +37,95 @@ async function checkProductAccess(user: any, productId: string) {
   }
 
   return { success: false, error: 'Anda tidak memiliki akses ke produk ini', status: 403 };
+}
+
+export async function GET(
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  try {
+    const { id } = await params;
+
+    const productDoc = await adminDb.collection('products').doc(id).get();
+    if (!productDoc.exists) {
+      return NextResponse.json(
+        { success: false, error: 'Produk tidak ditemukan' },
+        { status: 404 }
+      );
+    }
+
+    const product = { id: productDoc.id, ...productDoc.data()! };
+
+    // Autentikasi opsional: publik hanya boleh melihat produk aktif;
+    // pemilik/staf/admin boleh melihat produk non-aktif (preview)
+    let user: any = null;
+    if (request.headers.get('authorization')) {
+      const authResult = await authenticateRequest(request);
+      if (!(authResult instanceof NextResponse)) {
+        user = authResult.user;
+      }
+    }
+
+    if (product.status !== 'aktif') {
+      let allowed = user && ['super_admin', 'admin'].includes(user.role);
+      if (user && !allowed) {
+        if (product.sellerId === user.uid) {
+          allowed = true;
+        } else {
+          const storeDoc = product.storeId
+            ? await adminDb.collection('stores').doc(product.storeId).get()
+            : null;
+          if (storeDoc?.exists && storeDoc.data()!.ownerId === user.uid) {
+            allowed = true;
+          } else if (user.role === 'staf_toko') {
+            const userDoc = await adminDb.collection('users').doc(user.uid).get();
+            allowed = !!userDoc.data()?.assignedStoreIds?.includes(product.storeId);
+          }
+        }
+      }
+      if (!allowed) {
+        return NextResponse.json(
+          { success: false, error: 'Produk tidak ditemukan' },
+          { status: 404 }
+        );
+      }
+    }
+
+    // Gabung info toko (halaman detail /produk/[id] butuh field store*)
+    let store: Record<string, any> | null = null;
+    if (product.storeId) {
+      const storeDoc = await adminDb.collection('stores').doc(product.storeId).get();
+      if (storeDoc.exists) {
+        store = { id: storeDoc.id, ...storeDoc.data()! };
+      }
+    }
+
+    return NextResponse.json({
+      success: true,
+      data: {
+        product: {
+          ...product,
+          storeName: store?.name || '',
+          storeSlug: store?.slug || '',
+          storeLogoUrl: store?.logoUrl || null,
+          storeDescription: store?.description || '',
+          storeCity: store?.city || '',
+          storeProvince: store?.province || '',
+          storePhone: store?.phone || '',
+          storeWhatsapp: store?.whatsapp || '',
+          storeIsVerified: !!store?.isVerified,
+          storeRating: typeof store?.rating === 'number' ? store.rating : 0,
+          storeReviewCount: store?.reviewCount || 0,
+        },
+      },
+    });
+  } catch (error: any) {
+    console.error('Get product error:', error);
+    return NextResponse.json(
+      { success: false, error: error.message || 'Terjadi kesalahan server' },
+      { status: 500 }
+    );
+  }
 }
 
 export async function PATCH(
@@ -144,19 +240,19 @@ export async function DELETE(
 
     const { product } = accessCheck;
 
-    // Penjual can only delete non-active products
-    if (user.role === 'penjual' && product.status === 'aktif') {
-      return NextResponse.json(
-        { success: false, error: 'Produk aktif tidak bisa dihapus, nonaktifkan dulu' },
-        { status: 400 }
-      );
-    }
-
     // Staf toko cannot delete
     if (user.role === 'staf_toko') {
       return NextResponse.json(
         { success: false, error: 'Staf toko tidak bisa menghapus produk' },
         { status: 403 }
+      );
+    }
+
+    // Pemilik (non-admin) hanya bisa menghapus produk non-aktif
+    if (!['admin', 'super_admin'].includes(user.role) && product.status === 'aktif') {
+      return NextResponse.json(
+        { success: false, error: 'Produk aktif tidak bisa dihapus, nonaktifkan dulu' },
+        { status: 400 }
       );
     }
 

@@ -80,13 +80,15 @@ export const createCategorySchema = z.object({
 });
 
 export const reviewProductSchema = z.object({
-  productId: z.string().min(1),
+  // productId diambil dari path param, field body bersifat opsional
+  productId: z.string().min(1).optional(),
   action: z.enum(['approve', 'reject']),
   reason: z.string().max(500).optional(),
 });
 
 export const verifyStoreSchema = z.object({
-  storeId: z.string().min(1),
+  // storeId diambil dari path param, field body bersifat opsional
+  storeId: z.string().min(1).optional(),
   action: z.enum(['approve', 'reject']),
   reason: z.string().max(500).optional(),
 });
