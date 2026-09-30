@@ -26,9 +26,8 @@ export const metadata: Metadata = {
   creator: 'Laris Manis',
   publisher: 'Laris Manis',
   robots: 'index, follow',
-  verification: {
-    google: 'google-site-verification-code-here',
-  },
+  // verification.google dihapus — isi dengan kode asli dari Google Search
+  // Console bila tersedia (placeholder tidak mempercepat verifikasi)
   openGraph: {
     type: 'website',
     locale: 'id_ID',
