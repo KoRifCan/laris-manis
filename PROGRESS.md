@@ -76,6 +76,14 @@ Urutan kerja disepakati: rute 404 → tema → menu hamburger → akun/peran →
 - **Token**: shade `kunyit-50/800/900/950` dan `pandan-200/800/900/950` ditambahkan (dipakai halaman baru); nol kelas merah di semua halaman baru
 - **Verifikasi production** (deploy Ready `laris-manis-hiwrlrts9`, alias `laris-manis-id.vercel.app`): ke-11 URL → **200**; BFS crawl ulang 20 halaman → seluruh link internal **200**, tidak ada sisa 404
 
+#### Kategori 2: Tema Putih Pandan + toggle terang/gelap ✅ COMPLETED (commits `c9f099d`+`bc48fe8`, deploy `laris-manis-6bn7tuisq`)
+- **Palet**: ramp `brand-*` merah → Pandan Hijau (`#176B51`/`#0E4F3B`/dst), kanvas `#fbf8f3` → **putih `#FFFFFF`** (abu hangat tetap jadi section alternatif), kunyit-400 → `#E8A317`; override high-contrast juga hijau tua; ilustrasi `EtalaseCollage` (gerobak) merah → hijau
+- **Mode gelap**: `@custom-variant dark` berbasis **kelas `.dark`** (bukan media query) + skrip anti-flicker di `<head>` (baca `localStorage 'laris_manis_theme'`, default ikut sistem) + `color-scheme` mengikuti tema
+- **Toggle**: `src/components/ThemeToggle.tsx` (ikon bulan/matahari) di header atas — tersedia desktop & mobile; pilihan tersimpan di localStorage; `suppressHydrationWarning` pada `<html>`
+- **theme-color**: meta merah `#9e1b32` dihapus; satu meta dinamis `#lm-theme-color` = `#ffffff` terang / `#141310` gelap, diperbarui skrip & toggle
+- **Aset ikut rapikan**: `manifest.json` theme_color indigo `#4f46e5` → `#176B51` (blok screenshots dihapus — filenya tidak pernah ada); ikon PWA PNG semuanya **placeholder 1×1** & SVG indigo → diregenerasi hijau (PIL); `shortcut-*.png` yang hilang dibuat; **`og-image.png` 404 → dibuat baru** 1200×630 (putih + logo hijau + aksen kunyit)
+- **Verifikasi production** (deploy Ready `laris-manis-6bn7tuisq`): meta theme-color `#ffffff` ✓; nol hash `9e1b32`/`4f46e5` di HTML ✓; CSS build `--color-canvas:#fff`, `--color-brand-600:#176b51` ✓; kode toggle (`laris_manis_theme`) ada di JS bundle ✓; `/og-image.png`, `/icons/icon-512x512.png`, `/manifest.json` → 200, `theme_color: #176B51` ✓
+
 ### Phase 6: Testing & Deploy Produksi (Vercel)
 - [ ] Unit & integration tests
 - [ ] Deploy ke Vercel
@@ -90,10 +98,10 @@ Urutan kerja disepakati: rute 404 → tema → menu hamburger → akun/peran →
 ---
 
 ## Current Status
-**Phase**: 8 - Audit Menyeluruh, Kategori 1 Rute (selesai, tayang di production)
+**Phase**: 8 - Audit Menyeluruh, Kategori 1-2 Rute & Tema (selesai, tayang di production)
 **Branch**: fix/audit-menyeluruh
-**Last Commit**: 11 halaman 404 → dibuat & diverifikasi 200
-**Production**: https://laris-manis-id.vercel.app (deploy `laris-manis-hiwrlrts9`)
+**Last Commit**: aset PWA/og-image dibuat ulang hijau Pandan
+**Production**: https://laris-manis-id.vercel.app (deploy `laris-manis-6bn7tuisq`)
 
 ## Environment Variables Needed (for Vercel/GitHub Secrets)
 - `NEXT_PUBLIC_FIREBASE_API_KEY`
