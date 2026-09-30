@@ -98,6 +98,12 @@ Urutan kerja disepakati: rute 404 → tema → menu hamburger → akun/peran →
 - **UI baru**: `/akun/profil` (data diri + foto + status toko + ganti mode), `/akun/pengaturan` (tema terang/gelap/sistem, ganti sandi, sesi), `/produk/baru` (buat produk → `/api/products/me`); `Header`: dropdown profil + pindah mode belanja↔toko; dashboard penjual: state "belum punya toko" & banner tunggu verifikasi (tombol produk dinonaktifkan)
 - **e2e production** (40/40 cek PASS pada deploy `laris-manis-rnwtw7s11`): daftar → login → PATCH profil → ganti sandi (login ulang) → apply-seller (pending, dobel ditolak) → blokir produk sebelum verifikasi → admin list/approve → klaim jadi `penjual` → buat/PATCH produk → submit-review sendiri `menunggu_review` → admin approve → `aktif` + join toko ✓; negatif: user lain PATCH/DELETE produk → 403, pembeli submit-review → 403, penjual akses endpoint admin → 403, produk tak ada → 404
 
+#### Kategori 5: Sisa desain & audit link final ✅ COMPLETED (commit `970693e`, deploy `laris-manis-mpkxae3qg`)
+- **favicon.ico**: ternyata ikon hitam default 256px → diregenerasi multi-size (16–128) dari ikon brand hijau Pandan; verifikasi prod: dominan `#176B51` + putih ✓
+- **Bersih-bersih**: placeholder `verification.google` dihapus (kode asli menunggu Google Search Console), 5 SVG starter Next (`file/globe/next/vercel/window.svg`) tak direferensikan → dihapus (kini 404), folder `public/screenshots` kosong dihapus (blok manifest sudah dibersihkan di kategori 2)
+- **Meta final**: `theme-color` `#ffffff` dinamis ✓, `og:image` absolut + 1200×630 ✓, `twitter:card summary_large_image` ✓, 0 kemunculan merah/indigo (`9e1b32`/`4f46e5`) ✓, `/og-image.png` & `/manifest.json` → 200 ✓
+- **Crawl final production**: 42 URL (semua halaman dari beranda + aset statis) → **42/42 200**, nol link rusak
+
 ### Phase 6: Testing & Deploy Produksi (Vercel)
 - [ ] Unit & integration tests
 - [ ] Deploy ke Vercel
@@ -112,11 +118,11 @@ Urutan kerja disepakati: rute 404 → tema → menu hamburger → akun/peran →
 ---
 
 ## Current Status
-**Phase**: 8 - Audit Menyeluruh, Kategori 1-4 Rute, Tema, Menu & Akun/Peran (selesai, tayang di production)
+**Phase**: 8 - Audit Menyeluruh Produksi — Kategori 1-5 **SELESAI SEMUA**, tayang di production
 **Branch**: fix/audit-menyeluruh
-**Last Commit**: kategori 4 — peran ganda & RBAC kepemilikan (e2e 40/40 PASS)
-**Production**: https://laris-manis-id.vercel.app (deploy `laris-manis-rnwtw7s11`)
-**Tersisa**: kategori 5 — sisa desain (google-site-verification placeholder, favicon, screenshots, crawl link final)
+**Last Commit**: kategori 5 — favicon hijau + bersih-bersih aset + crawl final 42/42
+**Production**: https://laris-manis-id.vercel.app (deploy `laris-manis-mpkxae3qg`)
+**Belum / butuh tindakan di luar repo**: kode google-site-verification (Google Search Console); domain produksi masuk Firebase *Authorized domains* + penyedia email untuk kirim tautan verifikasi/reset (tanpa ini reset-sandi produksi tidak terkirim); wiring service worker (`sw.js` disajikan tapi belum pernah didaftarkan); rate limiting & unit test (Phase 6, di luar lingkup audit)
 
 ## Environment Variables Needed (for Vercel/GitHub Secrets)
 - `NEXT_PUBLIC_FIREBASE_API_KEY`
