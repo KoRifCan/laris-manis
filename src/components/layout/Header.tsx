@@ -132,6 +132,7 @@ export function Header() {
   }, [overlayOpen]);
 
   return (
+    <>
     <header className="sticky top-0 z-40 w-full bg-canvas/95 dark:bg-gray-950/95 backdrop-blur-sm border-b border-gray-200 dark:border-gray-800">
       <nav className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8" aria-label="Main navigation">
         <div className="flex h-16 items-center justify-between">
@@ -294,12 +295,20 @@ export function Header() {
           </div>
         </div>
       </nav>
+    </header>
 
       {/* Mobile Menu */}
       {mobileMenuOpen && (
-        <div className="fixed inset-0 z-50 md:hidden">
-          <div className="fixed inset-0 bg-black/60 backdrop-blur-[2px]" onClick={() => setMobileMenuOpen(false)} />
-          <div className="fixed inset-y-0 right-0 z-50 flex w-full max-w-sm flex-col bg-white dark:bg-gray-950 border-l border-gray-200 dark:border-gray-800 shadow-2xl">
+        <div className="fixed inset-0 z-50 md:hidden" role="dialog" aria-modal="true" aria-label="Menu navigasi">
+          <div
+            className="absolute inset-0 bg-black/60 backdrop-blur-[2px] animate-fade-in"
+            onClick={() => setMobileMenuOpen(false)}
+            aria-hidden="true"
+          />
+          <aside
+            className="absolute inset-y-0 right-0 z-50 flex w-[86%] max-w-sm flex-col bg-white dark:bg-gray-950 border-l border-gray-200 dark:border-gray-800 shadow-2xl animate-slide-in-right pt-[env(safe-area-inset-top)]"
+            aria-label="Sidebar navigasi"
+          >
             <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-800 shrink-0">
               <Link href="/" className="flex items-center gap-2" aria-label="Laris Manis - Beranda">
                 <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-brand-600">
@@ -405,15 +414,19 @@ export function Header() {
                 )}
               </div>
             </nav>
-          </div>
+          </aside>
         </div>
       )}
 
       {/* Search Modal */}
       {searchOpen && (
-        <div className="fixed inset-0 z-50 md:hidden">
-          <div className="fixed inset-0 bg-black/60 backdrop-blur-[2px]" onClick={() => setSearchOpen(false)} />
-          <div className="fixed inset-y-0 right-0 z-50 flex w-full max-w-sm flex-col bg-white dark:bg-gray-950 border-l border-gray-200 dark:border-gray-800 shadow-2xl">
+        <div className="fixed inset-0 z-50 md:hidden" role="dialog" aria-modal="true" aria-label="Pencarian">
+          <div
+            className="absolute inset-0 bg-black/60 backdrop-blur-[2px] animate-fade-in"
+            onClick={() => setSearchOpen(false)}
+            aria-hidden="true"
+          />
+          <aside className="absolute inset-y-0 right-0 z-50 flex w-[86%] max-w-sm flex-col bg-white dark:bg-gray-950 border-l border-gray-200 dark:border-gray-800 shadow-2xl animate-slide-in-right pt-[env(safe-area-inset-top)]">
             <div className="flex items-center gap-2 p-4 border-b border-gray-200 dark:border-gray-800 shrink-0">
               <button
                 onClick={() => setSearchOpen(false)}
@@ -437,9 +450,9 @@ export function Header() {
                 Fitur pencarian akan segera hadir
               </p>
             </div>
-          </div>
+          </aside>
         </div>
       )}
-    </header>
+    </>
   );
 }

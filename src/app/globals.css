@@ -202,6 +202,11 @@
     animation: scaleIn 0.2s ease-out;
   }
 
+  /* Sidebar menu mobile: meluncur masuk dari kanan */
+  .animate-slide-in-right {
+    animation: slideInRight 0.25s cubic-bezier(0.2, 0.8, 0.2, 1);
+  }
+
   /* Satu-satunya animasi besar: kartu dagangan "turun ke rak" */
   .shelf-settle {
     animation: shelfSettle 0.45s cubic-bezier(0.2, 0.8, 0.2, 1) both;
@@ -254,6 +259,11 @@
       opacity: 1;
       transform: scale(1);
     }
+  }
+  
+  @keyframes slideInRight {
+    from { transform: translateX(100%); }
+    to { transform: translateX(0); }
   }
   
   /* Text balance */
