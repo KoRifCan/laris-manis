@@ -5,7 +5,7 @@
   "start_url": "/",
   "display": "standalone",
   "background_color": "#ffffff",
-  "theme_color": "#4f46e5",
+  "theme_color": "#176B51",
   "orientation": "portrait-primary",
   "scope": "/",
   "lang": "id",
@@ -74,22 +74,6 @@
       "description": "Lihat produk favorit Anda",
       "url": "/favorit",
       "icons": [{ "src": "/icons/shortcut-favorit.png", "sizes": "192x192" }]
-    }
-  ],
-  "screenshots": [
-    {
-      "src": "/screenshots/home.png",
-      "sizes": "1280x720",
-      "type": "image/png",
-      "form_factor": "wide",
-      "label": "Halaman Utama Laris Manis"
-    },
-    {
-      "src": "/screenshots/katalog.png",
-      "sizes": "1280x720",
-      "type": "image/png",
-      "form_factor": "wide",
-      "label": "Katalog Produk"
     }
   ],
   "prefer_related_applications": false,
