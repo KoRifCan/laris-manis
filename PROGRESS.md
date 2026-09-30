@@ -66,6 +66,16 @@ Platform etalase produk UMKM (marketplace multi-toko) berbasis web + PWA
 - Catatan: pesan "Terjadi kesalahan jaringan" generik di halaman lain (daftar, lupa-password, verifikasi-email) belum ditangani — hanya login & favorit sesuai lingkup tugas
 - **Sesi tampilan** (laporan lanjutan: "login berhasil tapi tidak ada perubahan, disuruh login lagi"): `client-auth` kini menyimpan sesi (token + nama/email/role) dan memancarkan event `lm-auth-changed`; Header (desktop & mobile) menampilkan nama pengguna + tombol **Keluar** saat sesi valid (via `useSyncExternalStore`, tanpa hydration mismatch); halaman login **auto-redirect** bila sudah punya sesi valid — deploy production `laris-manis-gucj6ssd8`
 
+### Phase 8: Audit Menyeluruh Produksi (branch `fix/audit-menyeluruh`)
+Urutan kerja disepakati: rute 404 → tema → menu hamburger → akun/peran → sisa desain. Tiap kategori: commit kecil → push → deploy **production** → verifikasi URL production → update PROGRESS.
+
+#### Kategori 1: Rute — 11 halaman 404 ✅ COMPLETED (commit `c8eceee`, deploy `laris-manis-hiwrlrts9`)
+- **Temuan**: crawl 9 halaman utama production → 27 link internal, 11 di antaranya 404: `/kategori` (folder kosong), `/tentang`, `/bantuan`, `/bantuan/belanja`, `/privasi`, `/syarat`, `/panduan/penjual`, `/kebijakan/penjual`, `/karir`, `/blog`, `/kontak`
+- **Dibuat**: 11 halaman penuh, bahasa Indonesia, tanpa konten palsu (karir & blog jujur "belum ada/ disiapkan", kontak tanpa email/telepon karangan) — kerangka bersama `src/components/StaticPage.tsx` (hero breadcrumb + konten + footer), token warna global agar ikut tema
+- **Refactor**: tile kategori dipindah ke `src/lib/category-tiles.ts` (dipakai beranda + `/kategori`, tidak duplikasi)
+- **Token**: shade `kunyit-50/800/900/950` dan `pandan-200/800/900/950` ditambahkan (dipakai halaman baru); nol kelas merah di semua halaman baru
+- **Verifikasi production** (deploy Ready `laris-manis-hiwrlrts9`, alias `laris-manis-id.vercel.app`): ke-11 URL → **200**; BFS crawl ulang 20 halaman → seluruh link internal **200**, tidak ada sisa 404
+
 ### Phase 6: Testing & Deploy Produksi (Vercel)
 - [ ] Unit & integration tests
 - [ ] Deploy ke Vercel
@@ -80,10 +90,10 @@ Platform etalase produk UMKM (marketplace multi-toko) berbasis web + PWA
 ---
 
 ## Current Status
-**Phase**: 5c - Perbaikan Login & Favorit (Complete, sudah tayang di production)
-**Branch**: fix/auth-favorit-error
-**Last Commit**: Login & favorit kirim token, pesan error terdiferensiasi
-**Production**: https://laris-manis-id.vercel.app (deploy `laris-manis-rbgev3gse`, desain Phase 5b ikut tayang)
+**Phase**: 8 - Audit Menyeluruh, Kategori 1 Rute (selesai, tayang di production)
+**Branch**: fix/audit-menyeluruh
+**Last Commit**: 11 halaman 404 → dibuat & diverifikasi 200
+**Production**: https://laris-manis-id.vercel.app (deploy `laris-manis-hiwrlrts9`)
 
 ## Environment Variables Needed (for Vercel/GitHub Secrets)
 - `NEXT_PUBLIC_FIREBASE_API_KEY`
