@@ -9,6 +9,7 @@ import {
   ArrowRightOnRectangleIcon,
   ShieldCheckIcon,
   DocumentTextIcon,
+  CheckCircleIcon,
 } from '@heroicons/react/24/outline';
 import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
@@ -24,6 +25,8 @@ import {
   clearSession,
 } from '@/lib/client-auth';
 import { getThemePref, setThemePref, type ThemePref } from '@/lib/theme';
+import { GoogleIcon } from '@/components/ui/GoogleIcon';
+import { linkGoogleToCurrentAccount } from '@/lib/google-auth';
 
 const THEME_OPTIONS: { value: ThemePref; label: string }[] = [
   { value: 'light', label: 'Terang' },
@@ -43,6 +46,9 @@ export default function PengaturanPage() {
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
+  // null = memuat status kaitan Google
+  const [googleLinked, setGoogleLinked] = useState<boolean | null>(null);
+  const [linkingGoogle, setLinkingGoogle] = useState(false);
 
   useEffect(() => {
     const session = getSession();
@@ -59,6 +65,15 @@ export default function PengaturanPage() {
       setEmail(initialEmail);
       setTheme(getThemePref());
     });
+    (async () => {
+      try {
+        const res = await authFetch('/api/users/me');
+        const data = await readJson<{ googleProviderLinked?: boolean }>(res);
+        setGoogleLinked(Boolean(res.ok && data?.success && data.data?.googleProviderLinked));
+      } catch {
+        setGoogleLinked(false);
+      }
+    })();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -105,6 +120,52 @@ export default function PengaturanPage() {
       setError(errorMessage(err));
     } finally {
       setSaving(false);
+    }
+  };
+
+  const handleLinkGoogle = async () => {
+    setLinkingGoogle(true);
+    setError('');
+    setMessage('');
+    try {
+      // 1. Custom token uid yang sama → Firebase client punya currentUser
+      const sRes = await authFetch('/api/auth/google/link-session', { method: 'POST' });
+      const sData = await readJson<{ customToken: string }>(sRes);
+      if (!sRes.ok || !sData?.success || !sData.data?.customToken) {
+        setError(sData?.error || 'Gagal menyiapkan penautan Google.');
+        return;
+      }
+      // 2. Popup Google → linkWithPopup ke akun yang SAMA
+      const r = await linkGoogleToCurrentAccount(sData.data.customToken);
+      if (r.status === 'cancelled') {
+        setMessage('Pemilihan akun Google dibatalkan.');
+        return;
+      }
+      if (r.status === 'error') {
+        setError(r.message || 'Gagal menautkan akun Google.');
+        return;
+      }
+      // 3. Konfirmasi server: provider terpasang & uid cocok → tandai Firestore
+      const cRes = await authFetch('/api/auth/google/link', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ googleIdToken: r.googleIdToken }),
+      });
+      const cData = await readJson(cRes);
+      if (!cRes.ok || !cData?.success) {
+        setError(cData?.error || 'Gagal konfirmasi penautan Google.');
+        return;
+      }
+      setGoogleLinked(true);
+      setMessage('Akun Google berhasil dikaitkan.');
+    } catch (err) {
+      if (err instanceof ApiError && err.kind === 'session') {
+        router.push('/auth/login?callbackUrl=/akun/pengaturan');
+        return;
+      }
+      setError(errorMessage(err));
+    } finally {
+      setLinkingGoogle(false);
     }
   };
 
@@ -167,6 +228,41 @@ export default function PengaturanPage() {
                   {option.label}
                 </button>
               ))}
+            </div>
+          </Card>
+
+          {/* Akun Google */}
+          <Card className="p-6 mb-6">
+            <h2 className="flex items-center gap-2 font-semibold text-gray-900 dark:text-white">
+              <GoogleIcon className="h-5 w-5" />
+              Akun Google
+            </h2>
+            <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">
+              Kaitkan akun Google untuk bisa masuk tanpa password. Email yang sama
+              berarti satu akun yang sama — tidak ada akun ganda.
+            </p>
+            <div className="mt-4">
+              {googleLinked === null ? (
+                <span className="text-sm text-gray-500 dark:text-gray-400">Memeriksa status kaitan...</span>
+              ) : googleLinked ? (
+                <p
+                  role="status"
+                  className="inline-flex items-center gap-2 rounded-lg bg-green-50 border border-green-200 px-4 py-2.5 text-sm font-medium text-green-700 dark:bg-green-950 dark:border-green-800 dark:text-green-300"
+                >
+                  <CheckCircleIcon className="h-5 w-5" aria-hidden="true" />
+                  Akun Google sudah dikaitkan
+                </p>
+              ) : (
+                <Button
+                  type="button"
+                  variant="outline"
+                  loading={linkingGoogle}
+                  onClick={handleLinkGoogle}
+                >
+                  <GoogleIcon className="h-5 w-5 mr-2" />
+                  Kaitkan ke Akun Google
+                </Button>
+              )}
             </div>
           </Card>
 

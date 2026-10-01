@@ -66,6 +66,7 @@ export async function GET(request: NextRequest) {
         emailVerified: userData.emailVerified,
         storeId: userData.storeId,
         assignedStoreIds: userData.assignedStoreIds,
+        googleProviderLinked: Boolean(userData?.googleProviderLinked),
         sellerApplicationStatus: userData.sellerApplicationStatus,
         sellerApplication: userData.sellerApplication,
         store,

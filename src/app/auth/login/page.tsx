@@ -10,6 +10,13 @@ import { Input } from '@/components/ui/Input';
 import { Card } from '@/components/ui/Card';
 import { formatRupiah } from '@/lib/utils';
 import { getSession, setSession, readJson } from '@/lib/client-auth';
+import { Modal } from '@/components/ui/Modal';
+import { GoogleIcon } from '@/components/ui/GoogleIcon';
+import {
+  startGoogleSignIn,
+  completeGoogleLinkWithPassword,
+} from '@/lib/google-auth';
+import type { OAuthCredential } from 'firebase/auth';
 import { 
   EyeIcon, 
   EyeSlashIcon,
@@ -34,6 +41,14 @@ function LoginForm() {
     errorParam || (callbackUrl !== '/' ? 'Silakan masuk terlebih dahulu untuk melanjutkan.' : '');
   const [error, setError] = useState(defaultNotice);
   const [success, setSuccess] = useState('');
+  const [googleLoading, setGoogleLoading] = useState(false);
+  // Email Google sama dgn akun password → minta password utk menautkan (satu akun)
+  const [googlePending, setGooglePending] = useState<{
+    email: string;
+    credential: OAuthCredential | null;
+  } | null>(null);
+  const [googlePassword, setGooglePassword] = useState('');
+  const [googleLinkLoading, setGoogleLinkLoading] = useState(false);
 
   // Sudah login? tidak perlu menampilkan form lagi.
   useEffect(() => {
@@ -90,6 +105,76 @@ function LoginForm() {
       );
     } finally {
       setLoading(false);
+    }
+  };
+
+  const finishGoogleLogin = async (idToken: string) => {
+    try {
+      const res = await fetch('/api/auth/google', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ idToken }),
+      });
+      const data = await readJson<{
+        idToken: string;
+        displayName?: string;
+        email?: string;
+        role?: string;
+      }>(res);
+      if (!res.ok || !data?.success || !data.data?.idToken) {
+        setError(data?.error || 'Gagal masuk dengan Google. Silakan coba lagi.');
+        return;
+      }
+      setSession(data.data.idToken, {
+        displayName: data.data.displayName ?? null,
+        email: data.data.email ?? null,
+        role: data.data.role ?? null,
+      });
+      setSuccess('Login berhasil! Mengalihkan...');
+      setTimeout(() => router.push(callbackUrl), 1200);
+    } catch {
+      setError('Tidak dapat terhubung ke server. Periksa koneksi Anda lalu coba lagi.');
+    }
+  };
+
+  const handleGoogle = async () => {
+    setError('');
+    setGoogleLoading(true);
+    try {
+      const result = await startGoogleSignIn();
+      if (result.status === 'success' && result.idToken) {
+        await finishGoogleLogin(result.idToken);
+      } else if (result.status === 'needs-password' && result.email) {
+        setGooglePending({ email: result.email, credential: result.credential ?? null });
+      } else if (result.status === 'error') {
+        setError(result.message || 'Gagal masuk dengan Google.');
+      }
+      // 'cancelled' → biarkan senyap
+    } finally {
+      setGoogleLoading(false);
+    }
+  };
+
+  const handleGoogleLinkSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!googlePending) return;
+    setGoogleLinkLoading(true);
+    setError('');
+    try {
+      const result = await completeGoogleLinkWithPassword(
+        googlePending.email,
+        googlePassword,
+        googlePending.credential
+      );
+      if (result.status === 'success' && result.idToken) {
+        setGooglePending(null);
+        setGooglePassword('');
+        await finishGoogleLogin(result.idToken);
+      } else if (result.status === 'error') {
+        setError(result.message || 'Gagal menautkan akun Google.');
+      }
+    } finally {
+      setGoogleLinkLoading(false);
     }
   };
 
@@ -172,6 +257,24 @@ function LoginForm() {
               </Button>
             </form>
 
+            <div className="mt-6 flex items-center gap-3" aria-hidden="true">
+              <span className="flex-1 h-px bg-gray-200 dark:bg-gray-700" />
+              <span className="text-xs text-gray-500 dark:text-gray-400">atau</span>
+              <span className="flex-1 h-px bg-gray-200 dark:bg-gray-700" />
+            </div>
+
+            <Button
+              type="button"
+              variant="outline"
+              size="lg"
+              className="mt-4 w-full"
+              loading={googleLoading}
+              onClick={handleGoogle}
+            >
+              <GoogleIcon className="h-5 w-5 mr-2" />
+              Masuk dengan Google
+            </Button>
+
             <div className="mt-6 text-center">
               <p className="text-gray-600 dark:text-gray-400">
                 Belum punya akun?{' '}
@@ -181,6 +284,37 @@ function LoginForm() {
               </p>
             </div>
           </Card>
+
+          <Modal
+            isOpen={!!googlePending}
+            onClose={() => {
+              setGooglePending(null);
+              setGooglePassword('');
+            }}
+            title="Kaitkan akun Google"
+            description={
+              googlePending
+                ? `Email ${googlePending.email} sudah terdaftar. Masukkan password akun ini untuk mengaitkan Google — email yang sama berarti satu akun yang sama.`
+                : ''
+            }
+            size="sm"
+          >
+            <form onSubmit={handleGoogleLinkSubmit} className="space-y-4">
+              <Input
+                label="Password"
+                type="password"
+                value={googlePassword}
+                onChange={(e) => setGooglePassword(e.target.value)}
+                placeholder="••••••••"
+                required
+                autoComplete="current-password"
+                autoFocus
+              />
+              <Button type="submit" className="w-full" loading={googleLinkLoading}>
+                Kaitkan &amp; Masuk
+              </Button>
+            </form>
+          </Modal>
         </div>
       </main>
       <Footer />
