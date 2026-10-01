@@ -3,6 +3,7 @@ import { notFound } from 'next/navigation';
 import { Header } from '@/components/layout/Header';
 import { ProductActions } from '@/components/product/ProductActions';
 import { ProductGallery } from '@/components/product/ProductGallery';
+import { ReviewForm } from '@/components/product/ReviewForm';
 import { Footer } from '@/components/layout/Footer';
 import { Card } from '@/components/ui/Card';
 import { Badge, StatusBadge } from '@/components/ui/Badge';
@@ -267,15 +268,17 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
                 </div>
               </Card>
 
-              {reviews.length > 0 && (
-                <Card className="p-6">
-                  <div className="flex items-center justify-between mb-6">
-                    <h2 className="text-xl font-bold text-gray-900 dark:text-white">Ulasan ({reviews.length})</h2>
+              <Card className="p-6">
+                <div className="flex items-center justify-between mb-6">
+                  <h2 className="text-xl font-bold text-gray-900 dark:text-white">Ulasan ({reviews.length})</h2>
+                  {reviews.length > 3 && (
                     <Link href={`/produk/${product.id}#reviews`} className="text-brand-600 hover:text-brand-700 font-medium text-sm">
                       Lihat Semua
                       <ArrowRightIcon className="h-4 w-4 ml-1" />
                     </Link>
-                  </div>
+                  )}
+                </div>
+                {reviews.length > 0 ? (
                   <div className="space-y-4">
                     {reviews.slice(0, 3).map((review) => (
                       <div key={review.id} className="border-b border-gray-200 dark:border-gray-700 pb-4 last:border-0">
@@ -298,8 +301,15 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
                       </div>
                     ))}
                   </div>
-                </Card>
-              )}
+                ) : (
+                  <p className="text-gray-500 dark:text-gray-400 text-sm mb-4">
+                    Belum ada ulasan. Jadilah yang pertama mengulas produk ini.
+                  </p>
+                )}
+                <div className="mt-6">
+                  <ReviewForm productId={product.id} />
+                </div>
+              </Card>
             </div>
 
             {/* Sidebar */}

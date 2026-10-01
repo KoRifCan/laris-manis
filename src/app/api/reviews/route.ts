@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { revalidatePath } from 'next/cache';
 import { authenticateRequest } from '@/lib/api-auth';
 import { adminDb } from '@/lib/firebase-admin';
 import { validateSchema, createReviewSchema } from '@/lib/validation';
@@ -189,6 +190,8 @@ export async function POST(request: NextRequest) {
       request.headers.get('x-forwarded-for') || 'unknown',
       request.headers.get('user-agent') || 'unknown'
     );
+
+    revalidatePath(`/produk/${data.productId}`);
 
     return NextResponse.json({
       success: true,
