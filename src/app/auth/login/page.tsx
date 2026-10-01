@@ -28,7 +28,11 @@ function LoginForm() {
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(errorParam || '');
+  // Tiba dari halaman lain tanpa pesan (?callbackUrl= tanpa ?error=) →
+  // tampilkan konteks agar pengguna tahu mengapa diminta masuk
+  const defaultNotice =
+    errorParam || (callbackUrl !== '/' ? 'Silakan masuk terlebih dahulu untuk melanjutkan.' : '');
+  const [error, setError] = useState(defaultNotice);
   const [success, setSuccess] = useState('');
 
   // Sudah login? tidak perlu menampilkan form lagi.
