@@ -24,7 +24,7 @@ import {
   HeartIcon,
 } from '@heroicons/react/24/outline';
 import Link from 'next/link';
-import { authFetch, readJson, ApiError, errorMessage } from '@/lib/client-auth';
+import { authFetch, readJson, ApiError, errorMessage, getSession } from '@/lib/client-auth';
 import { ProductImage } from '@/components/ProductImage';
 
 interface Product {
@@ -60,6 +60,9 @@ export default function SellerDashboardPage() {
   const [loadError, setLoadError] = useState('');
   const [activeTab, setActiveTab] = useState<'produk' | 'statistik' | 'profil'>('produk');
   const [statusFilter, setStatusFilter] = useState<'all' | 'aktif' | 'menunggu_review' | 'ditolak' | 'draft' | 'nonaktif'>('all');
+  // Staf toko: tanpa hak hapus produk & tanpa akses pengaturan toko (dicek lagi di server).
+  const sessionRole = getSession()?.role;
+  const isStaf = sessionRole === 'staf_toko';
 
   useEffect(() => {
     fetchData();
@@ -438,14 +441,16 @@ export default function SellerDashboardPage() {
                               Ajukan Review
                             </Button>
                           )}
-                          <Button
-                            onClick={() => handleDelete(product.id)}
-                            variant="danger"
-                            className="flex-1 flex items-center justify-center gap-1"
-                            size="sm"
-                          >
-                            <TrashIcon className="h-4 w-4" />
-                          </Button>
+                          {!isStaf && (
+                            <Button
+                              onClick={() => handleDelete(product.id)}
+                              variant="danger"
+                              className="flex-1 flex items-center justify-center gap-1"
+                              size="sm"
+                            >
+                              <TrashIcon className="h-4 w-4" />
+                            </Button>
+                          )}
                         </div>
                       </Card>
                     );
@@ -529,12 +534,14 @@ export default function SellerDashboardPage() {
                     Lihat Toko Publik
                   </Button>
                 </Link>
-                <Link href="/dashboard/penjual/edit">
-                  <Button>
-                    <Cog6ToothIcon className="h-5 w-5 mr-2" />
-                    Edit Profil Toko
-                  </Button>
-                </Link>
+                {!isStaf && (
+                  <Link href="/dashboard/penjual/edit">
+                    <Button>
+                      <Cog6ToothIcon className="h-5 w-5 mr-2" />
+                      Edit Profil Toko
+                    </Button>
+                  </Link>
+                )}
               </div>
             </Card>
           )}

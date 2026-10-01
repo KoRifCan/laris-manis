@@ -30,6 +30,9 @@ export default function ProdukBaruPage() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
+  // Staf toko: wajib menentukan toko tujuan (storeId) — penjual pakai tokonya sendiri.
+  const [stafStores, setStafStores] = useState<{ id: string; name: string }[]>([]);
+  const [targetStoreId, setTargetStoreId] = useState('');
 
   const [form, setForm] = useState({
     name: '',
@@ -48,9 +51,21 @@ export default function ProdukBaruPage() {
     }
     (async () => {
       try {
-        const res = await fetch('/api/categories');
-        const data = await readJson<Category[]>(res);
+        const [catRes, meRes] = await Promise.all([
+          fetch('/api/categories'),
+          authFetch('/api/users/me'),
+        ]);
+        const data = await readJson<Category[]>(catRes);
         if (data?.success) setCategories(data.data ?? []);
+        const me = await readJson<{
+          role?: string;
+          assignedStores?: { id: string; name: string }[];
+        }>(meRes);
+        if (meRes.ok && me?.success && me.data?.role === 'staf_toko') {
+          const stores = (me.data.assignedStores || []).map((s) => ({ id: s.id, name: s.name }));
+          setStafStores(stores);
+          if (stores.length > 0) setTargetStoreId(stores[0].id);
+        }
       } catch {
         // kategori gagal dimuat — pilihan akan kosong, user bisa ulang
       } finally {
@@ -90,6 +105,7 @@ export default function ProdukBaruPage() {
           stock: parseInt(form.stock, 10),
           images: imageList.length > 0 ? imageList : [],
           status: form.status,
+          ...(targetStoreId ? { storeId: targetStoreId } : {}),
         }),
       });
       const data = await readJson(res);
@@ -270,9 +286,35 @@ export default function ProdukBaruPage() {
               </div>
 
               <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
-                <PhotoIcon className="h-4 w-4" aria-hidden="true" />
+                <PhotoIcon className="h-5 w-5" aria-hidden="true" />
                 Kosongkan foto untuk memakai gambar sementara. Foto tayang setelah produk disetujui admin.
               </div>
+
+              {stafStores.length > 0 && (
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    Toko Tujuan (staf toko)
+                  </label>
+                  <select
+                    value={targetStoreId}
+                    onChange={(e) => setTargetStoreId(e.target.value)}
+                    disabled={saving}
+                    className="w-full px-4 py-3 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-brand-500"
+                  >
+                    {stafStores.map((s) => (
+                      <option key={s.id} value={s.id}>
+                        {s.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              )}
+
+              {stafStores.length === 0 && loading === false && targetStoreId === '' && getSession()?.role === 'staf_toko' && (
+                <div role="alert" className="p-3 rounded-lg bg-amber-50 border border-amber-200 text-sm text-amber-800 dark:bg-amber-950 dark:border-amber-800 dark:text-amber-200">
+                  Akun staf toko belum ditugaskan ke toko mana pun. Hubungi admin untuk penugasan.
+                </div>
+              )}
 
               <Button type="submit" className="w-full" size="lg" loading={saving}>
                 Simpan Produk

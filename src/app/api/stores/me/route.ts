@@ -18,15 +18,21 @@ export async function GET(request: NextRequest) {
     // sehingga akun dengan mode ganda tetap bisa mengelola tokonya.
     const userDoc = await adminDb.collection('users').doc(user.uid).get();
     const userData = userDoc.data();
-    
-    if (!userData?.storeId) {
+
+    // Staf toko: ditugaskan lewat assignedStoreIds (tanpa storeId kepemilikan).
+    // GET tetap mengembalikan toko tugasannya agar dashboard bisa menampilkan produk.
+    const assigned = Array.isArray(userData?.assignedStoreIds) ? userData.assignedStoreIds : [];
+    const storeIdToUse: string | undefined =
+      userData?.storeId || (user.role === 'staf_toko' && assigned.length > 0 ? assigned[0] : undefined);
+
+    if (!storeIdToUse) {
       return NextResponse.json(
         { success: false, error: 'Anda belum memiliki toko' },
         { status: 404 }
       );
     }
 
-    const storeDoc = await adminDb.collection('stores').doc(userData.storeId).get();
+    const storeDoc = await adminDb.collection('stores').doc(storeIdToUse).get();
     
     if (!storeDoc.exists) {
       return NextResponse.json(
@@ -166,7 +172,20 @@ export async function PATCH(request: NextRequest) {
 
     const userDoc = await adminDb.collection('users').doc(user.uid).get();
     const userData = userDoc.data();
-    
+
+    // Staf toko tidak berwenang mengubah pengaturan toko (kepemilikan/pemilik).
+    if (
+      user.role === 'staf_toko' &&
+      !userData?.storeId &&
+      Array.isArray(userData?.assignedStoreIds) &&
+      userData.assignedStoreIds.length > 0
+    ) {
+      return NextResponse.json(
+        { success: false, error: 'Staf toko tidak bisa mengubah pengaturan toko' },
+        { status: 403 }
+      );
+    }
+
     if (!userData?.storeId) {
       return NextResponse.json(
         { success: false, error: 'Toko tidak ditemukan' },
