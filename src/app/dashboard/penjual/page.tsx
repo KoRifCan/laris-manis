@@ -427,7 +427,7 @@ export default function SellerDashboardPage() {
                               Edit
                             </Button>
                           </Link>
-                          {product.status === 'ditolak' && (
+                          {(product.status === 'ditolak' || product.status === 'draft') && (
                             <Button
                               onClick={() => handleSubmitReview(product.id)}
                               variant="primary"
@@ -435,7 +435,7 @@ export default function SellerDashboardPage() {
                               size="sm"
                             >
                               <ArrowRightOnRectangleIcon className="h-4 w-4" />
-                              Review
+                              Ajukan Review
                             </Button>
                           )}
                           <Button

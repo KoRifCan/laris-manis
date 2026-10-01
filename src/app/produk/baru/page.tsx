@@ -9,6 +9,7 @@ import { Footer } from '@/components/layout/Footer';
 import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
+import { ProductImageUpload } from '@/components/product/ProductImageUpload';
 import {
   authFetch,
   readJson,
@@ -218,6 +219,15 @@ export default function ProdukBaruPage() {
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                   Foto produk (URL, satu per baris, maksimal 5)
                 </label>
+                <ProductImageUpload
+                  onUploaded={(url) =>
+                    setForm((prev) => ({
+                      ...prev,
+                      images: prev.images.trim() ? `${prev.images.trim()}\n${url}` : url,
+                    }))
+                  }
+                  disabled={saving}
+                />
                 <textarea
                   name="images"
                   value={form.images}

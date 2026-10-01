@@ -11,6 +11,7 @@ import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { StatusBadge } from '@/components/ui/Badge';
 import { ProductImage } from '@/components/ProductImage';
+import { ProductImageUpload } from '@/components/product/ProductImageUpload';
 import {
   authFetch,
   readJson,
@@ -309,6 +310,14 @@ export default function ProdukEditPage() {
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                   Foto produk (URL, satu per baris, maksimal 5)
                 </label>
+                <ProductImageUpload
+                  onUploaded={(url) =>
+                    setForm((prev) => ({
+                      ...prev,
+                      images: prev.images.trim() ? `${prev.images.trim()}\n${url}` : url,
+                    }))
+                  }
+                />
                 <textarea
                   name="images"
                   value={form.images}
