@@ -116,6 +116,16 @@ Urutan kerja disepakati: rute 404 → tema → menu hamburger → akun/peran →
 - **Insiden data (diperbaiki)**: backfill awal memakai Firestore REST PATCH **tanpa `updateMask`** → 13 dokumen produk tersisa field `images`; dipulihkan penuh dari `scripts/restore-products.js` (data seed + join toko/seller/kategori, ID dokumen dipertahankan), `productCount` toko disinkronkan = 13; verifikasi: API produksi 13/13 produk lengkap, 0 gambar rusak
 - **Verifikasi produksi**: semua route baru → 200; crawl 41 URL → 40 OK + 1 SSL retry (semua 200); link internal 41/41 dari 17 halaman → 200; e2e API `13/13 PASS` (CRUD kategori + slug auto + nonaktif tersembunyi, audit-log terekam, status/toggle favorit on-off, delete uji)
 
+#### Menu role-based, tabel pengguna super-admin, backup/delete, tema default terang ✅ COMPLETED (commit `3e05630`, deploy `laris-manis-khokoi0y0`)
+- **Tabel "Daftar Pengguna" kosong di produksi** (angka `(16)` tampil tapi baris 0): IIFE `{(() => {...})()}` di `<tbody>` super-admin tidak menghasilkan anak → direfactor ke ternary biasa; tanggal pakai `formatDate` (aman untuk `createdAt {_seconds}`), guard `displayName`/`email`/`role` kosong, `?limit=100`; deep-link tab `?tab=users|categories|settings` via `useSearchParams` + `<Suspense>` (tanpa setState di effect)
+- **Menu fitur per-role di Header**: nav kini `Beranda|Katalog|Toko|Kategori` + `Dashboard` sesuai role (`/dashboard/penjual|admin|super-admin`); dropdown profil & menu mobile super_admin: `Kelola Pengguna`, `Kelola Kategori` (deep-link tab), `Log Aktivitas`; pembeli tetap tanpa item dashboard; pencarian mobile yang tadinya "akan segera hadir" kini fungsional → `/katalog?q=`
+- **API baru**: `DELETE /api/admin/users/[uid]` (super_admin; tolak hapus diri sendiri/super_admin lain; hapus Auth + dokumen user/toko/favorit; audit `delete_user`) dan `GET /api/admin/backup` (export JSON 7 koleksi + `Content-Disposition: attachment`)
+- **Bugfix API**: filter Firestore `'in'` dgn array kosong → `/api/admin/products/pending` **500** (dashboard admin selalu "Server sedang mengalami gangguan") dan `GET /api/products?city=` — kini di-skip saat kosong, chunk ≤30
+- **Bersih-bersih console**: `SessionProvider` next-auth dilepas (tak ada route `/api/auth/session` → `CLIENT_FETCH_ERROR` tiap halaman; dependency di-uninstall); path SVG Instagram di Footer rusak (`Expected number`) → diganti primitif SVG valid; tombol settings super-admin yang tak berfungsi (`Konfigurasi`/`Edit`/`Backup`/`Reset Database`) → Backup JSON nyata, sisanya disabled "Segera Hadir" + catatan operasional (Zona Bahaya menipu dihapus)
+- **Tema default terang**: `getThemePref()` default `light`, `system` hanya bila dipilih eksplisit (disimpan literal, tak lagi `removeItem`), script inline `layout.tsx` & listener `ThemeToggle` disinkronkan; toggle terang/gelap tetap untuk pilihan pengguna
+- **Data uji**: toko penjual uji punya `storeId` tanpa dokumen (`/api/stores/me` 404 → dashboard "belum memiliki toko") → dokumen `DaQ04nY2iGDwSCvmAScb` dibuat; total user dikembalikan 16 (sisa `uji-del` dibersihkan, role admin sementara dikembalikan ke `pembeli`)
+- **Verifikasi**: lint semua file tersentuh CLEAN; `tsc` 66 error (baseline 77, tanpa error baru); build OK; produksi — e2e API **13/13 PASS**, crawl **42/42 OK**, playwright **super-admin rows=16 + menu per-role PASS**, stage role **14/14 PASS** (penjual/admin/pembeli, nol console error, nol 404), tema terang walau sistem gelap, pencarian mobile → katalog, register→delete→login-gagal + backup JSON + 403 pembeli OK
+
 ### Phase 6: Testing & Deploy Produksi (Vercel)
 - [ ] Unit & integration tests
 - [ ] Deploy ke Vercel
@@ -130,10 +140,10 @@ Urutan kerja disepakati: rute 404 → tema → menu hamburger → akun/peran →
 ---
 
 ## Current Status
-**Phase**: 8 - Audit Menyeluruh Produksi — Kategori 1-5 + sidebar Android + basmi-404/fitur-per-role/gambar **SELESAI SEMUA**, tayang di production
+**Phase**: 8 - Audit Menyeluruh Produksi — Kategori 1-5 + sidebar Android + basmi-404/fitur-per-role/gambar + menu role/tabel super-admin/backup/tema-terang **SELESAI SEMUA**, tayang di production
 **Branch**: fix/audit-menyeluruh
-**Last Commit**: `9e3ca6d` — 4 halaman 404 baru, gambar produk placeholder lokal, favorit/share/galeri detail, logs super-admin, robots/sitemap
-**Production**: https://laris-manis-id.vercel.app (deploy `laris-manis-7umu97swy`)
+**Last Commit**: `3e05630` — menu role-based, tabel pengguna super-admin, API hapus user + backup JSON, bugfix 'in' filter, lepas next-auth, tema default terang
+**Production**: https://laris-manis-id.vercel.app (deploy `laris-manis-khokoi0y0`)
 **Belum / butuh tindakan di luar repo**: kode google-site-verification (Google Search Console); domain produksi masuk Firebase *Authorized domains* + penyedia email untuk kirim tautan verifikasi/reset (tanpa ini reset-sandi produksi tidak terkirim); wiring service worker (`sw.js` disajikan tapi belum pernah didaftarkan); rate limiting & unit test (Phase 6, di luar lingkup audit)
 
 ## Environment Variables Needed (for Vercel/GitHub Secrets)
@@ -196,6 +206,8 @@ Urutan kerja disepakati: rute 404 → tema → menu hamburger → akun/peran →
 - `src/app/api/favorites/route.ts` - Favorites toggle
 - `src/app/api/reviews/route.ts` - Reviews CRUD
 - `src/app/api/audit-logs/route.ts` - Audit logs
+- `src/app/api/admin/users/[uid]/route.ts` - Delete user (super_admin)
+- `src/app/api/admin/backup/route.ts` - Backup JSON semua koleksi (super_admin)
 
 ## Completed Files - UI Components
 - `src/components/ui/Button.tsx` - Button component with variants
