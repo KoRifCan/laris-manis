@@ -37,7 +37,12 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({
       success: true,
-      data: { id: storeDoc.id, ...storeDoc.data() },
+      data: {
+        id: storeDoc.id,
+        ...storeDoc.data(),
+        // Alasan penolakan pengajuan disimpan di dokumen user
+        rejectionReason: userData?.sellerApplicationRejectionReason || null,
+      },
     });
   } catch (error: any) {
     console.error('Get my store error:', error);

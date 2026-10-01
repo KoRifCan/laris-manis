@@ -18,6 +18,7 @@ import {
   ArrowRightOnRectangleIcon,
   MagnifyingGlassIcon,
   ChevronRightIcon,
+  TrashIcon,
 } from '@heroicons/react/24/outline';
 import Link from 'next/link';
 import { authFetch, readJson, ApiError, errorMessage } from '@/lib/client-auth';
@@ -48,10 +49,27 @@ interface PendingProduct {
   updatedAt: string;
 }
 
+interface AdminProduct {
+  id: string;
+  name: string;
+  price: number;
+  stock: number;
+  images: string[];
+  status: string;
+  rejectionReason?: string | null;
+  storeId: string;
+  storeName: string;
+  storeSlug: string;
+  sellerId: string;
+  createdAt: string;
+}
+
 export default function AdminDashboardPage() {
   const router = useRouter();
   const [pendingStores, setPendingStores] = useState<PendingStore[]>([]);
   const [pendingProducts, setPendingProducts] = useState<PendingProduct[]>([]);
+  const [allProducts, setAllProducts] = useState<AdminProduct[]>([]);
+  const [productView, setProductView] = useState<'pending' | 'all'>('pending');
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<'umkm' | 'produk'>('umkm');
 
@@ -61,13 +79,20 @@ export default function AdminDashboardPage() {
 
   const fetchData = async () => {
     try {
-      const [storesRes, productsRes] = await Promise.all([
+      const [storesRes, productsRes, allProductsRes] = await Promise.all([
         authFetch('/api/admin/stores/pending'),
         authFetch('/api/admin/products/pending'),
+        authFetch('/api/admin/products?limit=100'),
       ]);
+
+      // authFetch tidak melempar utk 403 → tolak eksplisit agar guard terpicu
+      if (storesRes.status === 403) {
+        throw new ApiError('client', 'Akses ditolak', 403);
+      }
 
       const storesData = await readJson<{ items: PendingStore[] }>(storesRes);
       const productsData = await readJson<{ items: PendingProduct[] }>(productsRes);
+      const allData = await readJson<{ items: AdminProduct[] }>(allProductsRes);
 
       if (storesData?.success) {
         setPendingStores(storesData.data?.items ?? []);
@@ -75,9 +100,17 @@ export default function AdminDashboardPage() {
       if (productsData?.success) {
         setPendingProducts(productsData.data?.items ?? []);
       }
+      if (allData?.success) {
+        setAllProducts(allData.data?.items ?? []);
+      }
     } catch (err) {
       if (err instanceof ApiError && err.kind === 'session') {
         router.push('/auth/login?callbackUrl=/dashboard/admin');
+        return;
+      }
+      if (err instanceof ApiError && err.status === 403) {
+        // Bukan admin → tolak akses halaman (API sudah menolak di backend)
+        router.replace('/');
         return;
       }
       console.error('Failed to fetch admin data:', errorMessage(err));
@@ -131,6 +164,23 @@ export default function AdminDashboardPage() {
       }
     } catch {
       console.error('Failed to review product');
+    }
+  };
+
+  const handleDeleteProduct = async (productId: string, productName: string) => {
+    if (!confirm(`Hapus permanen produk "${productName}"? Produk hilang dari katalog.`)) return;
+
+    try {
+      const res = await authFetch(`/api/products/${productId}`, { method: 'DELETE' });
+      if (res.ok) {
+        setAllProducts(prev => prev.filter(p => p.id !== productId));
+        setPendingProducts(prev => prev.filter(p => p.id !== productId));
+      } else {
+        const data = await res.json();
+        alert(data.error || 'Gagal menghapus produk');
+      }
+    } catch {
+      console.error('Failed to delete product');
     }
   };
 
@@ -267,7 +317,32 @@ export default function AdminDashboardPage() {
 
           {activeTab === 'produk' && (
             <div>
-              {pendingProducts.length === 0 ? (
+              {/* Sub-nav: menunggu review vs semua produk (moderasi) */}
+              <div className="flex gap-2 mb-4">
+                <button
+                  onClick={() => setProductView('pending')}
+                  className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
+                    productView === 'pending'
+                      ? 'bg-brand-600 text-white'
+                      : 'bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300'
+                  }`}
+                >
+                  Menunggu Review ({pendingProducts.length})
+                </button>
+                <button
+                  onClick={() => setProductView('all')}
+                  className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
+                    productView === 'all'
+                      ? 'bg-brand-600 text-white'
+                      : 'bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300'
+                  }`}
+                >
+                  Semua Produk ({allProducts.length})
+                </button>
+              </div>
+
+              {productView === 'pending' && (
+                pendingProducts.length === 0 ? (
                 <Card className="text-center py-12">
                   <ShoppingBagIcon className="h-16 w-16 text-gray-300 dark:text-gray-600 mx-auto mb-4" />
                   <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">Tidak ada produk menunggu review</h3>
@@ -325,6 +400,60 @@ export default function AdminDashboardPage() {
                     );
                   })}
                 </div>
+                )
+              )}
+
+              {productView === 'all' && (
+                allProducts.length === 0 ? (
+                  <Card className="text-center py-12">
+                    <ShoppingBagIcon className="h-16 w-16 text-gray-300 dark:text-gray-600 mx-auto mb-4" />
+                    <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">Belum ada produk</h3>
+                  </Card>
+                ) : (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {allProducts.map((product) => (
+                      <Card key={product.id} className="relative">
+                        <div className="relative aspect-square overflow-hidden rounded-lg bg-gray-100 dark:bg-gray-800 mb-3">
+                          <ProductImage
+                            src={product.images?.[0]}
+                            alt={product.name}
+                            className="w-full h-full object-cover"
+                          />
+                          <StatusBadge status={product.status} className="absolute top-2 right-2" />
+                        </div>
+
+                        <div className="space-y-2 mb-4">
+                          <h3 className="font-semibold text-gray-900 dark:text-white line-clamp-2">
+                            {product.name}
+                          </h3>
+                          <p className="text-xl font-bold text-gray-900 dark:text-white">
+                            {formatRupiah(product.price)}
+                          </p>
+                          <p className="text-sm text-gray-500 dark:text-gray-400">
+                            Toko: {product.storeName}
+                          </p>
+                          {product.rejectionReason && (
+                            <p className="text-xs text-red-600 dark:text-red-400">
+                              Pernah ditolak: {product.rejectionReason}
+                            </p>
+                          )}
+                        </div>
+
+                        <div className="flex gap-2">
+                          <Button
+                            onClick={() => handleDeleteProduct(product.id, product.name)}
+                            variant="danger"
+                            className="flex-1 flex items-center justify-center gap-1"
+                            size="sm"
+                          >
+                            <TrashIcon className="h-4 w-4" />
+                            Hapus
+                          </Button>
+                        </div>
+                      </Card>
+                    ))}
+                  </div>
+                )
               )}
             </div>
           )}

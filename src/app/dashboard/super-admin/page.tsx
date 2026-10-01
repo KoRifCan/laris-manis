@@ -91,6 +91,10 @@ function SuperAdminDashboardContent() {
       authFetch('/api/admin/users?limit=100'),
       authFetch('/api/categories'),
     ]);
+    // authFetch tidak melempar utk 403 → tolak eksplisit agar guard terpicu
+    if (usersRes.status === 403) {
+      throw new ApiError('client', 'Akses ditolak', 403);
+    }
     const usersData = await readJson<{ items: User[] }>(usersRes);
     const categoriesData = await readJson<Category[]>(categoriesRes);
     return { usersData, categoriesData };
@@ -112,6 +116,11 @@ function SuperAdminDashboardContent() {
         if (!active) return;
         if (err instanceof ApiError && err.kind === 'session') {
           router.push('/auth/login?callbackUrl=/dashboard/super-admin');
+          return;
+        }
+        if (err instanceof ApiError && err.status === 403) {
+          // Bukan super admin → tolak akses halaman (API sudah menolak di backend)
+          router.replace('/dashboard/admin');
           return;
         }
         console.error('Failed to fetch super admin data:', errorMessage(err));

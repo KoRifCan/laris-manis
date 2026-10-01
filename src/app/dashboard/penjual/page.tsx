@@ -48,6 +48,8 @@ interface Store {
   name: string;
   slug: string;
   isVerified: boolean;
+  reviewStatus?: string;
+  rejectionReason?: string | null;
 }
 
 export default function SellerDashboardPage() {
@@ -233,10 +235,21 @@ export default function SellerDashboardPage() {
               )}
             </div>
 
-            {store && !store.isVerified && (
+            {store && !store.isVerified && store.reviewStatus !== 'rejected' && (
               <div className="mt-4 rounded-xl border border-yellow-200 bg-yellow-50 p-4 text-sm text-yellow-800 dark:border-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-200">
                 <strong>Toko sedang menunggu verifikasi admin.</strong> Penambahan produk dan
                 penayangan di katalog dibuka setelah pengajuan disetujui.
+              </div>
+            )}
+            {store && !store.isVerified && store.reviewStatus === 'rejected' && (
+              <div className="mt-4 rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700 dark:border-red-800 dark:bg-red-900/20 dark:text-red-300">
+                <strong>Pengajuan toko Anda ditolak admin.</strong>
+                {store.rejectionReason && (
+                  <>
+                    {' '}Alasan: <span className="font-medium">{store.rejectionReason}</span>
+                  </>
+                )}{' '}
+                Perbaiki data toko Anda, lalu ajukan kembali melalui halaman profil.
               </div>
             )}
             {loadError && (
