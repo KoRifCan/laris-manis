@@ -1,25 +1,20 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { useState, useEffect, Suspense } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
 import { Card } from '@/components/ui/Card';
-import { Badge, StatusBadge } from '@/components/ui/Badge';
+import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
-import { Input } from '@/components/ui/Input';
-import { formatRupiah } from '@/lib/utils';
-import { 
-  UsersIcon,
-  ShieldCheckIcon,
-  Cog6ToothIcon,
-  PlusIcon,
+import { formatDate } from '@/lib/utils';
+import {
   PencilIcon,
   TrashIcon,
-  ArrowRightOnRectangleIcon,
   MagnifyingGlassIcon,
-  ChevronRightIcon,
   ExclamationTriangleIcon,
+  ShieldCheckIcon,
+  PlusIcon,
 } from '@heroicons/react/24/outline';
 import Link from 'next/link';
 import { authFetch, readJson, ApiError, errorMessage } from '@/lib/client-auth';
@@ -43,48 +38,87 @@ interface Category {
 }
 
 export default function SuperAdminDashboardPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="flex flex-col min-h-screen">
+          <Header />
+          <main className="flex-1 flex items-center justify-center py-12">
+            <div className="animate-spin rounded-full h-12 w-12 border-4 border-brand-600 border-t-transparent"></div>
+          </main>
+          <Footer />
+        </div>
+      }
+    >
+      <SuperAdminDashboardContent />
+    </Suspense>
+  );
+}
+
+function SuperAdminDashboardContent() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [users, setUsers] = useState<User[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState<'users' | 'categories' | 'settings'>('users');
   const [searchQuery, setSearchQuery] = useState('');
   const [roleFilter, setRoleFilter] = useState('');
 
-  useEffect(() => {
-    fetchData();
-  }, []);
+  // Tab aktif dibaca dari URL sehingga tautan ?tab=... selalu konsisten
+  const tabParam = searchParams.get('tab');
+  const activeTab: 'users' | 'categories' | 'settings' =
+    tabParam === 'categories' || tabParam === 'settings' ? tabParam : 'users';
 
-  const fetchData = async () => {
-    try {
-      const [usersRes, categoriesRes] = await Promise.all([
-        authFetch('/api/admin/users'),
-        authFetch('/api/categories'),
-      ]);
-
-      const usersData = await readJson<{ items: User[] }>(usersRes);
-      const categoriesData = await readJson<Category[]>(categoriesRes);
-
-      if (usersData?.success) {
-        setUsers(usersData.data?.items ?? []);
-      }
-      if (categoriesData?.success) {
-        setCategories(categoriesData.data ?? []);
-      }
-    } catch (err) {
-      if (err instanceof ApiError && err.kind === 'session') {
-        router.push('/auth/login?callbackUrl=/dashboard/super-admin');
-        return;
-      }
-      console.error('Failed to fetch super admin data:', errorMessage(err));
-    } finally {
-      setLoading(false);
-    }
+  const switchTab = (tab: 'users' | 'categories' | 'settings') => {
+    router.replace(
+      tab === 'users' ? '/dashboard/super-admin' : `/dashboard/super-admin?tab=${tab}`
+    );
   };
 
+  const fetchData = async () => {
+    const [usersRes, categoriesRes] = await Promise.all([
+      authFetch('/api/admin/users?limit=100'),
+      authFetch('/api/categories'),
+    ]);
+    const usersData = await readJson<{ items: User[] }>(usersRes);
+    const categoriesData = await readJson<Category[]>(categoriesRes);
+    return { usersData, categoriesData };
+  };
+
+  useEffect(() => {
+    let active = true;
+    fetchData()
+      .then(({ usersData, categoriesData }) => {
+        if (!active) return;
+        if (usersData?.success) {
+          setUsers(usersData.data?.items ?? []);
+        }
+        if (categoriesData?.success) {
+          setCategories(categoriesData.data ?? []);
+        }
+      })
+      .catch((err) => {
+        if (!active) return;
+        if (err instanceof ApiError && err.kind === 'session') {
+          router.push('/auth/login?callbackUrl=/dashboard/super-admin');
+          return;
+        }
+        console.error('Failed to fetch super admin data:', errorMessage(err));
+      })
+      .finally(() => {
+        if (active) setLoading(false);
+      });
+    return () => {
+      active = false;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   const filteredUsers = users.filter(u => {
-    const matchesSearch = u.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      u.displayName.toLowerCase().includes(searchQuery.toLowerCase());
+    const email = (u.email || '').toLowerCase();
+    const name = (u.displayName || '').toLowerCase();
+    const matchesSearch = email.includes(searchQuery.toLowerCase()) ||
+      name.includes(searchQuery.toLowerCase());
     const matchesRole = !roleFilter || u.role === roleFilter;
     return matchesSearch && matchesRole;
   });
@@ -112,11 +146,19 @@ export default function SuperAdminDashboardPage() {
 
   const handleDeleteUser = async (uid: string) => {
     if (!confirm('Yakin ingin menghapus user ini? Tindakan ini tidak bisa dibatalkan.')) return;
-    
+
     try {
-      alert('Fungsi hapus user belum diimplementasikan');
-    } catch {
-      console.error('Failed to delete user');
+      const res = await authFetch(`/api/admin/users/${encodeURIComponent(uid)}`, {
+        method: 'DELETE',
+      });
+      const data = await readJson<{ success: boolean; error?: string }>(res);
+      if (res.ok && data?.success) {
+        setUsers(prev => prev.filter(u => u.uid !== uid));
+      } else {
+        alert(data?.error || 'Gagal menghapus user');
+      }
+    } catch (err) {
+      alert(errorMessage(err) || 'Gagal menghapus user');
     }
   };
 
@@ -150,7 +192,7 @@ export default function SuperAdminDashboardPage() {
           <div className="border-b border-gray-200 dark:border-gray-700 mb-6">
             <nav className="flex gap-8" aria-label="Super admin tabs">
               <button
-                onClick={() => setActiveTab('users')}
+                onClick={() => switchTab('users')}
                 className={`py-4 px-1 text-sm font-medium border-b-2 transition-colors ${
                   activeTab === 'users' 
                     ? 'text-brand-600 dark:text-brand-400 border-brand-600' 
@@ -160,7 +202,7 @@ export default function SuperAdminDashboardPage() {
                 Kelola Pengguna ({users.length})
               </button>
               <button
-                onClick={() => setActiveTab('categories')}
+                onClick={() => switchTab('categories')}
                 className={`py-4 px-1 text-sm font-medium border-b-2 transition-colors ${
                   activeTab === 'categories' 
                     ? 'text-brand-600 dark:text-brand-400 border-brand-600' 
@@ -170,7 +212,7 @@ export default function SuperAdminDashboardPage() {
                 Kategori ({categories.length})
               </button>
               <button
-                onClick={() => setActiveTab('settings')}
+                onClick={() => switchTab('settings')}
                 className={`py-4 px-1 text-sm font-medium border-b-2 transition-colors ${
                   activeTab === 'settings' 
                     ? 'text-brand-600 dark:text-brand-400 border-brand-600' 
@@ -228,27 +270,24 @@ export default function SuperAdminDashboardPage() {
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
-                    {(() => {
-                      if (filteredUsers.length === 0) {
-                        return (
-                          <tr>
-                            <td colSpan={6} className="px-6 py-12 text-center text-gray-500 dark:text-gray-400">
-                              Tidak ada pengguna ditemukan
-                            </td>
-                          </tr>
-                        );
-                      }
-                      return filteredUsers.map((user) => (
+                    {filteredUsers.length === 0 ? (
+                      <tr>
+                        <td colSpan={6} className="px-6 py-12 text-center text-gray-500 dark:text-gray-400">
+                          Tidak ada pengguna ditemukan
+                        </td>
+                      </tr>
+                    ) : (
+                      filteredUsers.map((user) => (
                         <tr key={user.uid} className="hover:bg-gray-50 dark:hover:bg-gray-800">
                           <td className="px-6 py-4">
                             <div className="flex items-center gap-3">
                               <div className="flex h-10 w-10 items-center justify-center rounded-full bg-brand-100 dark:bg-brand-900/30">
                                 <span className="text-brand-600 dark:text-brand-400 font-medium">
-                                  {user.displayName.charAt(0).toUpperCase()}
+                                  {(user.displayName || user.email || '?').charAt(0).toUpperCase()}
                                 </span>
                               </div>
                               <div>
-                                <p className="font-medium text-gray-900 dark:text-white">{user.displayName}</p>
+                                <p className="font-medium text-gray-900 dark:text-white">{user.displayName || '-'}</p>
                                 <p className="text-sm text-gray-500 dark:text-gray-400">{user.email}</p>
                               </div>
                             </div>
@@ -260,7 +299,7 @@ export default function SuperAdminDashboardPage() {
                               user.role === 'penjual' ? 'success' :
                               user.role === 'staf_toko' ? 'info' : 'default'
                             }>
-                              {user.role.replace('_', ' ')}
+                              {(user.role || 'pembeli').replace('_', ' ')}
                             </Badge>
                           </td>
                           <td className="px-6 py-4">
@@ -284,7 +323,7 @@ export default function SuperAdminDashboardPage() {
                             )}
                           </td>
                           <td className="px-6 py-4 text-gray-500 dark:text-gray-400">
-                            {new Date(user.createdAt).toLocaleDateString('id-ID')}
+                            {formatDate(user.createdAt)}
                           </td>
                           <td className="px-6 py-4 text-right">
                             <div className="flex items-center justify-end gap-2">
@@ -310,8 +349,8 @@ export default function SuperAdminDashboardPage() {
                             </div>
                           </td>
                         </tr>
-                      )
-                    )})}
+                      ))
+                    )}
                   </tbody>
                 </table>
               </div>
@@ -323,12 +362,13 @@ export default function SuperAdminDashboardPage() {
             <div>
               <div className="flex items-center justify-between mb-6">
                 <h2 className="text-xl font-semibold text-gray-900 dark:text-white">Kelola Kategori</h2>
-                <Button asChild>
-                  <Link href="/dashboard/super-admin/kategori/baru">
-                    <PlusIcon className="h-5 w-5 mr-2" />
-                    Tambah Kategori
-                  </Link>
-                </Button>
+                <Link
+                  href="/dashboard/super-admin/kategori/baru"
+                  className="inline-flex items-center rounded-lg bg-brand-600 px-4 py-2 text-base font-medium text-white transition-colors hover:bg-brand-700 focus:outline-none focus:ring-2 focus:ring-brand-500"
+                >
+                  <PlusIcon className="h-5 w-5 mr-2" />
+                  Tambah Kategori
+                </Link>
               </div>
 
               <Card>
@@ -379,40 +419,53 @@ export default function SuperAdminDashboardPage() {
                   <div>
                     <h3 className="font-medium text-gray-900 dark:text-white mb-2">Rate Limiting</h3>
                     <p className="text-gray-600 dark:text-gray-400 text-sm">Konfigurasi rate limit untuk API sensitif (login, upload, dll)</p>
-                    <Button variant="outline" className="mt-2" size="sm">Konfigurasi</Button>
+                    <Button variant="outline" className="mt-2" size="sm" disabled title="Fitur ini sedang dalam pengembangan">
+                      Segera Hadir
+                    </Button>
                   </div>
                   <div>
                     <h3 className="font-medium text-gray-900 dark:text-white mb-2">Email Templates</h3>
                     <p className="text-gray-600 dark:text-gray-400 text-sm">Kustomisasi template email verifikasi, reset password, notifikasi</p>
-                    <Button variant="outline" className="mt-2" size="sm">Edit</Button>
+                    <Button variant="outline" className="mt-2" size="sm" disabled title="Fitur ini sedang dalam pengembangan">
+                      Segera Hadir
+                    </Button>
                   </div>
                   <div>
                     <h3 className="font-medium text-gray-900 dark:text-white mb-2">Audit Logs</h3>
                     <p className="text-gray-600 dark:text-gray-400 text-sm">Lihat log aktivitas admin dan sistem</p>
-                    <Button asChild variant="outline" className="mt-2" size="sm">
-                      <Link href="/dashboard/super-admin/logs">Lihat Logs</Link>
-                    </Button>
+                    <Link
+                      href="/dashboard/super-admin/logs"
+                      className="inline-flex items-center mt-2 px-3 py-1.5 text-sm font-medium rounded-lg border-2 border-brand-600 text-brand-600 hover:bg-brand-50 focus:ring-2 focus:ring-brand-500 dark:border-brand-400 dark:text-brand-400 dark:hover:bg-brand-900/20"
+                    >
+                      Lihat Logs
+                    </Link>
                   </div>
                   <div>
-                    <h3 className="font-medium text-gray-900 dark:text-white mb-2">Backup & Restore</h3>
-                    <p className="text-gray-600 dark:text-gray-400 text-sm">Backup data Firestore dan restore jika diperlukan</p>
-                    <Button variant="outline" className="mt-2" size="sm">Backup Sekarang</Button>
+                    <h3 className="font-medium text-gray-900 dark:text-white mb-2">Backup Data</h3>
+                    <p className="text-gray-600 dark:text-gray-400 text-sm">
+                      Unduh salinan semua data (users, toko, produk, kategori, ulasan, log) dalam format JSON
+                    </p>
+                    <a
+                      href="/api/admin/backup"
+                      download
+                      className="inline-flex items-center mt-2 px-4 py-2 text-sm font-medium rounded-lg border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800"
+                    >
+                      Backup Sekarang (JSON)
+                    </a>
                   </div>
                 </div>
               </Card>
 
-              <Card className="p-6 bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800">
-                <h2 className="text-xl font-semibold text-red-900 dark:text-red-100 mb-2 flex items-center gap-2">
+              <Card className="p-6 bg-amber-50 dark:bg-amber-900/20 border-amber-200 dark:border-amber-800">
+                <h2 className="text-xl font-semibold text-amber-900 dark:text-amber-100 mb-2 flex items-center gap-2">
                   <ExclamationTriangleIcon className="h-5 w-5" />
-                  Zona Bahaya
+                  Catatan Operasional
                 </h2>
-                <p className="text-red-700 dark:text-red-300 mb-4 text-sm">
-                  Tindakan di bawah ini bersifat permanen dan tidak bisa dibatalkan. Gunakan dengan hati-hati.
+                <p className="text-amber-800 dark:text-amber-200 text-sm">
+                  Selalu lakukan backup sebelum perubahan data besar. Fitur penghapusan massal
+                  (reset database) sengaja tidak tersedia dari dashboard; hubungi tim infrastruktur
+                  untuk penanganan manual.
                 </p>
-                <div className="flex flex-wrap gap-4">
-                  <Button variant="danger">Hapus Semua Data Test</Button>
-                  <Button variant="danger">Reset Database</Button>
-                </div>
               </Card>
             </div>
           )}

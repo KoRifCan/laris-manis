@@ -1,19 +1,20 @@
-// Preferensi tema: 'light' | 'dark' | 'system' (default).
+// Preferensi tema: 'light' (default) | 'dark' | 'system'.
 // Disimpan di localStorage; penerapan dilakukan lewat kelas .dark di <html>.
+// Pengguna memilih temanya sendiri; default selalu terang.
 
 export type ThemePref = 'light' | 'dark' | 'system';
 
 const KEY = 'laris_manis_theme';
 
 export function getThemePref(): ThemePref {
-  if (typeof window === 'undefined') return 'system';
+  if (typeof window === 'undefined') return 'light';
   try {
     const stored = localStorage.getItem(KEY);
-    if (stored === 'dark' || stored === 'light') return stored;
+    if (stored === 'dark' || stored === 'light' || stored === 'system') return stored;
   } catch {
     // localStorage tidak tersedia
   }
-  return 'system';
+  return 'light';
 }
 
 export function systemPrefersDark(): boolean {
@@ -22,7 +23,9 @@ export function systemPrefersDark(): boolean {
 
 export function isDarkNow(): boolean {
   const pref = getThemePref();
-  return pref === 'dark' || (pref === 'system' && systemPrefersDark());
+  if (pref === 'dark') return true;
+  if (pref === 'light') return false;
+  return systemPrefersDark();
 }
 
 export function applyTheme(dark: boolean): void {
@@ -34,11 +37,7 @@ export function applyTheme(dark: boolean): void {
 
 export function setThemePref(pref: ThemePref): void {
   try {
-    if (pref === 'system') {
-      localStorage.removeItem(KEY);
-    } else {
-      localStorage.setItem(KEY, pref);
-    }
+    localStorage.setItem(KEY, pref);
   } catch {
     // tetap terapkan tema walau tidak bisa menyimpan
   }

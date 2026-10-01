@@ -60,7 +60,7 @@ export const viewport: Viewport = {
 };
 
 // Terapkan tema tersimpan SEBELUM paint supaya tidak ada kedip terang->gelap.
-const themeInit = `(function(){try{var s=localStorage.getItem('laris_manis_theme');var m=window.matchMedia('(prefers-color-scheme: dark)').matches;var d=s==='dark'||(s!=='light'&&m);if(d)document.documentElement.classList.add('dark');var t=document.getElementById('lm-theme-color');if(t)t.setAttribute('content',d?'#141310':'#ffffff');}catch(e){}})();`;
+const themeInit = `(function(){try{var s=localStorage.getItem('laris_manis_theme');var m=window.matchMedia('(prefers-color-scheme: dark)').matches;var d=s==='dark'||(s==='system'&&m);if(d)document.documentElement.classList.add('dark');var t=document.getElementById('lm-theme-color');if(t)t.setAttribute('content',d?'#141310':'#ffffff');}catch(e){}})();`;
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (

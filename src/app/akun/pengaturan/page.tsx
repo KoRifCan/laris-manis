@@ -35,7 +35,7 @@ export default function PengaturanPage() {
   const router = useRouter();
 
   const [email, setEmail] = useState<string | null>(null);
-  const [theme, setTheme] = useState<ThemePref>('system');
+  const [theme, setTheme] = useState<ThemePref>('light');
 
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
@@ -53,8 +53,12 @@ export default function PengaturanPage() {
       );
       return;
     }
-    setEmail(session.email || null);
-    setTheme(getThemePref());
+    const initialEmail = session.email || null;
+    // sinkronkan state awal di microtask agar tidak memicu render berantai
+    queueMicrotask(() => {
+      setEmail(initialEmail);
+      setTheme(getThemePref());
+    });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 

@@ -2,25 +2,30 @@
 
 import { useEffect, useState } from 'react';
 import { SunIcon, MoonIcon } from '@heroicons/react/24/outline';
-import { isDarkNow, applyTheme, setThemePref } from '@/lib/theme';
+import { isDarkNow, applyTheme, setThemePref, getThemePref } from '@/lib/theme';
 
 // Tombol ganti tema terang/gelap. Pilihan disimpan di localStorage;
-// bila belum pernah memilih, mengikuti preferensi sistem.
+// bila belum pernah memilih, temanya terang (default).
 export function ThemeToggle({ className }: { className?: string }) {
   const [dark, setDark] = useState(false);
 
   useEffect(() => {
-    setDark(isDarkNow());
+    let alive = true;
+    // sinkronkan nilai awal di microtask agar tidak memicu render berantai
+    queueMicrotask(() => {
+      if (alive) setDark(isDarkNow());
+    });
     const onChange = (event: MediaQueryListEvent) => {
-      // hanya ikuti sistem bila pengguna belum memilih sendiri
-      if (!localStorage.getItem('laris_manis_theme')) {
-        setDark(event.matches);
-        applyTheme(event.matches);
-      }
+      // hanya ikuti sistem bila pengguna memilih tema "Sistem"
+      if (getThemePref() !== 'system') return;
+      setDark(event.matches);
+      applyTheme(event.matches);
     };
     window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', onChange);
-    return () =>
+    return () => {
+      alive = false;
       window.matchMedia('(prefers-color-scheme: dark)').removeEventListener('change', onChange);
+    };
   }, []);
 
   const toggle = () => {

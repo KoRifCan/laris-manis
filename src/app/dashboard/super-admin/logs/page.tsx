@@ -28,7 +28,7 @@ interface AuditLog {
   targetId?: string;
   details?: Record<string, unknown>;
   ipAddress?: string;
-  createdAt: unknown;
+  createdAt: string | Date | { _seconds?: number; seconds?: number } | null;
 }
 
 interface LogsResponse {
@@ -85,8 +85,9 @@ export default function AuditLogsPage() {
       router.push('/auth/login?callbackUrl=/dashboard/super-admin/logs');
       return;
     }
-    // eslint-disable-next-line react-hooks/set-state-in-effect, react-hooks/exhaustive-deps
-    fetchLogs(1, '');
+    // jalankan di microtask agar tidak memicu render berantai dari effect
+    queueMicrotask(() => fetchLogs(1, ''));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const totalPages = Math.max(1, Math.ceil(total / LIMIT));

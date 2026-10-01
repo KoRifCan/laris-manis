@@ -3,10 +3,10 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
-import { 
-  HomeIcon, 
-  MagnifyingGlassIcon, 
-  HeartIcon, 
+import {
+  HomeIcon,
+  MagnifyingGlassIcon,
+  HeartIcon,
   UserCircleIcon,
   ShoppingBagIcon,
   Bars3Icon,
@@ -15,6 +15,10 @@ import {
   UserIcon,
   Cog6ToothIcon,
   ArrowRightOnRectangleIcon,
+  Squares2X2Icon,
+  UsersIcon,
+  ClipboardDocumentListIcon,
+  TagIcon,
 } from '@heroicons/react/24/outline';
 import { useSyncExternalStore, useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
@@ -41,6 +45,7 @@ export function Header() {
   const mode = useSyncExternalStore(subscribeMode, getModeSnapshot, () => 'belanja' as const);
   const [profileOpen, setProfileOpen] = useState(false);
   const [account, setAccount] = useState<MyAccount | null>(null);
+  const [searchQuery, setSearchQuery] = useState('');
   const profileRef = useRef<HTMLDivElement | null>(null);
 
   // Muat data akun (status toko) untuk menentukan item menu mode ganda
@@ -51,7 +56,10 @@ export function Header() {
         if (alive) setAccount(data);
       });
     } else {
-      setAccount(null);
+      // reset di microtask agar tidak memicu render berantai dari effect
+      queueMicrotask(() => {
+        if (alive) setAccount(null);
+      });
     }
     return () => {
       alive = false;
@@ -106,11 +114,33 @@ export function Header() {
     router.push('/');
   };
 
+  // Dashboard sesuai role pengguna (null bila tidak punya dashboard)
+  const role = session?.role || null;
+  const dashboardHref =
+    role === 'super_admin'
+      ? '/dashboard/super-admin'
+      : role === 'admin'
+        ? '/dashboard/admin'
+        : role === 'penjual' || role === 'staf_toko'
+          ? '/dashboard/penjual'
+          : null;
+
   const navLinks = [
     { href: '/', label: 'Beranda', icon: HomeIcon },
     { href: '/katalog', label: 'Katalog', icon: MagnifyingGlassIcon },
     { href: '/toko', label: 'Toko', icon: ShoppingBagIcon },
+    { href: '/kategori', label: 'Kategori', icon: TagIcon },
+    ...(dashboardHref
+      ? [{ href: dashboardHref, label: 'Dashboard', icon: Squares2X2Icon }]
+      : []),
   ];
+
+  const handleSearchSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    const q = searchQuery.trim();
+    setSearchOpen(false);
+    router.push(q ? `/katalog?q=${encodeURIComponent(q)}` : '/katalog');
+  };
 
   const overlayOpen = mobileMenuOpen || searchOpen;
 
@@ -237,6 +267,48 @@ export function Header() {
                           <Cog6ToothIcon className="h-4 w-4" aria-hidden="true" />
                           Pengaturan
                         </Link>
+                        {dashboardHref && (
+                          <Link
+                            href={dashboardHref}
+                            onClick={() => setProfileOpen(false)}
+                            className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium text-brand-600 hover:bg-brand-50 dark:text-brand-400 dark:hover:bg-brand-900/20"
+                            role="menuitem"
+                          >
+                            <Squares2X2Icon className="h-4 w-4" aria-hidden="true" />
+                            Dashboard
+                          </Link>
+                        )}
+                        {role === 'super_admin' && (
+                          <>
+                            <Link
+                              href="/dashboard/super-admin?tab=users"
+                              onClick={() => setProfileOpen(false)}
+                              className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800"
+                              role="menuitem"
+                            >
+                              <UsersIcon className="h-4 w-4" aria-hidden="true" />
+                              Kelola Pengguna
+                            </Link>
+                            <Link
+                              href="/dashboard/super-admin?tab=categories"
+                              onClick={() => setProfileOpen(false)}
+                              className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800"
+                              role="menuitem"
+                            >
+                              <TagIcon className="h-4 w-4" aria-hidden="true" />
+                              Kelola Kategori
+                            </Link>
+                            <Link
+                              href="/dashboard/super-admin/logs"
+                              onClick={() => setProfileOpen(false)}
+                              className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800"
+                              role="menuitem"
+                            >
+                              <ClipboardDocumentListIcon className="h-4 w-4" aria-hidden="true" />
+                              Log Aktivitas
+                            </Link>
+                          </>
+                        )}
                         {account?.store?.isVerified && (
                           <button
                             type="button"
@@ -376,6 +448,44 @@ export function Header() {
                       <Cog6ToothIcon className="h-6 w-6" aria-hidden="true" />
                       Pengaturan
                     </Link>
+                    {dashboardHref && (
+                      <Link
+                        href={dashboardHref}
+                        onClick={() => setMobileMenuOpen(false)}
+                        className="flex items-center gap-3 px-3 py-3 rounded-lg text-base font-medium text-brand-600 hover:bg-brand-50 dark:text-brand-400 dark:hover:bg-brand-900/20"
+                      >
+                        <Squares2X2Icon className="h-6 w-6" aria-hidden="true" />
+                        Dashboard
+                      </Link>
+                    )}
+                    {role === 'super_admin' && (
+                      <>
+                        <Link
+                          href="/dashboard/super-admin?tab=users"
+                          onClick={() => setMobileMenuOpen(false)}
+                          className="flex items-center gap-3 px-3 py-3 rounded-lg text-base font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-100 dark:text-gray-400 dark:hover:text-white dark:hover:bg-gray-800"
+                        >
+                          <UsersIcon className="h-6 w-6" aria-hidden="true" />
+                          Kelola Pengguna
+                        </Link>
+                        <Link
+                          href="/dashboard/super-admin?tab=categories"
+                          onClick={() => setMobileMenuOpen(false)}
+                          className="flex items-center gap-3 px-3 py-3 rounded-lg text-base font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-100 dark:text-gray-400 dark:hover:text-white dark:hover:bg-gray-800"
+                        >
+                          <TagIcon className="h-6 w-6" aria-hidden="true" />
+                          Kelola Kategori
+                        </Link>
+                        <Link
+                          href="/dashboard/super-admin/logs"
+                          onClick={() => setMobileMenuOpen(false)}
+                          className="flex items-center gap-3 px-3 py-3 rounded-lg text-base font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-100 dark:text-gray-400 dark:hover:text-white dark:hover:bg-gray-800"
+                        >
+                          <ClipboardDocumentListIcon className="h-6 w-6" aria-hidden="true" />
+                          Log Aktivitas
+                        </Link>
+                      </>
+                    )}
                     {account?.store?.isVerified && (
                       <button
                         type="button"
@@ -435,19 +545,21 @@ export function Header() {
               >
                 <XMarkIcon className="h-6 w-6" />
               </button>
-              <div className="flex-1 relative">
-                <MagnifyingGlassIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
+              <form onSubmit={handleSearchSubmit} className="flex-1 relative">
+                <MagnifyingGlassIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5" />
                 <input
                   type="search"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
                   placeholder="Cari produk..."
                   className="w-full pl-10 pr-4 py-2.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-brand-500"
                   autoFocus
                 />
-              </div>
+              </form>
             </div>
             <div className="p-4 space-y-4 overflow-y-auto overscroll-contain flex-1 pb-[max(1rem,env(safe-area-inset-bottom))]">
               <p className="text-sm text-gray-500 dark:text-gray-400 text-center py-8">
-                Fitur pencarian akan segera hadir
+                Ketik kata kunci lalu tekan Enter untuk mencari di katalog
               </p>
             </div>
           </aside>

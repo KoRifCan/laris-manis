@@ -90,14 +90,17 @@ export async function GET(request: NextRequest) {
     // Filter by city/province (denormalized in store)
     let filteredProducts = products;
     if (city || province) {
-      const storeIds = [...new Set(products.map(p => p.storeId))];
-      const storesSnapshot = await adminDb
-        .collection('stores')
-        .where('__name__', 'in', storeIds)
-        .get();
+      const storeIds = [...new Set(products.map(p => p.storeId).filter(Boolean))] as string[];
       const storeMap = new Map();
-      storesSnapshot.docs.forEach(doc => storeMap.set(doc.id, doc.data()));
-      
+      // Firestore menolak filter 'in' dgn array kosong
+      if (storeIds.length > 0) {
+        const storesSnapshot = await adminDb
+          .collection('stores')
+          .where('__name__', 'in', storeIds)
+          .get();
+        storesSnapshot.docs.forEach(doc => storeMap.set(doc.id, doc.data()));
+      }
+
       filteredProducts = products.filter(p => {
         const store = storeMap.get(p.storeId);
         if (!store) return false;
@@ -127,10 +130,13 @@ export async function GET(request: NextRequest) {
         hasMore: filteredProducts.length === limit,
       },
     });
-  } catch (error: any) {
+  } catch (error) {
     console.error('Get products error:', error);
     return NextResponse.json(
-      { success: false, error: error.message || 'Terjadi kesalahan server' },
+      {
+        success: false,
+        error: error instanceof Error ? error.message : 'Terjadi kesalahan server',
+      },
       { status: 500 }
     );
   }
