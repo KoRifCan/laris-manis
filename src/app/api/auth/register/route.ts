@@ -30,12 +30,13 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // Create user
+    // Create user (nomor telepon opsional hanya disimpan di Firestore —
+    // tidak dikirim ke Firebase Auth karena Auth mewajibkan nomor unik
+    // global, sehingga pendaftaran publik bisa digagalkan nomor orang lain)
     const userRecord = await adminAuth.createUser({
       email,
       password,
       displayName,
-      phoneNumber: phoneNumber || undefined,
       emailVerified: false,
     });
 

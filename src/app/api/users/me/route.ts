@@ -1,16 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { authenticateRequest } from '@/lib/api-auth';
 import { adminAuth, adminDb } from '@/lib/firebase-admin';
-
-// Nomor lokal Indonesia → E.164 untuk Firebase Auth; null bila format tak dikenal
-function toE164(phone: string): string | null {
-  const p = phone.replace(/[\s\-()]/g, '');
-  if (/^\+\d{8,15}$/.test(p)) return p;
-  if (/^0\d{8,12}$/.test(p)) return '+62' + p.slice(1);
-  if (/^62\d{8,12}$/.test(p)) return '+' + p;
-  if (/^8\d{8,11}$/.test(p)) return '+62' + p;
-  return null;
-}
+import { toE164 } from '@/lib/phone';
 
 export async function GET(request: NextRequest) {
   try {
@@ -161,7 +152,16 @@ export async function PATCH(request: NextRequest) {
     }
     if (updates.phoneNumber !== undefined) {
       const e164 = updates.phoneNumber ? toE164(updates.phoneNumber) : null;
-      await adminAuth.updateUser(user.uid, { phoneNumber: e164 });
+      try {
+        await adminAuth.updateUser(user.uid, { phoneNumber: e164 });
+      } catch (phoneErr: unknown) {
+        // Nomor adalah data Firestore; bila Auth menolak (mis. nomor sudah
+        // dipakai akun lain) jangan gagulkan seluruh update profil
+        const code = (phoneErr as { code?: string })?.code;
+        if (code !== 'auth/phone-number-already-exists' && code !== 'auth/invalid-phone-number') {
+          throw phoneErr;
+        }
+      }
     }
 
     return NextResponse.json({
