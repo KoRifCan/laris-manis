@@ -271,3 +271,21 @@ Pengujian menyeluruh semua role via browser otomatis (Playwright) + API di produ
 - **D**: ulasan tak muncul setelah submit (ISR `revalidate: 60`) → `revalidatePath('/produk/[id]')` setelah POST ulasan.
 
 Catatan: total error tsc/lint = angka baseline (semua pre-existing, tanpa error baru).
+
+### Google Auth (commit `0d945e7`, uji G: 18/18 prod)
+- **Masuk/daftar dengan Google**: tombol di `/auth/login` ("Masuk dengan Google") & `/auth/daftar`
+  ("Daftar dengan Google") → `signInWithPopup` → `POST /api/auth/google` (verifikasi idToken):
+  akun baru otomatis terdaftar (role pembeli, emailVerified), akun lama → login + tandai provider.
+- **Email sama = satu akun**: jika email Google sudah terdaftar sbg akun password,
+  Firebase melempar `auth/account-exists-with-different-credential` → modal "Kaitkan akun Google"
+  meminta password → `linkWithCredential` (satu uid, dua provider) — tidak pernah membuat akun ganda.
+  Safety net server: doc/email beda uid → `409` + instruksi kaitkan via Pengaturan.
+- **Kaitkan Google di Pengaturan** (`/akun/pengaturan`, kartu "Akun Google"): tombol
+  "Kaitkan ke Akun Google" → `POST /api/auth/google/link-session` (custom token uid sama) →
+  `linkWithPopup` → `POST /api/auth/google/link` (verifikasi provider terpasang) → flag
+  `googleProviderLinked` di Firestore + audit `link_google`. Status tampil: "sudah dikaitkan".
+- **Konfigurasi**: provider Google aktif; `laris-manis-id.vercel.app` ditambahkan ke
+  Firebase Authorized domains via Identity Toolkit Admin API v2 (`updateConfig`).
+- Batas pengujian otomatis: E2E penuh (pilih akun Google sungguhan) butuh akun Google nyata —
+  yang diuji otomatis: tombol/flow UI, popup error-handling, semua endpoint (400/401/403/200),
+  custom-token link step, regresi B 8/8.
