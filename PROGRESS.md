@@ -240,3 +240,34 @@ Urutan kerja disepakati: rute 404 → tema → menu hamburger → akun/peran →
 6. Setup GitHub repository and push code
 7. Configure Vercel project and connect to GitHub
 8. Test all API endpoints with real Firebase project
+## Hasil QA End-to-End (branch `fix/qa-menyeluruh`, 1 Okt 2026)
+
+Pengujian menyeluruh semua role via browser otomatis (Playwright) + API di production
+(https://laris-manis-id.vercel.app). Commits: `1d88305` (A), `bcd83b1` (B), `298dd8e`+`b213a28` (C/C2),
+`888b6fb` (D), `8de5231` (E), `efbabf9` (F).
+
+| Kategori | Cakupan | Hasil prod |
+|---|---|---|
+| A — Tamu | beranda/katalog/detail/cari/kategori/favorit+login guard/pengajuan toko | 14/14 PASS |
+| B — Auth (register/pengunjung) | daftar, validasi telepon E.164, login, lupa-sesi | 8/8 PASS |
+| C — Super admin | dashboard, users, kategori, pengaturan, backup, log | 16/16 PASS |
+| C2 — Admin/moderator | verifikasi toko, moderasi produk, alasan tolak, audit, RBAC | 35/35 PASS |
+| D — Pembeli | favorit, WhatsApp, ulasan, profil, ganti password, jadi penjual | 21/21 PASS |
+| E — Penjual | CRUD produk, upload foto, alur review→aktif→katalog, RBAC API | 23/23 PASS |
+| F — Staf toko | toko tugas, create/edit, tanpa hapus, tanpa pengaturan toko | 19/19 PASS |
+
+### Root cause: fitur hilang (missing feature) yang ditambahkan
+- **C**: tidak ada UI/API membuat akun Admin/Moderator & Staf Toko → `POST /api/admin/users` + form "Tambah Pengguna" (super admin).
+- **C2**: admin tak bisa melihat/menghapus produk melanggar (hanya daftar pending) → `GET /api/admin/products` + sub-tab "Semua Produk" + tombol Hapus; penjual tak pernah melihat alasan penolakan toko → `/api/stores/me` + banner merah berisi alasan.
+- **D**: halaman produk tidak punya form menulis ulasan (padahal API ada) → komponen `ReviewForm` + section ulasan selalu tampil.
+- **E**: tak ada UI upload foto produk (`/api/upload` tidak dipakai halaman mana pun) → `ProductImageUpload` di /produk/baru & /produk/[id]/edit; produk `draft` tak bisa diajukan review (tombol hanya utk `ditolak`) → tombol "Ajukan Review" utk draft.
+- **F**: `/api/stores/me` staf → 404 (dashboard salah empty-state) → GET kembalikan toko tugas; form produk tak kirim `storeId` (staf selalu 403) → pilihan "Toko Tujuan"; tombol Hapus & Edit Profil Toko tampil utk staf → disembunyikan (server tetap 403).
+
+### Root cause: bug pada fitur yang ada
+- **A**: favorit tanpa login → redirect login tanpa pesan → notice default saat `?callbackUrl=` tanpa `?error=`.
+- **B**: register meneruskan nomor telepon ke Firebase Auth (gagal E.164 utk `08…` + phone unik global) → telepon hanya disimpan di Firestore + `toE164()` di `src/lib/phone.ts`.
+- **E**: upload foto gagal di production (`BLOB_READ_WRITE_TOKEN` tak tersedia di runtime) → env secret diset ke project Vercel.
+- **C2/RBAC**: `authFetch` tidak melempar error utk 403 → guard dashboard cek status eksplisit (super admin ↔ admin saling blokir).
+- **D**: ulasan tak muncul setelah submit (ISR `revalidate: 60`) → `revalidatePath('/produk/[id]')` setelah POST ulasan.
+
+Catatan: total error tsc/lint = angka baseline (semua pre-existing, tanpa error baru).
