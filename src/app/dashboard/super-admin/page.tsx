@@ -63,6 +63,17 @@ function SuperAdminDashboardContent() {
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [roleFilter, setRoleFilter] = useState('');
+  const [showCreateForm, setShowCreateForm] = useState(false);
+  const [creating, setCreating] = useState(false);
+  const [createNotice, setCreateNotice] = useState<{ kind: 'ok' | 'err'; text: string } | null>(null);
+  const [createForm, setCreateForm] = useState({
+    displayName: '',
+    email: '',
+    password: '',
+    role: 'admin',
+    storeId: '',
+  });
+  const [stores, setStores] = useState<{ id: string; name: string }[]>([]);
 
   // Tab aktif dibaca dari URL sehingga tautan ?tab=... selalu konsisten
   const tabParam = searchParams.get('tab');
@@ -162,6 +173,58 @@ function SuperAdminDashboardContent() {
     }
   };
 
+  const ensureStoresLoaded = async () => {
+    if (stores.length > 0) return;
+    try {
+      const res = await authFetch('/api/stores?limit=100');
+      const data = await readJson<{ items: { id: string; name: string }[] }>(res);
+      setStores(data?.data?.items ?? []);
+    } catch {
+      setStores([]);
+    }
+  };
+
+  const handleCreateUser = async () => {
+    setCreating(true);
+    setCreateNotice(null);
+    try {
+      const res = await authFetch('/api/admin/users', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          displayName: createForm.displayName.trim(),
+          email: createForm.email.trim(),
+          password: createForm.password,
+          role: createForm.role,
+          ...(createForm.role === 'staf_toko' && createForm.storeId
+            ? { storeId: createForm.storeId }
+            : {}),
+        }),
+      });
+      const data = await readJson(res);
+      if (!res.ok || !data?.success) {
+        const detailText = Array.isArray(data?.details)
+          ? data.details.filter((d): d is string => typeof d === 'string').join(', ')
+          : '';
+        setCreateNotice({
+          kind: 'err',
+          text: detailText || data?.error || 'Gagal membuat akun',
+        });
+        return;
+      }
+      setCreateNotice({ kind: 'ok', text: `Akun ${createForm.email} berhasil dibuat` });
+      setCreateForm({ displayName: '', email: '', password: '', role: 'admin', storeId: '' });
+      setShowCreateForm(false);
+      const fresh = await authFetch('/api/admin/users?limit=100');
+      const freshData = await readJson<{ items: User[] }>(fresh);
+      if (freshData?.success) setUsers(freshData.data?.items ?? []);
+    } catch (err) {
+      setCreateNotice({ kind: 'err', text: errorMessage(err) || 'Gagal membuat akun' });
+    } finally {
+      setCreating(false);
+    }
+  };
+
   if (loading) {
     return (
       <div className="flex flex-col min-h-screen">
@@ -253,8 +316,116 @@ function SuperAdminDashboardContent() {
                       <option value="staf_toko">Staf Toko</option>
                       <option value="pembeli">Pembeli</option>
                     </select>
+                    <Button
+                      type="button"
+                      size="sm"
+                      onClick={() => {
+                        setShowCreateForm((v) => !v);
+                        setCreateNotice(null);
+                        if (!showCreateForm) void ensureStoresLoaded();
+                      }}
+                    >
+                      <PlusIcon className="h-4 w-4 mr-1" />
+                      Tambah Pengguna
+                    </Button>
                   </div>
                 </div>
+
+                {createNotice && (
+                  <div
+                    role="alert"
+                    className={`mt-4 p-3 rounded-lg text-sm border ${
+                      createNotice.kind === 'ok'
+                        ? 'bg-green-50 border-green-200 text-green-700'
+                        : 'bg-red-50 border-red-200 text-red-700'
+                    }`}
+                  >
+                    {createNotice.text}
+                  </div>
+                )}
+
+                {showCreateForm && (
+                  <form
+                    className="mt-4 grid gap-3 sm:grid-cols-2 bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 rounded-lg p-4"
+                    onSubmit={(e) => {
+                      e.preventDefault();
+                      void handleCreateUser();
+                    }}
+                  >
+                    <label className="text-sm text-gray-700 dark:text-gray-300">
+                      Nama Lengkap
+                      <input
+                        required
+                        value={createForm.displayName}
+                        onChange={(e) => setCreateForm((f) => ({ ...f, displayName: e.target.value }))}
+                        className="mt-1 w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
+                        placeholder="Nama pengguna"
+                      />
+                    </label>
+                    <label className="text-sm text-gray-700 dark:text-gray-300">
+                      Email
+                      <input
+                        required
+                        type="email"
+                        value={createForm.email}
+                        onChange={(e) => setCreateForm((f) => ({ ...f, email: e.target.value }))}
+                        className="mt-1 w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
+                        placeholder="nama@email.com"
+                      />
+                    </label>
+                    <label className="text-sm text-gray-700 dark:text-gray-300">
+                      Password
+                      <input
+                        required
+                        type="password"
+                        minLength={8}
+                        value={createForm.password}
+                        onChange={(e) => setCreateForm((f) => ({ ...f, password: e.target.value }))}
+                        className="mt-1 w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
+                        placeholder="Minimal 8 karakter"
+                      />
+                    </label>
+                    <label className="text-sm text-gray-700 dark:text-gray-300">
+                      Role
+                      <select
+                        value={createForm.role}
+                        onChange={(e) => setCreateForm((f) => ({ ...f, role: e.target.value }))}
+                        className="mt-1 w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
+                      >
+                        <option value="admin">Admin / Moderator</option>
+                        <option value="staf_toko">Staf Toko</option>
+                        <option value="penjual">Penjual</option>
+                        <option value="pembeli">Pembeli</option>
+                      </select>
+                    </label>
+                    {createForm.role === 'staf_toko' && (
+                      <label className="text-sm text-gray-700 dark:text-gray-300 sm:col-span-2">
+                        Toko yang ditugaskan
+                        <select
+                          required
+                          value={createForm.storeId}
+                          onChange={(e) => setCreateForm((f) => ({ ...f, storeId: e.target.value }))}
+                          className="mt-1 w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
+                        >
+                          <option value="">— Pilih toko —</option>
+                          {stores.map((s) => (
+                            <option key={s.id} value={s.id}>
+                              {s.name}
+                            </option>
+                          ))}
+                        </select>
+                      </label>
+                    )}
+                    <div className="sm:col-span-2 flex gap-3">
+                      <Button type="submit" size="sm" loading={creating}>
+                        Buat Akun
+                      </Button>
+                      <Button type="button" size="sm" variant="secondary" onClick={() => setShowCreateForm(false)}>
+                        Batal
+                      </Button>
+                    </div>
+                  </form>
+                )}
               </div>
 
               <div className="overflow-x-auto">

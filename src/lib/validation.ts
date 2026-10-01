@@ -103,6 +103,15 @@ export const changeRoleSchema = z.object({
   role: z.enum(['pembeli', 'penjual', 'staf_toko', 'admin', 'super_admin']),
 });
 
+// Buat akun baru dari dashboard super admin
+export const createUserSchema = z.object({
+  email: z.string().email('Email tidak valid'),
+  password: z.string().min(8, 'Password minimal 8 karakter'),
+  displayName: z.string().min(2, 'Nama minimal 2 karakter').max(100),
+  role: z.enum(['pembeli', 'penjual', 'staf_toko', 'admin']),
+  storeId: z.string().optional(),
+});
+
 export const createReviewSchema = z.object({
   productId: z.string().min(1),
   rating: z.number().int().min(1).max(5),

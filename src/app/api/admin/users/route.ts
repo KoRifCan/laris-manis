@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { authenticateRequest, requireRole } from '@/lib/api-auth';
+import { authenticateRequest } from '@/lib/api-auth';
 import { adminAuth, adminDb } from '@/lib/firebase-admin';
-import { validateSchema, changeRoleSchema } from '@/lib/validation';
+import { validateSchema, changeRoleSchema, createUserSchema } from '@/lib/validation';
 import { createAuditLog, setUserRole } from '@/lib/rbac';
 
 export async function GET(request: NextRequest) {
@@ -64,10 +64,10 @@ export async function GET(request: NextRequest) {
         hasMore: users.length === limit,
       },
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Get users error:', error);
     return NextResponse.json(
-      { success: false, error: error.message || 'Terjadi kesalahan server' },
+      { success: false, error: error instanceof Error ? error.message : 'Terjadi kesalahan server' },
       { status: 500 }
     );
   }
@@ -148,10 +148,120 @@ export async function PATCH(request: NextRequest) {
       success: true,
       message: 'Role berhasil diubah',
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Change role error:', error);
     return NextResponse.json(
-      { success: false, error: error.message || 'Terjadi kesalahan server' },
+      { success: false, error: error instanceof Error ? error.message : 'Terjadi kesalahan server' },
+      { status: 500 }
+    );
+  }
+}
+// Buat akun baru (Admin / Staf Toko / Penjual / Pembeli) dari dashboard super admin
+export async function POST(request: NextRequest) {
+  try {
+    const authResult = await authenticateRequest(request);
+
+    if (authResult instanceof NextResponse) {
+      return authResult;
+    }
+
+    const { user } = authResult;
+
+    if (user.role !== 'super_admin') {
+      return NextResponse.json(
+        { success: false, error: 'Hanya super admin yang bisa membuat akun' },
+        { status: 403 }
+      );
+    }
+
+    const body = await request.json();
+    const { success, data, errors } = validateSchema(createUserSchema, body);
+
+    if (!success) {
+      return NextResponse.json(
+        { success: false, error: 'Validasi gagal', details: errors },
+        { status: 400 }
+      );
+    }
+
+    if (data.role === 'staf_toko' && !data.storeId) {
+      return NextResponse.json(
+        { success: false, error: 'Staf toko harus ditugaskan ke sebuah toko' },
+        { status: 400 }
+      );
+    }
+
+    // Cek email belum terpakai
+    try {
+      await adminAuth.getUserByEmail(data.email);
+      return NextResponse.json(
+        { success: false, error: 'Email sudah terdaftar' },
+        { status: 400 }
+      );
+    } catch (checkErr: unknown) {
+      const code = (checkErr as { code?: string })?.code;
+      if (code !== 'auth/user-not-found') throw checkErr;
+    }
+
+    // Verifikasi toko bila staf ditugaskan
+    if (data.storeId) {
+      const storeDoc = await adminDb.collection('stores').doc(data.storeId).get();
+      if (!storeDoc.exists) {
+        return NextResponse.json(
+          { success: false, error: 'Toko tujuan tidak ditemukan' },
+          { status: 400 }
+        );
+      }
+    }
+
+    const userRecord = await adminAuth.createUser({
+      email: data.email,
+      password: data.password,
+      displayName: data.displayName,
+      emailVerified: false,
+    });
+
+    await adminAuth.setCustomUserClaims(userRecord.uid, { role: data.role });
+
+    await adminDb.collection('users').doc(userRecord.uid).set({
+      uid: userRecord.uid,
+      email: data.email,
+      displayName: data.displayName,
+      role: data.role,
+      assignedStoreIds: data.role === 'staf_toko' && data.storeId ? [data.storeId] : [],
+      phoneNumber: null,
+      emailVerified: false,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    });
+
+    await createAuditLog(
+      user.uid,
+      user.role,
+      'create_user',
+      'user',
+      userRecord.uid,
+      { email: data.email, role: data.role, storeId: data.storeId || null },
+      request.headers.get('x-forwarded-for') || 'unknown',
+      request.headers.get('user-agent') || 'unknown'
+    );
+
+    return NextResponse.json({
+      success: true,
+      message: 'Akun berhasil dibuat',
+      data: { uid: userRecord.uid, email: data.email, role: data.role },
+    });
+  } catch (error: unknown) {
+    const e = error as { code?: string; message?: string };
+    if (e?.code === 'auth/email-already-exists') {
+      return NextResponse.json(
+        { success: false, error: 'Email sudah terdaftar' },
+        { status: 400 }
+      );
+    }
+    console.error('Create user error:', error);
+    return NextResponse.json(
+      { success: false, error: e?.message || 'Terjadi kesalahan server' },
       { status: 500 }
     );
   }
